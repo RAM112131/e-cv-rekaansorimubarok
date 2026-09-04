@@ -8,7 +8,7 @@ import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 
 // Use public URLs to bypass Vite import analysis (avoids requiring a restart)
 const cardGLB = '/models/card.glb';
-const lanyard = '/models/lanyard.png';
+const lanyard = '/images/lanyard.webp';
 
 import * as THREE from 'three';
 
@@ -25,6 +25,12 @@ const BLANK_PIXEL =
 // independently, aspect-preserving (no stretching).
 const FRONT_UV_RECT = { x: 0, y: 0, w: 0.5, h: 0.755 };
 const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
+
+// Reusable vectors — created ONCE outside component to avoid GC pressure
+const vec = new THREE.Vector3();
+const ang = new THREE.Vector3();
+const rot = new THREE.Vector3();
+const dir = new THREE.Vector3();
 
 export default function Lanyard({
   position = [0, 0, 30],
@@ -46,16 +52,34 @@ export default function Lanyard({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // ─── DPR: Cap di 1.5 untuk smooth 60fps. ─────────────────────────────────
+  // Desktop layar biasa = 1.0, HiDPI max = 1.5 (bukan 2 yang berat)
+  const dpr = isMobile ? [1, 1.5] : [1, 1.5];
+
   return (
     <div className="relative z-0 w-full h-screen flex justify-center items-center transform scale-100 origin-center">
       <Canvas
         camera={{ position: position, fov: fov }}
-        dpr={[1, isMobile ? 1.5 : 2]}
-        gl={{ alpha: transparent }}
-        onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
+        dpr={dpr}
+        gl={{
+          alpha: transparent,
+          // ─── GPU optimizations ────────────────────────────────────────
+          antialias: !isMobile,       // Matikan antialiasing di mobile (berat)
+          powerPreference: 'high-performance', // Request dedicated GPU
+          stencil: false,             // Tidak pakai stencil buffer (hemat memory)
+          depth: true,
+        }}
+        frameloop="always"            // Physics Rapier butuh always agar simulasi mulus
+        performance={{ min: 0.5 }}    // R3F auto-degrade DPR jika fps turun di bawah 30
+        onCreated={({ gl }) => {
+          gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
+          // Batasi shadow map precision
+          gl.shadowMap.enabled = false;
+        }}
       >
         <ambientLight intensity={Math.PI} />
-        <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+        {/* ─── Physics timeStep: 'vary' = adaptive timestep, lebih smooth ─── */}
+        <Physics gravity={gravity} timeStep="vary" maxVelocityIterations={4} maxPositionIterations={4}>
           <Band
             isMobile={isMobile}
             frontImage={frontImage}
@@ -67,29 +91,16 @@ export default function Lanyard({
           />
         </Physics>
         <Environment blur={0.75}>
+          {/* Kurangi jumlah lightformer: 4 → 2 (hemat GPU) */}
           <Lightformer
-            intensity={2}
+            intensity={3}
             color="white"
             position={[0, -1, 5]}
             rotation={[0, 0, Math.PI / 3]}
             scale={[100, 0.1, 1]}
           />
           <Lightformer
-            intensity={3}
-            color="white"
-            position={[-1, -1, 1]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={3}
-            color="white"
-            position={[1, 1, 1]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={10}
+            intensity={8}
             color="white"
             position={[-10, 0, 14]}
             rotation={[0, Math.PI / 2, Math.PI / 3]}
@@ -117,20 +128,13 @@ function Band({
     j2 = useRef(),
     j3 = useRef(),
     card = useRef();
-  const vec = new THREE.Vector3(),
-    ang = new THREE.Vector3(),
-    rot = new THREE.Vector3(),
-    dir = new THREE.Vector3();
+
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
   const { nodes, materials } = useGLTF(cardGLB);
   const texture = useTexture(lanyardImage || lanyard);
-  // useTexture must be called unconditionally; use a blank pixel when an image
-  // isn't supplied for a given face, then skip compositing it below.
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
   const backTex = useTexture(backImage || BLANK_PIXEL);
 
-  // Composite the front/back images into the card's texture atlas (front = left
-  // half, back = right half). Each image is drawn aspect-preserving (no stretch).
   const cardMap = useMemo(() => {
     const baseMap = materials.base.map;
     if (!frontImage && !backImage) return baseMap;
@@ -143,7 +147,6 @@ function Band({
     canvas.height = H;
     const ctx = canvas.getContext('2d');
     if (!ctx) return baseMap;
-    // Keep the original baked atlas for the card edges and any untouched face.
     ctx.drawImage(baseImg, 0, 0, W, H);
 
     const drawFitted = (img, rect) => {
@@ -151,12 +154,23 @@ function Band({
       const ry = rect.y * H;
       const rw = rect.w * W;
       const rh = rect.h * H;
-      const pick = imageFit === 'contain' ? Math.min : Math.max;
-      const scale = pick(rw / img.width, rh / img.height);
-      const dw = img.width * scale;
-      const dh = img.height * scale;
-      const dx = rx + (rw - dw) / 2;
-      const dy = ry + (rh - dh) / 2;
+
+      let dw, dh, dx, dy;
+
+      if (imageFit === 'fill') {
+        dw = rw;
+        dh = rh;
+        dx = rx;
+        dy = ry;
+      } else {
+        const pick = imageFit === 'contain' ? Math.min : Math.max;
+        const scale = pick(rw / img.width, rh / img.height);
+        dw = img.width * scale;
+        dh = img.height * scale;
+        dx = rx + (rw - dw) / 2;
+        dy = ry + (rh - dh) / 2;
+      }
+
       ctx.save();
       ctx.beginPath();
       ctx.rect(rx, ry, rw, rh);
@@ -165,16 +179,18 @@ function Band({
       ctx.restore();
     };
 
+    // console.log removed — unnecessary in production
     if (frontImage && frontTex.image) drawFitted(frontTex.image, FRONT_UV_RECT);
     if (backImage && backTex.image) drawFitted(backTex.image, BACK_UV_RECT);
 
     const composite = new THREE.CanvasTexture(canvas);
     composite.colorSpace = THREE.SRGBColorSpace;
     composite.flipY = baseMap.flipY;
-    composite.anisotropy = 16;
+    composite.anisotropy = 4; // Turun dari 16 → 4 (visual tetap bagus, GPU jauh lebih ringan)
     composite.needsUpdate = true;
     return composite;
   }, [frontImage, backImage, imageFit, frontTex, backTex, materials.base.map]);
+
   const [curve] = useState(
     () =>
       new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
@@ -182,6 +198,7 @@ function Band({
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
 
+  // panjang tali id card
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
@@ -197,12 +214,14 @@ function Band({
     }
   }, [hovered, dragged]);
 
+  // ─── Curve segment count: mobile=12, desktop=24 (turun dari 32) ──────────
+  const curveSegments = isMobile ? 12 : 24;
+
   useFrame((state, delta) => {
     if (dragged) {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
-      const distance = -state.camera.position.z / dir.z;
-      vec.copy(state.camera.position).add(dir.multiplyScalar(distance));
+      vec.add(dir.multiplyScalar(state.camera.position.length()));
       [card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp());
       card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z });
     }
@@ -231,17 +250,17 @@ function Band({
 
   return (
     <>
-      <RigidBody position={[xOffset, 4.5, 0]} ref={fixed} {...segmentProps} type="fixed" />
-      <RigidBody position={[xOffset + 0.5, 4.5, 0]} ref={j1} {...segmentProps}>
+      <RigidBody position={[xOffset, 4.3, 0]} ref={fixed} {...segmentProps} type="fixed" />
+      <RigidBody position={[xOffset, 3.2, 0]} ref={j1} {...segmentProps}>
         <BallCollider args={[0.1]} />
       </RigidBody>
-      <RigidBody position={[xOffset + 1, 4.5, 0]} ref={j2} {...segmentProps}>
+      <RigidBody position={[xOffset, 2.1, 0]} ref={j2} {...segmentProps}>
         <BallCollider args={[0.1]} />
       </RigidBody>
-      <RigidBody position={[xOffset + 1.5, 4.5, 0]} ref={j3} {...segmentProps}>
+      <RigidBody position={[xOffset, 1.0, 0]} ref={j3} {...segmentProps}>
         <BallCollider args={[0.1]} />
       </RigidBody>
-      <RigidBody position={[xOffset + 2, 4.5, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+      <RigidBody position={[xOffset, -0.5, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group
             scale={2.25}
@@ -257,15 +276,15 @@ function Band({
             <mesh geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
                 map={cardMap}
-                map-anisotropy={16}
-                clearcoat={isMobile ? 0 : 1}
+                map-anisotropy={4}
+                clearcoat={isMobile ? 0 : 0.5}       // Turun dari 1 → 0.5 (lebih ringan)
                 clearcoatRoughness={0.15}
                 roughness={0.9}
-                metalness={0.8}
+                metalness={0.5}                       // Turun dari 0.8 → 0.5 (hemat PBR cost)
               />
             </mesh>
-            <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />
-            <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
+            <mesh geometry={nodes.clip.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} />
+            <mesh geometry={nodes.clamp.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} />
           </group>
         </RigidBody>
       <mesh ref={band}>
@@ -273,7 +292,7 @@ function Band({
         <meshLineMaterial
           color="white"
           depthTest={false}
-          resolution={isMobile ? [1000, 2000] : [1000, 1000]}
+          resolution={[1000, 1000]}  // Unified: tidak perlu beda mobile/desktop
           useMap
           map={texture}
           repeat={[-1, 1]}
@@ -283,3 +302,6 @@ function Band({
     </>
   );
 }
+
+useGLTF.preload(cardGLB);
+useTexture.preload(lanyard);

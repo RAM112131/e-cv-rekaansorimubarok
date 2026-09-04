@@ -12,13 +12,16 @@ class Certificate extends Model
 
     protected $fillable = [
         'user_id',
+        'certificate_category_id',
         'title',
+        'category',
         'image',
         'issuer',
         'credential_id',
         'issue_date',
         'expiration_date',
         'credential_url',
+        'description',
         'order',
     ];
 
@@ -51,5 +54,10 @@ class Certificate extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function certificateCategory(): BelongsTo
+    {
+        return $this->belongsTo(CertificateCategory::class, 'certificate_category_id');
     }
 }

@@ -7,6 +7,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -41,15 +42,6 @@ class ManageCv extends Page implements HasSchemas
     {
         $user = auth()->user();
         $cvData = $user->cv_data ?? [];
-
-        $defaultTools = [
-            ['name' => 'Figma'],
-            ['name' => 'VS Code'],
-            ['name' => 'Antigravity'],
-            ['name' => 'Laragon'],
-            ['name' => 'Tailwind CSS'],
-            ['name' => 'Bootstrap'],
-        ];
 
         $defaultLanguages = [
             ['name' => 'Indonesia', 'rating' => 5],
@@ -137,13 +129,12 @@ class ManageCv extends Page implements HasSchemas
         $this->form->fill([
             'cv_avatar' => $user->cv_avatar,
             'cv_name' => $cvData['cv_name'] ?? $user->name,
-            'cv_subtitle' => $user->cv_subtitle ?? 'Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya',
+            'cv_subtitle' => $cvData['cv_subtitle'] ?? 'Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya',
             'phone' => $user->phone ?? '+62 882118269212',
             'email' => $user->email ?? 'reka114141@gmail.com',
             'linkedin_url' => $user->linkedin_url ?? 'https://www.linkedin.com/in/reka-ansori-mubarok-a5508427a',
             'location' => $user->location ?? 'Ciamis, Jawa Barat',
             'cv_about' => $user->cv_about ?? 'Mahasiswa aktif Sistem Informasi di UBSI yang antusias dalam pengembangan web. Memiliki pengalaman membangun aplikasi berbasis Laravel dengan integrasi pembayaran digital. Berkomitmen untuk terus belajar dan berkontribusi di lingkungan kerja profesional.',
-            'cv_tools' => $cvData['cv_tools'] ?? $defaultTools,
             'cv_languages' => $cvData['cv_languages'] ?? $defaultLanguages,
             'cv_certifications' => $cvData['cv_certifications'] ?? $defaultCertifications,
             'educations' => count($existingEducations) > 0 ? $existingEducations : $defaultEducations,
@@ -177,28 +168,36 @@ class ManageCv extends Page implements HasSchemas
                             ->disk('public')
                             ->directory('cv_avatars')
                             ->imageEditor()
-                            ->circleCropper(),
+                            ->circleCropper()
+                            ->columnSpan('full')
+                            ->helperText('Unggah foto profil yang akan tampil di bagian header CV.'),
                         TextInput::make('cv_name')
                             ->label('Nama Lengkap di CV')
-                            ->required(),
+                            ->required()
+                            ->helperText('Nama yang akan tampil di bagian header dokumen CV.'),
                         TextInput::make('cv_subtitle')
                             ->label('Subtitle / Tagline CV')
                             ->required()
-                            ->placeholder('Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya'),
+                            ->placeholder('Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya')
+                            ->helperText('Contoh: Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya'),
                         TextInput::make('phone')
                             ->label('Nomor Telepon')
-                            ->placeholder('+62 882118269212'),
+                            ->placeholder('+62 882118269212')
+                            ->helperText('Gunakan format internasional agar mudah dihubungi.'),
                         TextInput::make('email')
                             ->label('Email')
                             ->email()
-                            ->placeholder('reka114141@gmail.com'),
+                            ->placeholder('reka114141@gmail.com')
+                            ->helperText('Email utama yang akan ditampilkan di CV.'),
                         TextInput::make('linkedin_url')
                             ->label('URL LinkedIn')
                             ->url()
-                            ->placeholder('https://www.linkedin.com/in/reka-ansori-mubarok-a5508427a'),
+                            ->placeholder('https://www.linkedin.com/in/reka-ansori-mubarok-a5508427a')
+                            ->helperText('Pastikan URL LinkedIn aktif dan lengkap.'),
                         TextInput::make('location')
                             ->label('Lokasi')
-                            ->placeholder('Ciamis, Jawa Barat'),
+                            ->placeholder('Ciamis, Jawa Barat')
+                            ->helperText('Kota atau wilayah tempat Anda berada.'),
                     ])
                     ->columns(2),
 
@@ -207,35 +206,22 @@ class ManageCv extends Page implements HasSchemas
                         Textarea::make('cv_about')
                             ->label('Deskripsi Ringkas "Tentang Saya"')
                             ->rows(4)
-                            ->required(),
+                            ->required()
+                            ->helperText('Ringkas dan fokus pada nilai utama yang ingin Anda tampilkan untuk perekrut.'),
                     ]),
 
                 Section::make('3. Keahlian Teknis (Skill Bars Left)')
                     ->description('Daftar keahlian teknis otomatis diambil langsung dari data master Skills.')
                     ->components([
-                        TextInput::make('skills_master_info')
+                        Placeholder::make('skills_master_info')
                             ->label('Informasi Master Skills')
-                            ->disabled()
-                            ->default('Data keahlian teknis diambil otomatis dari menu master Skills (/admin/skills).'),
+                            ->content('Data keahlian teknis diambil otomatis dari menu master Skills (/admin/skills). Gunakan menu Skills untuk mengubah daftar dan kategori teknis Anda.'),
                     ]),
 
-                Section::make('4. Tools & Platform (Tags Left)')
-                    ->components([
-                        Repeater::make('cv_tools')
-                            ->label('Daftar Tools')
-                            ->schema([
-                                TextInput::make('name')
-                                    ->label('Nama Tool / Framework')
-                                    ->required()
-                                    ->placeholder('Figma / Laravel / Tailwind CSS'),
-                            ])
-                            ->columns(2)
-                            ->reorderable()
-                            ->addActionLabel('Tambah Tool'),
-                    ]),
-
-                Section::make('5. Keahlian Bahasa (Opsional Sidebar Left)')
+                Section::make('4. Keahlian Bahasa (Opsional Sidebar Left)')
                     ->description('Kosongkan item jika tidak ingin menampilkan bagian Bahasa pada dokumen CV.')
+                    ->collapsible()
+                    ->collapsed()
                     ->components([
                         Repeater::make('cv_languages')
                             ->label('Daftar Keahlian Bahasa')
@@ -245,7 +231,7 @@ class ManageCv extends Page implements HasSchemas
                                     ->required()
                                     ->placeholder('Indonesia / Inggris / Jepang'),
                                 Select::make('rating')
-                                    ->label('Tingkat Kemahiran (Dots)')
+                                    ->label('Tingkat Kemahiran')
                                     ->options([
                                         1 => '1 Dot - Dasar',
                                         2 => '2 Dots - Elemen',
@@ -259,11 +245,14 @@ class ManageCv extends Page implements HasSchemas
                             ->columns(2)
                             ->reorderable()
                             ->addActionLabel('Tambah Bahasa')
-                            ->defaultItems(0),
+                            ->defaultItems(0)
+                            ->helperText('Gunakan bagian ini jika Anda ingin menampilkan bahasa di CV.'),
                     ]),
 
-                Section::make('6. Sertifikasi & Ujikom (Opsional Sidebar Left)')
+                Section::make('5. Sertifikasi & Ujikom (Opsional Sidebar Left)')
                     ->description('Daftar sertifikasi kompetensi, ujikom, atau sertifikat pelatihan khusus untuk CV.')
+                    ->collapsible()
+                    ->collapsed()
                     ->components([
                         Repeater::make('cv_certifications')
                             ->label('Daftar Sertifikasi / Ujikom')
@@ -283,17 +272,19 @@ class ManageCv extends Page implements HasSchemas
                             ->columns(3)
                             ->reorderable()
                             ->addActionLabel('Tambah Sertifikasi')
-                            ->defaultItems(0),
+                            ->defaultItems(0)
+                            ->helperText('Masukkan satu sertifikasi per baris untuk kejelasan dokumen CV.'),
                     ]),
 
-                Section::make('7. Riwayat Pendidikan (Timeline Main)')
+                Section::make('6. Riwayat Pendidikan (Timeline Main)')
                     ->components([
                         Repeater::make('educations')
                             ->label('Daftar Pendidikan')
                             ->schema([
                                 TextInput::make('institution')
                                     ->label('Nama Kampus / Sekolah')
-                                    ->required(),
+                                    ->required()
+                                    ->columnSpan('full'),
                                 TextInput::make('degree')
                                     ->label('Tingkat / Gelar')
                                     ->placeholder('S1 / SMA'),
@@ -315,17 +306,19 @@ class ManageCv extends Page implements HasSchemas
                             ])
                             ->columns(2)
                             ->reorderable()
-                            ->addActionLabel('Tambah Pendidikan'),
+                            ->addActionLabel('Tambah Pendidikan')
+                            ->helperText('Tambahkan riwayat pendidikan utama yang ingin ditonjolkan di CV.'),
                     ]),
 
-                Section::make('8. Proyek & Pengalaman Kerja (Timeline Main)')
+                Section::make('7. Proyek & Pengalaman Kerja (Timeline Main)')
                     ->components([
                         Repeater::make('cv_projects')
                             ->label('Daftar Proyek / Pengalaman')
                             ->schema([
                                 TextInput::make('name')
                                     ->label('Judul Proyek / Pengalaman Kerja')
-                                    ->required(),
+                                    ->required()
+                                    ->columnSpan('full'),
                                 TextInput::make('badge')
                                     ->label('Tahun / Periode')
                                     ->placeholder('2026 / Sep 2023 - Jul 2024'),
@@ -335,22 +328,27 @@ class ManageCv extends Page implements HasSchemas
                                 Textarea::make('desc')
                                     ->label('Deskripsi / Poin Rincian')
                                     ->rows(4)
-                                    ->helperText('Fleksibel: Bisa berupa paragraf biasa ATAU poin-poin menggunakan strip/bullet (-, *, •).')
+                                    ->helperText('Fleksibel: paragraf biasa atau daftar poin dengan tanda (•, -, *).')
                                     ->placeholder("Contoh Paragraf:\nMembangun website pemilihan OSIS responsif dengan fitur pemilihan online.\n\nContoh List:\n• Membangun platform web iuran sampah.\n• Mengintegrasikan Midtrans Payment Gateway."),
                             ])
                             ->columns(2)
                             ->reorderable()
-                            ->addActionLabel('Tambah Proyek / Pengalaman'),
+                            ->addActionLabel('Tambah Proyek / Pengalaman')
+                            ->helperText('Masukkan proyek dan pengalaman kerja yang paling relevan untuk CV Anda.'),
                     ]),
 
-                Section::make('9. Organisasi & Kepanitiaan (Timeline Main)')
+                Section::make('8. Organisasi & Kepanitiaan (Timeline Main)')
+                    ->description('Tampilkan peran organisasi atau kepanitiaan yang memperkuat nilai kepemimpinan dan kolaborasi Anda.')
+                    ->collapsible()
+                    ->collapsed()
                     ->components([
                         Repeater::make('cv_orgs')
                             ->label('Daftar Organisasi / Panitia')
                             ->schema([
                                 TextInput::make('name')
                                     ->label('Nama Kegiatan / Divisi')
-                                    ->required(),
+                                    ->required()
+                                    ->columnSpan('full'),
                                 TextInput::make('badge')
                                     ->label('Periode')
                                     ->placeholder('Januari - Desember 2025'),
@@ -360,12 +358,13 @@ class ManageCv extends Page implements HasSchemas
                                 Textarea::make('desc')
                                     ->label('Deskripsi Peran & Tanggung Jawab')
                                     ->rows(4)
-                                    ->helperText('Fleksibel: Bisa berupa paragraf biasa ATAU poin-poin menggunakan strip/bullet (-, *, •).')
+                                    ->helperText('Fleksibel: paragraf atau daftar poin untuk menggambarkan kontribusi Anda.' )
                                     ->placeholder("Contoh Paragraf:\nBertugas membangun dan menjaga citra organisasi melalui komunikasi eksternal.\n\nContoh List:\n• Mengelola komunikasi eksternal dan internal.\n• Mengatur distribusi konsumsi panitia."),
                             ])
                             ->columns(2)
                             ->reorderable()
-                            ->addActionLabel('Tambah Organisasi'),
+                            ->addActionLabel('Tambah Organisasi')
+                            ->helperText('Gunakan bagian ini untuk organisasi, kepanitiaan, atau peran non-formal yang relevan.'),
                     ]),
             ])
             ->statePath('data');
@@ -387,7 +386,6 @@ class ManageCv extends Page implements HasSchemas
             'cv_about' => $state['cv_about'] ?? null,
             'cv_data' => [
                 'cv_name' => $state['cv_name'] ?? $user->name,
-                'cv_tools' => $state['cv_tools'] ?? [],
                 'cv_languages' => $state['cv_languages'] ?? [],
                 'cv_certifications' => $state['cv_certifications'] ?? [],
                 'cv_projects' => $state['cv_projects'] ?? [],

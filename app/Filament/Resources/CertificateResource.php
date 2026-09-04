@@ -11,6 +11,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -40,6 +42,19 @@ class CertificateResource extends Resource
                             ->placeholder('misal: AWS Certified Solutions Architect, Laravel Web Development')
                             ->required(),
 
+                        Select::make('certificate_category_id')
+                            ->label('Kategori Sertifikat')
+                            ->relationship('certificateCategory', 'name')
+                            ->createOptionForm([
+                                TextInput::make('name')
+                                    ->label('Nama Kategori')
+                                    ->required(),
+                            ])
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Pilih Kategori Sertifikat'),
+
+
                         TextInput::make('issuer')
                             ->label('Lembaga / Instansi Penerbit')
                             ->placeholder('misal: Laravel LLC, Google, AWS, Dicoding')
@@ -65,6 +80,12 @@ class CertificateResource extends Resource
                             ->url()
                             ->columnSpanFull(),
 
+                        Textarea::make('description')
+                            ->label('Deskripsi Sertifikat (Opsional)')
+                            ->placeholder('Penjelasan singkat mengenai materi, kompetensi, atau pencapaian sertifikat')
+                            ->rows(3)
+                            ->columnSpanFull(),
+
                         TextInput::make('order')
                             ->label('Urutan Tampilan')
                             ->numeric()
@@ -78,6 +99,7 @@ class CertificateResource extends Resource
                         FileUpload::make('image')
                             ->label('Upload Gambar Sertifikat (PNG / JPG / WEBP)')
                             ->image()
+                            ->disk('public')
                             ->directory('certificates/images')
                             ->imagePreviewHeight('140px')
                             ->helperText('Unggah foto/tangkapan layar dokumen sertifikat fisik.'),
@@ -90,6 +112,7 @@ class CertificateResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->with('certificateCategory'))
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Foto')
@@ -99,6 +122,14 @@ class CertificateResource extends Resource
                     ->label('Judul Sertifikat')
                     ->searchable()
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('certificateCategory.name')
+                    ->label('Kategori')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('warning')
+                    ->placeholder('-'),
 
                 Tables\Columns\TextColumn::make('issuer')
                     ->label('Penerbit')

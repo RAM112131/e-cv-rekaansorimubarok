@@ -14,6 +14,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -32,6 +33,11 @@ class ExperienceResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return true;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -47,6 +53,14 @@ class ExperienceResource extends Resource
                             ->label('Perusahaan / Instansi / Organisasi')
                             ->placeholder('misal: PT Telkom, HIMA Informatika, SMK Negeri 1')
                             ->required(),
+
+                        FileUpload::make('company_logo')
+                            ->label('Logo Perusahaan / Organisasi')
+                            ->image()
+                            ->directory('experiences/logos')
+                            ->imagePreviewHeight('60px')
+                            ->columnSpanFull()
+                            ->helperText('Unggah logo resmi (opsional).'),
 
                         Select::make('type')
                             ->label('Kategori & Tipe Pengalaman')
@@ -80,9 +94,16 @@ class ExperienceResource extends Resource
                             ->live()
                             ->default(false),
 
-                        Textarea::make('description')
+                        RichEditor::make('description')
                             ->label('Deskripsi Tanggung Jawab & Pencapaian')
-                            ->rows(4)
+                            ->toolbarButtons([
+                                'bold',
+                                'italic',
+                                'bulletList',
+                                'orderedList',
+                                'redo',
+                                'undo',
+                            ])
                             ->columnSpanFull(),
 
                         TextInput::make('order')
@@ -95,7 +116,7 @@ class ExperienceResource extends Resource
 
                 Section::make('Dokumentasi Kegiatan / Pengalaman')
                     ->components([
-                        FileUpload::make('company_logo')
+                        FileUpload::make('documentation_photos')
                             ->label('Upload Foto Dokumentasi (Bisa Banyak / Slide)')
                             ->image()
                             ->multiple()
@@ -124,7 +145,7 @@ class ExperienceResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('company')
-                    ->label('Perusahaan / Organisasi')
+                    ->label('Perusahaan / Organismi')
                     ->searchable()
                     ->sortable(),
 

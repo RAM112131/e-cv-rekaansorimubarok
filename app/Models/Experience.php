@@ -21,6 +21,7 @@ class Experience extends Model
         'end_date',
         'is_current',
         'description',
+        'documentation_photos',
         'order',
     ];
 
@@ -31,6 +32,7 @@ class Experience extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'is_current' => 'boolean',
+            'documentation_photos' => 'array',
             'order' => 'integer',
         ];
     }

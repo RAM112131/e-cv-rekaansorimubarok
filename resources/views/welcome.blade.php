@@ -1,9 +1,67 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth" style="scroll-padding-top: 80px;">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Portofolio | {{ $user->name ?? 'Rayhan Aditya' }}</title>
+    {{-- ==================== SEO & Metadata Start ==================== --}}
+  <title>
+      {{ $seoTitle ?? $user->name ?? 'Rayhan Aditya' }} – Portfolio | Web Developer
+  </title>
+
+  <meta name="description"
+        content="{{ $seoDescription ?? $user->bio ?? 'Saya seorang Web Developer yang fokus pada menciptakan pengalaman
+  web yang fungsional, visual menarik, dan berdampak nyata.' }}">
+  <meta name="keywords"
+        content="{{ $seoKeywords ?? 'web developer, frontend, UI/UX, Laravel, React, Three.js, portfolio, Indonesia'
+  }}">
+
+  <!-- Canonical URL – gunakan URL absolut halaman ini -->
+  <link rel="canonical"
+        href="{{ url()->current() }}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type"          content="website">
+  <meta property="og:url"           content="{{ url()->current() }}">
+  <meta property="og:title"         content="{{ $ogTitle ?? $user->name ?? 'Rayhan Aditya' }} – Portfolio">
+  <meta property="og:description"   content="{{ $ogDescription ?? $user->bio ?? 'Portofolio saya yang menampilkan
+  proyek, skill, dan pengalaman dalam pembangunan web.' }}">
+  <meta property="og:image"         content="{{ $ogImage ?? asset('images/gambar-depan.webp') }}">
+  <meta property="og:site_name"     content="{{ $user->name ?? 'Reka Ansori Mubarok' }} Portfolio">
+  <meta property="og:locale"        content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"         content="summary_large_image">
+  <meta name="twitter:site"         content="@{{ $twitterHandle ?? 'your_twitter_handle' }}">
+  <meta name="twitter:title"        content="{{ $twitterTitle ?? $user->name ?? 'Reka Ansori Mubarok' }} – Portfolio">
+  <meta name="twitter:description"  content="{{ $twitterDescription ?? $user->bio ?? 'Saya seorang Web Developer yang
+  fokus pada menciptakan pengalaman web yang fungsional, visual menarik, dan berdampak nyata.' }}">
+  <meta name="twitter:image:src"    content="{{ $twitterImage ?? asset('images/gambar-depan.webp') }}">
+
+  <!-- JSON‑LD Structured Data (Person) -->
+  <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@@type": "Person",
+    "name": "{{ $jsonLdName ?? $user->name ?? 'Rayhan Aditya' }}",
+    "url": "{{ url()->current() }}",
+    "sameAs": [
+      @foreach($user->socialLinks as $link)
+        "@if(strtolower($link->platform) == 'github'){{ $link->url }}@elseif(strtolower($link->platform) ==
+  'linkedin'){{ $link->url }}@elseif(strtolower($link->platform) == 'instagram'){{ $link->url
+  }}@elseif(strtolower($link->platform) == 'twitter' || strtolower($link->platform) == 'x'){{ $link->url }}@endif",
+      @endforeach
+    ],
+    "jobTitle": "{{ $jsonLdJobTitle ?? $user->headline ?? 'Web Developer' }}",
+    "description": "{{ $jsonLdDescription ?? $user->bio ?? 'Saya seorang Web Developer yang fokus pada menciptakan
+  pengalaman web yang fungsional, visual menarik, dan berdampak nyata.' }}",
+    "image": "{{ $jsonLdImage ?? asset('images/og-portofolio.jpg') }}",
+    "address": {
+    "@@type": "PostalAddress",
+      "addressLocality": "{{ $jsonLdCity ?? $user->location ?? 'Indonesia' }}",
+      "addressCountry": "ID"
+    }
+  }
+  </script>
+  {{-- ==================== SEO & Metadata End ==================== --}}
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,9 +101,30 @@
         }
         
         .glass-nav {
-            background: rgba(17, 17, 24, 0.7); /* dark with opacity */
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(3, 0, 20, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        /* Nav link active/hover underline glow */
+        .nav-link-futuristic {
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav-link-futuristic::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, var(--color-accentlight), var(--color-neon-blue));
+            box-shadow: 0 0 6px rgba(212, 175, 55, 0.3);
+            transition: width 0.3s ease;
+        }
+        .nav-link-futuristic:hover::after {
+            width: 100%;
         }
         
         .huge-bg-text {
@@ -57,7 +136,7 @@
             font-family: var(--font-heading);
             font-weight: 700;
             color: var(--color-accentlight);
-            opacity: 0.10;
+            opacity: 0.05;
             white-space: nowrap;
             z-index: 0;
             line-height: 1;
@@ -65,15 +144,15 @@
         }
         
         .skill-tag {
-            border: 1px solid #333;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 0.35rem 1rem;
             font-size: 0.75rem;
             border-radius: 9999px;
-            color: #ccc;
+            color: #cbd5e1;
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            background: rgba(0,0,0,0.5);
+            background: rgba(15, 23, 42, 0.5);
             font-family: var(--font-mono);
         }
         .skill-tag:hover {
@@ -92,39 +171,163 @@
             top: 6px;
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); /* Gold shadow */
         }
+        
+        /* Solar System Animations */
+        .solar-orbit {
+            transform-style: preserve-3d;
+        }
+        
+        /* Clean orbit rotation — no translate in keyframe, centering done via negative margin on the element */
+        @keyframes orbit-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        
+        /* Counter-rotate the planet so it faces the viewer and stays perfectly round */
+        @keyframes planet-upright {
+            from { transform: rotateZ(0deg)    rotateX(-82deg); }
+            to   { transform: rotateZ(-360deg) rotateX(-82deg); }
+        }
     </style>
 </head>
 <body class="antialiased">
 
+    <!-- Global Floating Toast Notification (Success / Error) -->
+    @if(session('contact_success') || session('contact_error') || $errors->any())
+    <div x-data="{ showToast: true }"
+         x-show="showToast"
+         x-init="setTimeout(() => showToast = false, 7000)"
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="translate-y-[-20px] opacity-0 scale-95"
+         x-transition:enter-end="translate-y-0 opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="translate-y-0 opacity-100 scale-100"
+         x-transition:leave-end="translate-y-[-20px] opacity-0 scale-95"
+         class="fixed top-20 right-4 sm:right-8 z-[100] max-w-md w-full pointer-events-auto">
+        
+        @if(session('contact_success'))
+        <div class="clay-card rounded-2xl p-4 bg-[#0a1610]/95 border border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.3),inset_1px_1px_4px_rgba(255,255,255,0.1)] backdrop-blur-xl flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-400 flex-shrink-0 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 class="font-heading font-bold text-sm text-white flex items-center justify-between">
+                    <span>Pesan Berhasil Terkirim!</span>
+                    <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-widest bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-500/30">Terkirim</span>
+                </h4>
+                <p class="text-xs font-sans text-emerald-200/90 mt-1 leading-relaxed">{{ session('contact_success') }}</p>
+            </div>
+            <button @click="showToast = false" class="text-slate-400 hover:text-white transition p-1 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        @endif
+
+        @if(session('contact_error'))
+        <div class="clay-card rounded-2xl p-4 bg-[#1a0a0a]/95 border border-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.3),inset_1px_1px_4px_rgba(255,255,255,0.1)] backdrop-blur-xl flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-400/50 flex items-center justify-center text-red-400 flex-shrink-0 shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 class="font-heading font-bold text-sm text-white flex items-center justify-between">
+                    <span>Gagal Mengirim Pesan!</span>
+                    <span class="text-[10px] font-mono text-red-400 uppercase tracking-widest bg-red-500/20 px-2 py-0.5 rounded-full border border-red-500/30">Error</span>
+                </h4>
+                <p class="text-xs font-sans text-red-200/90 mt-1 leading-relaxed">{{ session('contact_error') }}</p>
+            </div>
+            <button @click="showToast = false" class="text-slate-400 hover:text-white transition p-1 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        @endif
+
+        @if($errors->any() && !session('contact_error'))
+        <div class="clay-card rounded-2xl p-4 bg-[#1a0a0a]/95 border border-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.3),inset_1px_1px_4px_rgba(255,255,255,0.1)] backdrop-blur-xl flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-400/50 flex items-center justify-center text-red-400 flex-shrink-0 shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 class="font-heading font-bold text-sm text-white flex items-center justify-between">
+                    <span>Pesan Gagal Terkirim</span>
+                    <span class="text-[10px] font-mono text-red-400 uppercase tracking-widest bg-red-500/20 px-2 py-0.5 rounded-full border border-red-500/30">Validasi</span>
+                </h4>
+                <p class="text-xs font-sans text-red-200/90 mt-1">Harap periksa dan lengkapi kolom form yang belum sesuai.</p>
+            </div>
+            <button @click="showToast = false" class="text-slate-400 hover:text-white transition p-1 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        @endif
+
+    </div>
+    @endif
+
+    <!-- Swarm Cursor Root -->
+    <div id="react-swarm-cursor-root" class="fixed inset-0 z-[5] pointer-events-none"></div>
     <!-- 3D Background Canvas -->
-    <div id="react-id-card-root" class="fixed inset-0 w-full z-0 opacity-100 pointer-events-auto" data-name="{{ $firstName . ' ' . $lastName }}" data-headline="{{ $user->headline }}" data-avatar="{{ $user->avatar ? Storage::url($user->avatar) : 'null' }}"></div>
+    <div id="react-id-card-root" class="absolute top-0 left-0 w-full h-screen z-10 opacity-100 pointer-events-auto" data-name="{{ $firstName . ' ' . $lastName }}" data-headline="{{ $user->headline }}" data-avatar="{{ $user->avatar ? Storage::url($user->avatar) : 'null' }}"></div>
 
     <!-- Fixed Navigation Menu -->
-    <nav x-data="{ mobileMenuOpen: false, scrolled: false }" 
-         @scroll.window="scrolled = (window.pageYOffset > 20)"
-         :class="scrolled ? 'glass-nav' : 'bg-transparent'"
-         class="fixed top-0 w-full z-50 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 md:px-12 py-4 flex justify-between items-center">
+    <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 transition-all duration-300">
+        <nav x-data="{ 
+                 mobileMenuOpen: false, 
+                 scrolled: false, 
+                 activeSection: 'beranda',
+                 updateActiveSection() {
+                     this.scrolled = (window.pageYOffset > 20);
+                     const sections = ['kontak', 'karier', 'proyek-preview', 'skill', 'beranda'];
+                     const scrollPos = window.pageYOffset + 250;
+                     for (const sec of sections) {
+                         const el = document.getElementById(sec);
+                         if (el && scrollPos >= el.offsetTop) {
+                             this.activeSection = sec;
+                             break;
+                         }
+                     }
+                 }
+             }" 
+             x-init="updateActiveSection(); if (window.location.hash) { activeSection = window.location.hash.replace('#', ''); }"
+             @scroll.window="updateActiveSection()"
+             :class="scrolled ? 'glass-nav py-3 px-8 rounded-full shadow-2xl max-w-6xl w-full' : 'bg-transparent py-5 px-4 w-full'"
+             class="transition-all duration-300 flex justify-between items-center max-w-7xl mx-auto">
             <!-- Logo -->
-            <a href="#beranda" class="font-heading text-2xl font-bold tracking-widest uppercase text-white">
-                {{ ucfirst(strtolower(explode(' ', $user->name)[0] ?? 'Rayhan')) }}<span class="text-accentlight">.</span>
+            <a href="#beranda" @click="activeSection = 'beranda'" class="font-heading text-2xl font-bold tracking-widest uppercase text-white cursor-pointer hover:opacity-85 transition">
+                {{ ucfirst(strtolower(explode(' ', $user->name)[0] ?? 'Rayhan')) }}<span class="text-accentlight" style="text-shadow: 0 0 8px rgba(212,175,55,0.4);">.</span>
             </a>
             
             <!-- Desktop Menu -->
-            <ul class="hidden md:flex gap-8 text-xs uppercase tracking-[0.15em] text-gray-400 font-medium">
-                <li><a href="#beranda" class="hover:text-accentlight transition">Beranda</a></li>
-                <li><a href="#skill" class="hover:text-accentlight transition">Skill</a></li>
-                <li><a href="#pengalaman" class="hover:text-accentlight transition">Pengalaman</a></li>
-                <li><a href="#proyek" class="hover:text-accentlight transition">Proyek</a></li>
-                <li><a href="#sertifikat" class="hover:text-accentlight transition">Sertifikat</a></li>
-                <li><a href="#kontak" class="hover:text-accentlight transition">Kontak</a></li>
-                @auth
-                    <li><a href="{{ url('/admin') }}" class="text-accentlight font-bold">Admin Panel</a></li>
-                @endauth
-            </ul>
+            <div class="hidden md:flex items-center gap-8">
+                <ul class="flex gap-8 text-xs uppercase tracking-[0.15em] text-gray-400 font-medium items-center">
+                    <li>
+                        <a href="{{ route('home') }}#beranda" 
+                           @click="activeSection = 'beranda'"
+                           :class="activeSection === 'beranda' ? 'text-accentlight font-bold active' : 'text-gray-400 hover:text-accentlight'"
+                           class="nav-link-futuristic transition duration-200 cursor-pointer">Beranda</a>
+                    </li>
+                    <li><a href="{{ route('projects.index') }}" class="nav-link-futuristic hover:text-accentlight transition duration-200 cursor-pointer">Proyek</a></li>
+                    <li><a href="{{ route('certificates.index') }}" class="nav-link-futuristic hover:text-accentlight transition duration-200 cursor-pointer">Sertifikat</a></li>
+                    <li>
+                        <a href="{{ route('home') }}#kontak" 
+                           @click="activeSection = 'kontak'"
+                           :class="activeSection === 'kontak' ? 'text-accentlight font-bold active' : 'text-gray-400 hover:text-accentlight'"
+                           class="nav-link-futuristic transition duration-200 cursor-pointer">Kontak</a>
+                    </li>
+                    @auth
+                        <li><a href="{{ url('/admin') }}" class="text-accentlight font-bold hover:text-accent transition duration-200 cursor-pointer">Admin Panel</a></li>
+                    @endauth
+                </ul>
+                
+                <!-- Download CV Button (Clay) -->
+                @if(Route::has('cv.download'))
+                <a href="{{ route('cv.download') }}" class="clay-btn bg-accent/90 hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-xs px-5 py-2.5 inline-flex items-center gap-2 cursor-pointer">
+                    <span>Download CV</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                </a>
+                @endif
+            </div>
 
             <!-- Mobile Menu Button -->
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-300 focus:outline-none">
+            <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-300 focus:outline-none cursor-pointer">
                 <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                 </svg>
@@ -132,42 +335,58 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-        </div>
-
-        <!-- Mobile Menu Dropdown -->
-        <div x-show="mobileMenuOpen" 
-             x-transition
-             style="display: none;"
-             class="md:hidden bg-darker border-b border-white/10 absolute w-full left-0 top-full">
-            <ul class="flex flex-col text-xs uppercase tracking-widest text-gray-400 p-6 gap-6 text-center">
-                <li><a @click="mobileMenuOpen = false" href="#beranda" class="hover:text-accentlight transition block">Beranda</a></li>
-                <li><a @click="mobileMenuOpen = false" href="#skill" class="hover:text-accentlight transition block">Skill</a></li>
-                <li><a @click="mobileMenuOpen = false" href="#pengalaman" class="hover:text-accentlight transition block">Pengalaman</a></li>
-                <li><a @click="mobileMenuOpen = false" href="#proyek" class="hover:text-accentlight transition block">Proyek</a></li>
-                <li><a @click="mobileMenuOpen = false" href="#sertifikat" class="hover:text-accentlight transition block">Sertifikat</a></li>
-                <li><a @click="mobileMenuOpen = false" href="#kontak" class="hover:text-accentlight transition block">Kontak</a></li>
-                @auth
-                    <li><a @click="mobileMenuOpen = false" href="{{ url('/admin') }}" class="text-accentlight font-bold block">Admin Panel</a></li>
-                @endauth
-            </ul>
-        </div>
-    </nav>
+            
+            <!-- Mobile Menu Dropdown -->
+            <div x-show="mobileMenuOpen"
+                 x-transition
+                 style="display: none;"
+                 class="md:hidden clay-card absolute left-4 right-4 top-full mt-2 shadow-2xl z-50">
+                <ul class="flex flex-col text-xs uppercase tracking-widest text-gray-400 p-6 gap-6 text-center">
+                    <li>
+                        <a @click="mobileMenuOpen = false; activeSection = 'beranda'" 
+                           href="{{ route('home') }}#beranda" 
+                           :class="activeSection === 'beranda' ? 'text-accentlight font-bold' : 'hover:text-accentlight'"
+                           class="transition block cursor-pointer">Beranda</a>
+                    </li>
+                    <li><a @click="mobileMenuOpen = false" href="{{ route('projects.index') }}" class="hover:text-accentlight transition block cursor-pointer">Proyek</a></li>
+                    <li><a @click="mobileMenuOpen = false" href="{{ route('certificates.index') }}" class="hover:text-accentlight transition block cursor-pointer">Sertifikat</a></li>
+                    <li>
+                        <a @click="mobileMenuOpen = false; activeSection = 'kontak'" 
+                           href="{{ route('home') }}#kontak" 
+                           :class="activeSection === 'kontak' ? 'text-accentlight font-bold' : 'hover:text-accentlight'"
+                           class="transition block cursor-pointer">Kontak</a>
+                    </li>
+                    @auth
+                        <li><a @click="mobileMenuOpen = false" href="{{ url('/admin') }}" class="text-accentlight font-bold block cursor-pointer">Admin Panel</a></li>
+                    @endauth
+                    @if(Route::has('cv.download'))
+                    <li>
+                        <a @click="mobileMenuOpen = false" href="{{ route('cv.download') }}" class="clay-btn bg-accent/90 text-slate-950 font-bold uppercase tracking-wider text-xs px-5 py-2.5 inline-flex items-center justify-center gap-2 cursor-pointer mx-auto">
+                            <span>Download CV</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </a>
+                    </li>
+                    @endif
+                </ul>
+            </div>
+        </nav>
+    </div>
 
     <!-- SECTION: BERANDA -->
-    <header id="beranda" class="relative min-h-screen flex flex-col justify-center px-6 md:px-12 pt-24 pb-20 overflow-hidden pointer-events-none">
+    <header id="beranda" class="bg-darker futuristic-grid relative min-h-screen flex flex-col justify-center px-6 md:px-12 pt-24 pb-20 overflow-hidden pointer-events-none">
         <!-- Huge Background Text -->
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-            <h1 class="font-heading font-bold text-[20vw] text-accent opacity-10 leading-none whitespace-nowrap select-none" style="transform: translateY(-5%);">PORTFOLIO</h1>
+            <h1 class="font-heading font-bold text-[20vw] text-accent opacity-[0.04] leading-none whitespace-nowrap select-none" style="transform: translateY(-5%); text-shadow: 0 0 80px rgba(212,175,55,0.08);">PORTFOLIO</h1>
         </div>
         
-        <div class="relative z-10 w-full mt-0.5 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between mt-10 pointer-events-none">
+        <div class="relative z-30 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between pointer-events-none">
             <div class="w-full lg:w-3/5 flex flex-col pointer-events-auto">
 
-                <span style="font-family: var(--font-script);" class="text-white text-3xl md:text-5xl mb-2">Hello, I'm</span>
-                <h1 class="font-heading text-6xl md:text-7xl lg:text-[6rem] font-bold leading-[1.0] tracking-tight mb-0 text-white uppercase">
+                <span style="font-family: var(--font-script);" class="neon-text-gold text-white text-3xl md:text-5xl mb-2">Hello, I'm</span>
+                <h1 class="font-heading text-6xl md:text-7xl lg:text-[6rem] font-bold leading-[1.0] tracking-tight mb-0 text-white uppercase" style="text-shadow: 0 0 40px rgba(212,175,55,0.1), 0 0 80px rgba(212,175,55,0.03);">
                     {{ $firstName }}
                 </h1>
-                <h1 class="font-heading text-6xl md:text-7xl lg:text-[6rem] font-bold leading-[1.0] tracking-tight mb-4 text-white uppercase">
+                <h1 class="font-heading text-6xl md:text-7xl lg:text-[6rem] font-bold leading-[1.0] tracking-tight mb-4 text-white uppercase" style="text-shadow: 0 0 40px rgba(212,175,55,0.1), 0 0 80px rgba(212,175,55,0.03);">
                     {{ $lastName }}
                 </h1>
 
@@ -177,260 +396,1717 @@
                 </h2>
                 @endif
 
-                <p class="text-gray-400 text-sm md:text-[15px] leading-[1.8] mb-8 max-w-md font-sans font-light">
+                <p class="text-gray-400 text-sm md:text-[15px] leading-[1.8] mb-8 max-w-xl font-sans font-light">
                     {{ $user->bio ?? 'I design and build stylish, user-focused web experiences that combine creativity with strategy. Passionate about clean design, smooth interactions, and details that make a difference.' }}
                 </p>
 
                 <!-- Action Buttons & Socials -->
-                <div class="flex flex-wrap items-center gap-6 mb-12">
-                    <!-- Download CV Button -->
+                <div class="flex flex-wrap items-center gap-5 mb-12">
+                    <!-- Download CV Button (Clay) -->
                     @if(Route::has('cv.download'))
-                    <a href="{{ route('cv.download') }}" class="group relative px-6 py-3 border border-accentlight text-accentlight font-sans font-bold uppercase tracking-widest text-xs hover:bg-accentlight hover:text-darker transition-all duration-300 rounded-sm overflow-hidden">
-                        <span class="relative z-10 flex items-center gap-2">
-                            <span>Download CV</span>
-                            <svg class="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        </span>
+                    <a href="{{ route('cv.download') }}" class="group clay-btn bg-accent hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-xs px-6 py-3.5 cursor-pointer overflow-hidden inline-flex items-center gap-2">
+                        <span>Download CV</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     </a>
                     @else
-                    <a href="{{ $user->cv_file ? Storage::url($user->cv_file) : '#' }}" target="_blank" class="group relative px-6 py-3 border border-accentlight text-accentlight font-sans font-bold uppercase tracking-widest text-xs hover:bg-accentlight hover:text-darker transition-all duration-300 rounded-sm overflow-hidden">
-                        <span class="relative z-10 flex items-center gap-2">
-                            <span>Download CV</span>
-                            <svg class="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        </span>
+                    <a href="{{ $user->cv_file ? Storage::url($user->cv_file) : '#' }}" target="_blank" class="group clay-btn bg-accent hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-xs px-6 py-3.5 cursor-pointer overflow-hidden inline-flex items-center gap-2">
+                        <span>Download CV</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     </a>
                     @endif
 
                     <!-- Divider -->
-                    @if(isset($user) && $user->socialLinks->count() > 0)
                     <div class="hidden md:block w-px h-8 bg-white/10"></div>
 
-                    <!-- Social Links -->
-                    <div class="flex items-center gap-4">
-                        @foreach($user->socialLinks as $link)
-                        <a href="{{ $link->url }}" target="_blank" class="text-gray-400 hover:text-accentlight transform hover:-translate-y-1 transition-all duration-300" title="{{ $link->platform }}">
-                            @if(strtolower($link->platform) == 'github')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path></svg>
-                            @elseif(strtolower($link->platform) == 'linkedin')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clip-rule="evenodd"></path></svg>
-                            @elseif(strtolower($link->platform) == 'instagram')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" clip-rule="evenodd"></path></svg>
-                            @elseif(strtolower($link->platform) == 'twitter' || strtolower($link->platform) == 'x')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
-                            @else
-                            <span class="font-bold text-xs uppercase tracking-widest">{{ $link->platform }}</span>
-                            @endif
-                        </a>
-                        @endforeach
-                    </div>
-                    @endif
+                    <!-- Social Links Component -->
+                    <x-social-links :links="$user->socialLinks ?? null" 
+                                    itemClass="clay-circle w-10 h-10 flex items-center justify-center text-amber-300 hover:text-white transition-all hover:scale-110 cursor-pointer" />
                 </div>
                 
-                <div class="flex items-center gap-3 text-gray-500 text-[10px] md:text-xs font-mono tracking-widest uppercase">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    {{ $user->location ? strtoupper($user->location) : 'AVAILABLE FOR FREELANCE' }}
-                </div>
+
             </div>
             
-            <div class="hidden lg:flex flex-col gap-10 text-left absolute right-0">
-                <div class="flex items-center gap-4">
-                    <h3 class="text-accentlight font-heading text-5xl md:text-7xl font-bold mb-0">{{ $yearsExperience }}+</h3>
-                    <p class="text-gray-400 text-[10px] font-sans font-bold uppercase tracking-widest leading-relaxed">YEARS<br>EXPERIENCE</p>
+            <!-- Stats (desktop: absolute right, same as before) -->
+            <div class="hidden lg:flex flex-col gap-6 text-left absolute right-0">
+                <div class="clay-card px-5 py-4 flex items-center gap-4">
+                    <div class="clay-circle w-11 h-11 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-accentlight" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-accentlight neon-text-gold font-heading text-4xl font-bold mb-0">{{ $yearsExperience }}+</h3>
+                        <p class="text-gray-500 text-[9px] font-sans font-bold uppercase tracking-widest leading-relaxed">TAHUN PENGALAMAN</p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <h3 class="text-accentlight font-heading text-5xl md:text-7xl font-bold mb-0">{{ $totalProjects }}+</h3>
-                    <p class="text-gray-400 text-[10px] font-sans font-bold uppercase tracking-widest leading-relaxed">PROJECTS<br>COMPLETED</p>
+                <div class="clay-card px-5 py-4 flex items-center gap-4">
+                    <div class="clay-circle w-11 h-11 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-accentlight" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-accentlight neon-text-gold font-heading text-4xl font-bold mb-0">{{ $totalProjects }}+</h3>
+                        <p class="text-gray-500 text-[9px] font-sans font-bold uppercase tracking-widest leading-relaxed">PROYEK SELESAI</p>
+                    </div>
                 </div>
-                <div class="flex items-center gap-4">
-                    <h3 class="text-accentlight font-heading text-5xl md:text-7xl font-bold mb-0">{{ $totalClients }}+</h3>
-                    <p class="text-gray-400 text-[10px] font-sans font-bold uppercase tracking-widest leading-relaxed">HAPPY<br>CLIENTS</p>
+                <div class="clay-card px-5 py-4 flex items-center gap-4">
+                    <div class="clay-circle w-11 h-11 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-accentlight" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-accentlight neon-text-gold font-heading text-4xl font-bold mb-0">{{ $totalClients }}+</h3>
+                        <p class="text-gray-500 text-[9px] font-sans font-bold uppercase tracking-widest leading-relaxed">KLIEN PUAS</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Bar (mobile: horizontal below hero) -->
+        <div class="lg:hidden relative z-10 w-full max-w-7xl mx-auto mt-12 pointer-events-auto">
+            <div class="grid grid-cols-3 gap-3">
+                <div class="clay-card px-3 py-4 text-center">
+                    <h3 class="text-accentlight neon-text-gold font-heading text-2xl font-bold">{{ $yearsExperience }}+</h3>
+                    <p class="text-gray-500 text-[8px] font-sans font-bold uppercase tracking-widest mt-1">Pengalaman</p>
+                </div>
+                <div class="clay-card px-3 py-4 text-center">
+                    <h3 class="text-accentlight neon-text-gold font-heading text-2xl font-bold">{{ $totalProjects }}+</h3>
+                    <p class="text-gray-500 text-[8px] font-sans font-bold uppercase tracking-widest mt-1">Proyek</p>
+                </div>
+                <div class="clay-card px-3 py-4 text-center">
+                    <h3 class="text-accentlight neon-text-gold font-heading text-2xl font-bold">{{ $totalClients }}+</h3>
+                    <p class="text-gray-500 text-[8px] font-sans font-bold uppercase tracking-widest mt-1">Klien</p>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- SECTION: SKILL -->
-    <section id="skill" class="px-6 md:px-12 py-24 bg-darker/80 border-t border-white/5 relative z-10">
-        <div class="max-w-7xl mx-auto">
-            <h3 class="font-heading text-3xl tracking-wide mb-12 flex items-center gap-4 text-white">
-                <span class="text-accentlight text-4xl leading-none font-sans font-light">+</span> Keahlian & Teknologi
-            </h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                @foreach($groupedSkills as $category => $categorySkills)
-                <div>
-                    <h4 class="text-accentlight text-xs uppercase tracking-[0.2em] mb-6 pb-2 border-b border-white/10">{{ $category }}</h4>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($categorySkills as $skill)
-                            <span class="skill-tag">{{ $skill->name }}</span>
-                        @endforeach
+    <section id="skill" class="px-6 md:px-12 py-8 md:py-10 relative flex flex-col items-center justify-center overflow-hidden before:absolute before:inset-0 before:bg-darker before:z-[-1]">
+        
+
+
+        <!-- Header Showcase Area (Matching Proyek, Sertifikat, & Karier Header Style) -->
+        <div class="max-w-7xl mx-auto w-full mb-4 md:mb-6 relative z-20">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
+                
+                <!-- Left Column: Title & Subtitle -->
+                <div class="w-full lg:w-1/2 flex flex-col items-start text-left">
+                    <h2 class="font-heading text-3xl sm:text-4xl md:text-5xl text-white font-bold tracking-tight mb-4">
+                        Teknologi &amp; <span class="text-accentlight neon-text-gold">Keahlian.</span>
+                    </h2>
+
+                    <p class="text-slate-400 font-sans text-xs md:text-sm max-w-md leading-relaxed mb-0">
+                        Perangkat lunak, bahasa pemrograman, dan kerangka kerja utama yang dikuasai dalam membangun solusi digital modern.
+                    </p>
+                </div>
+
+                <!-- Right Column: Average Skill Percentage Widget Box (Claymorphism Style matching Social Links & Hero) -->
+                <div class="w-full lg:w-1/2 flex items-center justify-start lg:justify-end">
+                    <div class="clay-card inline-flex items-center gap-4 p-3.5 px-5 rounded-2xl border border-amber-400/30 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+                        <div class="clay-circle w-11 h-11 flex items-center justify-center text-amber-300 flex-shrink-0">
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        
+                        <div>
+                            <span class="block text-[9px] font-mono uppercase tracking-[0.2em] text-amber-400 font-bold mb-0.5">PERSENTASE KEAHLIAN</span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-2xl font-bold text-white font-heading">{{ (int) round($groupedSkills->flatten()->avg('level') ?? 0) }}%</span>
+                                <span class="text-slate-400 font-mono text-xs">Rata-rata Kuasai</span>
+                            </div>
+                        </div>
+
+                        <!-- Mini 3D Glowing Bar Chart Visualization (Gold & Amber) -->
+                        <div class="clay-card flex items-end gap-1.5 h-8 px-2.5 py-1.5 rounded-xl border border-amber-400/20 ml-2">
+                            <div class="w-1.5 bg-gradient-to-t from-amber-700 to-amber-400 rounded-t-sm h-5 shadow-[0_0_6px_rgba(212,175,55,0.4)]"></div>
+                            <div class="w-1.5 bg-gradient-to-t from-amber-600 to-amber-300 rounded-t-sm h-3 shadow-[0_0_6px_rgba(251,191,36,0.4)]"></div>
+                            <div class="w-1.5 bg-gradient-to-t from-amber-500 to-amber-200 rounded-t-sm h-7 shadow-[0_0_8px_rgba(251,191,36,0.6)]"></div>
+                        </div>
                     </div>
                 </div>
-                @endforeach
+
             </div>
+        </div>
+
+        <!-- Central Floating Showcase (Scattered Layout) -->
+        <div class="relative w-full max-w-6xl flex-1 min-h-[400px] md:min-h-[500px] max-h-[600px] flex items-center justify-center z-20 scale-75 sm:scale-90 lg:scale-100 mt-2">
+            
+            <!-- Podium 3D base -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[20%] w-[380px] h-[120px] sm:w-[480px] sm:h-[140px] podium-3d z-10">
+            </div>
+
+
+            
+            <!-- Dynamic Percentage Text (Center) -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center mt-[-30px]" style="z-index: 30;">
+                <div class="absolute -top-12 -left-8 text-accent animate-pulse">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L13.5 9.5L21 11L13.5 12.5L12 20L10.5 12.5L3 11L10.5 9.5L12 2Z"/></svg>
+                </div>
+                <div id="dynamic-percentage" class="font-heading font-black flex items-start leading-none" style="filter: drop-shadow(0 20px 30px rgba(0,0,0,0.9));">
+                    <span id="sun-skill-level" class="text-8xl sm:text-[180px] tracking-tighter" style="background: linear-gradient(180deg, #fff 0%, #d4af37 60%, #92400e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 20px rgba(212,175,55,0.5);">0</span>
+                    <span class="text-5xl sm:text-[80px] mt-2 sm:mt-6 font-bold" style="background: linear-gradient(180deg, #fff 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">%</span>
+                </div>
+                
+                <div id="sun-skill-name" class="mt-3 font-sans text-xs font-bold tracking-widest text-accentlight uppercase opacity-0 transition-opacity duration-300">KEAHLIAN</div>
+            </div>
+
+            @php
+                // Flatten and get all skills for the scattered layout
+                $allPlanetSkills = collect();
+                foreach ($groupedSkills as $cat => $skills) {
+                    $allPlanetSkills = $allPlanetSkills->merge($skills);
+                }
+                
+                // Limit to max 20 to avoid extreme overcrowding, but accommodate a dynamic amount
+                $maxDisplay = min(20, $allPlanetSkills->count());
+                $topSkills = $allPlanetSkills->take($maxDisplay);
+                
+                // Generate dynamic scattered positions
+                $positions = [];
+                foreach ($topSkills as $idx => $skill) {
+                    // Spread them out along an ellipse
+                    $angle = ($idx / $maxDisplay) * pi() * 2;
+                    
+                    // Jitter the radius to scatter them (inner vs outer band)
+                    $isInner = ($idx % 2 == 0);
+                    // Safe zone to not block the center text (which is around 50% +/- 25% horizontal)
+                    $radX = $isInner ? rand(30, 36) : rand(42, 48); // Horizontal percentage
+                    $radY = $isInner ? rand(32, 38) : rand(44, 48); // Vertical percentage
+                    
+                    $centerX = 50;
+                    $centerY = 45;
+                    
+                    $left = $centerX + ($radX * cos($angle));
+                    $top = $centerY + ($radY * sin($angle));
+                    
+                    // Determine Size based on Level
+                    $level = $skill->level ?? 50;
+                    if ($level >= 90) {
+                        $sizeClass = "w-[90px] h-[90px] sm:w-[120px] sm:h-[120px] p-3";
+                        $imgClass = "w-12 h-12 sm:w-16 sm:h-16 mb-2";
+                        $textClass = "text-[11px] sm:text-sm";
+                    } elseif ($level >= 75) {
+                        $sizeClass = "w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] p-2";
+                        $imgClass = "w-10 h-10 sm:w-14 sm:h-14 mb-1.5";
+                        $textClass = "text-[10px] sm:text-xs";
+                    } elseif ($level >= 50) {
+                        $sizeClass = "w-[70px] h-[70px] sm:w-[85px] sm:h-[85px] p-1.5";
+                        $imgClass = "w-8 h-8 sm:w-10 sm:h-10 mb-1";
+                        $textClass = "text-[9px] sm:text-[10px]";
+                    } else {
+                        $sizeClass = "w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] p-1";
+                        $imgClass = "w-6 h-6 sm:w-8 sm:h-8 mb-1";
+                        $textClass = "text-[8px] sm:text-[9px]";
+                    }
+
+                    // Determine dynamic tooltip placement based on proximity to edges
+                    $distLeft = $left;
+                    $distRight = 100 - $left;
+                    $distTop = $top;
+                    $distBottom = 100 - $top;
+                    
+                    $minDist = min($distLeft, $distRight, $distTop, $distBottom);
+                    
+                    $tooltipClass = '';
+                    if ($minDist == $distLeft) {
+                        $tooltipClass = 'left-full top-1/2 -translate-y-1/2 ml-3'; // closest to left edge, open right
+                    } elseif ($minDist == $distRight) {
+                        $tooltipClass = 'right-full top-1/2 -translate-y-1/2 mr-3'; // closest to right edge, open left
+                    } elseif ($minDist == $distTop) {
+                        $tooltipClass = 'top-full left-1/2 -translate-x-1/2 mt-3'; // closest to top edge, open bottom
+                    } else {
+                        $tooltipClass = 'bottom-full left-1/2 -translate-x-1/2 mb-3'; // closest to bottom edge, open top
+                    }
+                    
+                    $durations = ['4.8s', '5.6s', '6.4s', '7.2s', '5.2s', '6.8s', '5.0s', '6.0s'];
+                    $delays = ['0s', '-1.6s', '-3.2s', '-4.8s', '-2.4s', '-0.8s', '-3.8s', '-2.0s'];
+
+                    $positions[] = [
+                        'top' => $top . '%',
+                        'left' => $left . '%',
+                        'anim' => 'float-' . (($idx % 6) + 1),
+                        'duration' => $durations[$idx % count($durations)],
+                        'delay' => $delays[$idx % count($delays)],
+                        'sizeClass' => $sizeClass,
+                        'imgClass' => $imgClass,
+                        'textClass' => $textClass,
+                        'tooltipClass' => $tooltipClass
+                    ];
+                }
+            @endphp
+            
+            <!-- Floating Scattered Elements -->
+            @foreach ($topSkills as $idx => $skill)
+            @php
+                $iconUrl = $skill->icon ? Storage::url($skill->icon) : null;
+                $pos = $positions[$idx];
+                
+                // Use database description if available, otherwise fallback
+                $desc = $skill->description ?: "Familiar and experienced in utilizing {$skill->name} to build modern applications with a proficiency level of {$skill->level}%.";
+            @endphp
+            <div class="absolute z-40 skill-node"
+                 style="top: {{ $pos['top'] }}; left: {{ $pos['left'] }}; transform: translate(-50%, -50%);">
+                 <div class="relative cursor-pointer" onclick="toggleSkillModal(this)" style="animation: {{ $pos['anim'] }} {{ $pos['duration'] }} ease-in-out {{ $pos['delay'] }} infinite;">
+                    
+                    <!-- Icon Box -->
+                    <div class="clay-icon-3d {{ $pos['sizeClass'] }} hover:border-accent/50 transition-colors duration-300">
+                         @if($iconUrl)
+                            <img src="{{ $iconUrl }}" alt="{{ $skill->name }}" class="{{ $pos['imgClass'] }} object-contain drop-shadow-xl pointer-events-none" loading="lazy">
+                         @else
+                            <span class="text-accentlight font-heading font-bold text-xl mb-1.5 pointer-events-none">{{ strtoupper(substr($skill->name, 0, 2)) }}</span>
+                         @endif
+                         <span class="{{ $pos['textClass'] }} font-sans font-bold text-slate-300 text-center leading-tight truncate w-full px-1 pointer-events-none">{{ $skill->name }}</span>
+                    </div>
+
+                    <!-- Clickable Modal / Tooltip -->
+                    <div class="skill-modal hidden absolute w-48 md:w-56 p-4 bg-slate-900/95 border border-slate-700/80 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] backdrop-blur-xl z-50 {{ $pos['tooltipClass'] }}" onclick="event.stopPropagation()">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-accent font-bold text-sm md:text-base">{{ $skill->name }}</h4>
+                            <span class="text-[10px] bg-accent/20 text-accentlight px-2 py-0.5 rounded-full">{{ $skill->level }}%</span>
+                        </div>
+                        <p class="text-[10px] md:text-xs text-slate-400 leading-relaxed">
+                            {{ $desc }}
+                        </p>
+                        <!-- Close button for mobile or clarity -->
+                        <button class="absolute -top-2 -right-2 w-6 h-6 bg-slate-800 border border-slate-600 rounded-full text-slate-400 hover:text-white flex items-center justify-center text-xs shadow-lg" onclick="this.closest('.skill-node').style.zIndex='40'; this.closest('.skill-modal').classList.add('hidden'); event.stopPropagation();">✕</button>
+                    </div>
+
+                 </div>
+            </div>
+            @endforeach
+            
+            <script>
+            function toggleSkillModal(element) {
+                const node = element.closest('.skill-node');
+                
+                // Hide all other modals and reset z-index
+                document.querySelectorAll('.skill-modal').forEach(el => {
+                    if (el !== element.querySelector('.skill-modal')) {
+                        el.classList.add('hidden');
+                        el.closest('.skill-node').style.zIndex = '40';
+                    }
+                });
+                
+                // Toggle current modal and z-index
+                const modal = element.querySelector('.skill-modal');
+                if (modal.classList.contains('hidden')) {
+                    modal.classList.remove('hidden');
+                    node.style.zIndex = '100'; // bring to front
+                } else {
+                    modal.classList.add('hidden');
+                    node.style.zIndex = '40'; // reset
+                }
+            }
+            
+            // Close on outside click
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.skill-node')) {
+                    document.querySelectorAll('.skill-modal').forEach(el => {
+                        el.classList.add('hidden');
+                        el.closest('.skill-node').style.zIndex = '40';
+                    });
+                }
+            });
+            
+            (function() {
+                var skills = @json($allPlanetSkills->map(fn($s) => ['name' => $s->name, 'level' => $s->level ?? 0])->values());
+                if(skills.length === 0) return;
+                
+                var lastIdx = -1;
+                var levelEl = document.getElementById('sun-skill-level');
+                var nameEl = document.getElementById('sun-skill-name');
+                var container = document.getElementById('dynamic-percentage');
+
+                function showNext() {
+                    if (!levelEl || !nameEl) return;
+                    
+                    var nextIdx;
+                    if (skills.length > 1) {
+                        do {
+                            nextIdx = Math.floor(Math.random() * skills.length);
+                        } while (nextIdx === lastIdx);
+                    } else {
+                        nextIdx = 0;
+                    }
+                    lastIdx = nextIdx;
+                    var skill = skills[nextIdx];
+
+                    if (container) {
+                        container.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+                        container.style.opacity = '0';
+                        container.style.transform = 'scale(0.92)';
+                    }
+                    nameEl.style.transition = 'opacity 0.15s ease';
+                    nameEl.style.opacity = '0';
+
+                    setTimeout(function() {
+                        levelEl.innerText = skill.level;
+                        nameEl.innerText = skill.name;
+                        
+                        if (container) {
+                            container.style.opacity = '1';
+                            container.style.transform = 'scale(1)';
+                        }
+                        nameEl.style.opacity = '1';
+                    }, 150);
+                }
+
+                function startLoop() {
+                    showNext();
+                    setInterval(showNext, 1500);
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', startLoop);
+                } else {
+                    startLoop();
+                }
+            })();
+            </script>
         </div>
     </section>
 
+    @php
+        $experienceData = $experiences->map(function($e) {
+            $start = \Carbon\Carbon::parse($e->start_date);
+            $end = $e->is_current ? now() : ($e->end_date ? \Carbon\Carbon::parse($e->end_date) : now());
+            $months = $start->diffInMonths($end) + 1;
+            $durText = $months >= 12 ? floor($months / 12) . ' Tahun ' . ($months % 12 > 0 ? ($months % 12) . ' Bulan' : '') : $months . ' Bulan';
+            
+            // Handle company logo (could be string or array due to cast changes)
+            $logoUrl = null;
+            if ($e->company_logo) {
+                if (is_array($e->company_logo) && count($e->company_logo) > 0) {
+                    $logoUrl = Storage::disk('public')->url(is_string(array_key_first($e->company_logo)) ? $e->company_logo[array_key_first($e->company_logo)] : $e->company_logo[0]);
+                } else if (is_string($e->company_logo)) {
+                    $logoUrl = Storage::disk('public')->url($e->company_logo);
+                }
+            }
+
+            // Handle documentation photos
+            $docs = [];
+            if ($e->documentation_photos && is_array($e->documentation_photos)) {
+                foreach ($e->documentation_photos as $photo) {
+                    $docs[] = Storage::disk('public')->url($photo);
+                }
+            }
+            
+            return [
+                'title' => $e->title,
+                'company' => $e->company,
+                'logo' => $logoUrl,
+                'location' => $e->location,
+                'type' => $e->type ?? 'Full-time',
+                'start' => $start->format('M Y'),
+                'end' => $e->is_current ? 'Present' : ($e->end_date ? \Carbon\Carbon::parse($e->end_date)->format('M Y') : 'N/A'),
+                'duration' => $durText,
+                'desc' => $e->description,
+                'photos' => $docs,
+            ];
+        })->values();
+    @endphp
     <!-- SECTION: PENGALAMAN -->
-    <section id="pengalaman" class="px-6 md:px-12 py-24 bg-dark/90 border-t border-white/5 relative z-10">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <div>
-                <h3 class="font-heading text-3xl tracking-wide mb-12 flex items-center gap-4 text-white">
-                    <span class="text-accentlight text-4xl leading-none font-sans font-light">+</span> Pengalaman
-                </h3>
-                <p class="text-gray-400 text-[14px] leading-[1.75] mb-8">
-                    Fokus saya bukan hanya pada penulisan kode, tetapi bagaimana teknologi dapat memberikan solusi nyata. Berikut adalah perjalanan kolaborasi dan implementasi sistem yang pernah saya lakukan.
-                </p>
+    <section id="pengalaman" class="px-6 md:px-12 py-8 md:py-10 relative overflow-hidden bg-darker futuristic-grid before:absolute before:inset-0 before:bg-darker before:z-[-1]" x-data="{ 
+        activeExp: 0, 
+        experiences: {{ json_encode($experienceData) }},
+        modalOpen: false,
+        modalImages: [],
+        modalIndex: 0,
+        openModal(photos, index) {
+            this.modalImages = photos;
+            this.modalIndex = index;
+            this.modalOpen = true;
+        },
+        nextImage() {
+            if(this.modalIndex < this.modalImages.length - 1) this.modalIndex++;
+        },
+        prevImage() {
+            if(this.modalIndex > 0) this.modalIndex--;
+        }
+    }">
+        <div class="relative z-10 max-w-7xl mx-auto">
+            <!-- Hero Header Showcase Area (2 Columns - Matching Proyek & Sertifikat Header Style) -->
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-4 md:mb-6 relative z-10">
                 
-                <!-- Timeline -->
-                <div class="relative border-l border-white/10 ml-2 pl-8 flex flex-col gap-10 mt-10">
-                    @foreach($experiences as $exp)
-                    <div class="relative">
-                        <div class="timeline-dot"></div>
-                        <span class="text-[10px] text-accentlight font-sans tracking-[0.1em] mb-1 block uppercase font-medium">
-                            {{ \Carbon\Carbon::parse($exp->start_date)->format('Y') }} - {{ $exp->is_current ? 'Sekarang' : \Carbon\Carbon::parse($exp->end_date)->format('Y') }}
-                        </span>
-                        <h5 class="text-lg font-medium text-white mb-1 tracking-wide">{{ $exp->title }}</h5>
-                        <h6 class="text-[10px] text-gray-500 uppercase tracking-[0.1em] mb-3">{{ $exp->company }}</h6>
-                        <p class="text-[14px] text-gray-400 leading-[1.75]">
-                            {{ $exp->description }}
+                <!-- Left Column: Title & Subtitle -->
+                <div class="w-full lg:w-1/2 flex flex-col items-start">
+                    <h2 class="font-heading text-3xl sm:text-4xl md:text-5xl text-white font-bold tracking-tight mb-4">
+                        Perjalanan <span class="text-accentlight neon-text-gold">Karier.</span>
+                    </h2>
+
+                    <p class="text-slate-400 font-sans text-xs md:text-sm max-w-md leading-relaxed mb-0">
+                        Rekam jejak profesional, peran kepemimpinan, dan kontribusi nyata dalam industri teknologi.
+                    </p>
+                </div>
+
+                <!-- Right Column: 3D Floating Career Chrono Orbit Graphic (Matching Proyek & Sertifikat Right Graphic) -->
+                <div class="w-full lg:w-1/2 flex items-center justify-center relative min-h-[170px] sm:min-h-[200px] pointer-events-none select-none">
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                        <div class="w-48 h-48 bg-amber-500/10 rounded-full blur-[80px]"></div>
+                    </div>
+
+                    <!-- Orbit Rings -->
+                    <div class="absolute w-[240px] h-[80px] sm:w-[300px] sm:h-[100px] rounded-[50%] border border-amber-400/25 pointer-events-none z-0" style="transform: rotate(-12deg); box-shadow: 0 0 25px rgba(212,175,55,0.1);">
+                        <div class="absolute top-2 right-8 w-3 h-3 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-[0_0_10px_#f59e0b]"></div>
+                        <div class="absolute bottom-2 left-10 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-[0_0_12px_rgba(212,175,55,0.8)]"></div>
+                    </div>
+
+                    <!-- 3D Clay Career Badge / Briefcase Floating Showcase -->
+                    <div class="relative z-10 flex flex-col items-center justify-center w-full py-1 [perspective:1000px]">
+                        <div class="relative z-20 w-48 h-28 sm:w-56 sm:h-34 rounded-[22px] bg-gradient-to-br from-[#1c1f33] via-[#101324] to-[#070914] border-2 border-amber-400/40 p-4 shadow-[-14px_18px_35px_rgba(0,0,0,0.95),inset_2px_2px_8px_rgba(255,255,255,0.15),0_0_25px_rgba(212,175,55,0.2)] flex items-center justify-between pointer-events-auto transition-transform duration-700 hover:scale-105"
+                             style="transform: rotateX(18deg) rotateY(-15deg) rotateZ(4deg);">
+                            <div class="space-y-2 w-1/2 pr-2">
+                                <div class="w-[90%] h-2 rounded-full bg-[#0a0c16] border border-amber-400/20 shadow-inner"></div>
+                                <div class="w-[70%] h-2 rounded-full bg-[#0a0c16] border border-amber-400/20 shadow-inner"></div>
+                                <div class="w-[50%] h-2 rounded-full bg-[#0a0c16] border border-amber-400/20 shadow-inner"></div>
+                            </div>
+                            <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-tr from-amber-500/20 to-amber-400/10 border border-amber-400/40 flex items-center justify-center text-amber-300 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-amber-400 drop-shadow-[0_0_6px_rgba(212,175,55,0.8)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8 lg:gap-12" x-show="experiences.length > 0">
+                <!-- Left Sidebar (Timeline + Tabs + Quote) -->
+                <div class="w-full lg:w-[340px] flex-shrink-0 flex flex-col justify-between relative z-10">
+                    <div class="relative pl-6 space-y-4">
+                        <!-- Vertical Timeline Line -->
+                        <div class="absolute left-1.5 top-4 bottom-4 w-[2px] bg-slate-800/80 z-0"></div>
+
+                        <template x-for="(exp, index) in experiences" :key="index">
+                            <div class="relative group cursor-pointer" @click="activeExp = index">
+                                <!-- Connecting Dot on Vertical Timeline Line -->
+                                <div class="absolute -left-6 top-1/2 -translate-y-1/2 z-10 transition-all duration-300">
+                                    <div x-show="activeExp === index" class="w-3.5 h-3.5 rounded-full bg-amber-400 border-2 border-darker shadow-[0_0_12px_rgba(212,175,55,0.9)] animate-pulse"></div>
+                                    <div x-show="activeExp !== index" class="w-2.5 h-2.5 rounded-full bg-slate-700 hover:bg-amber-400/60 transition-colors"></div>
+                                </div>
+
+                                <!-- Tab Card (Hero clay-card style) -->
+                                <div class="relative w-full p-4 rounded-2xl transition-all duration-300 cursor-pointer flex items-center justify-between clay-card"
+                                     :class="activeExp === index 
+                                        ? 'border-accentlight/60 shadow-[0_0_20px_rgba(212,175,55,0.15)] bg-amber-400/10 scale-[1.02]' 
+                                        : 'hover:border-slate-700/80'">
+                                    
+                                    <div class="flex items-center gap-3.5 min-w-0">
+                                        <!-- Logo / Initial Box (Clay-Card UI matching Hero, wall-to-wall cover with 100% text/icon visibility) -->
+                                        <div class="clay-card w-12 h-12 flex items-center justify-center flex-shrink-0 transition-all duration-300 overflow-hidden relative border"
+                                             :class="activeExp === index 
+                                                ? 'border-amber-400/50 shadow-[0_0_12px_rgba(212,175,55,0.2)]' 
+                                                : 'border-slate-800'">
+                                            <template x-if="exp.logo">
+                                                <img :src="exp.logo" :alt="exp.company"
+                                                     class="w-full h-full object-cover scale-[1.12] select-none pointer-events-none rounded-xl"
+                                                     oncontextmenu="return false;"
+                                                     ondragstart="return false;"
+                                                     draggable="false">
+                                            </template>
+                                            <template x-if="!exp.logo">
+                                                <span class="font-heading font-black text-lg select-none text-accentlight" x-text="exp.company.substring(0,1)"></span>
+                                            </template>
+                                        </div>
+                                        <div class="flex-grow min-w-0 pr-2">
+                                            <div class="font-heading font-bold text-sm truncate text-white" x-text="exp.company"></div>
+                                            <div class="text-[11px] text-slate-400 truncate mt-0.5" x-text="exp.title"></div>
+                                            <div class="text-[10px] text-accentlight font-medium tracking-wide mt-1" x-text="exp.start + ' - ' + exp.end"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Chevron Arrow for Active Tab -->
+                                    <div x-show="activeExp === index" class="text-accentlight flex-shrink-0 pr-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Left Quote Clay Card (Consistent with Hero clay-card) -->
+                    <div class="mt-6 p-4 clay-card flex items-start gap-3">
+                        <div class="w-8 h-8 clay-circle flex items-center justify-center text-accentlight font-serif text-xl font-bold flex-shrink-0 mt-0.5">
+                            “
+                        </div>
+                        <p class="text-slate-300 text-xs italic font-sans leading-relaxed">
+                            Setiap pengalaman adalah pelajaran, setiap proyek adalah kesempatan untuk berkembang.
                         </p>
                     </div>
-                    @endforeach
+                </div>
 
+                <!-- Right Main Content (Active Detail Card) -->
+                <div class="w-full flex-grow min-w-0">
+                    <!-- The Big Clay Detail Card (Consistent with Hero clay-card) -->
+                    <div class="w-full h-full p-6 md:p-8 lg:p-10 clay-card relative overflow-hidden">
+                        
+                        <!-- Work & Career Tech Graphic (Top Right Corner) -->
+                        <div class="absolute -top-6 -right-6 w-64 h-64 pointer-events-none opacity-20 z-0">
+                            <svg viewBox="0 0 200 200" fill="none" class="w-full h-full text-amber-400">
+                                <!-- Tech Work Grid & Nodes -->
+                                <circle cx="120" cy="80" r="70" stroke="currentColor" stroke-width="1" stroke-dasharray="6 6" />
+                                <circle cx="120" cy="80" r="50" stroke="currentColor" stroke-width="1.5" />
+                                <!-- Briefcase / Work Icon Emblem -->
+                                <g transform="translate(95, 55) scale(2)" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="7" width="20" height="14" rx="3" fill="currentColor" fill-opacity="0.1" />
+                                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                                    <path d="M12 12v3" />
+                                    <path d="M2 11h20" stroke-dasharray="2 2" />
+                                </g>
+                                <!-- Career Connections -->
+                                <circle cx="70" cy="50" r="4" fill="currentColor" />
+                                <circle cx="170" cy="110" r="4" fill="currentColor" />
+                                <line x1="70" y1="50" x2="90" y2="65" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" />
+                                <line x1="150" y1="95" x2="170" y2="110" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" />
+                            </svg>
+                        </div>
+
+                        <template x-for="(exp, index) in experiences" :key="index">
+                            <div x-show="activeExp === index"
+                                 x-transition:enter="transition ease-out duration-500"
+                                 x-transition:enter-start="opacity-0 translate-y-6"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="w-full relative z-10">
+                                
+                                <!-- Card Header (Logo, Company, Title, Meta, Date Pill) -->
+                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-dashed border-slate-800/80">
+                                    <div class="flex items-center gap-5">
+                                        <!-- Logo Box (Clay-Card UI matching Hero, wall-to-wall cover with 100% text/icon visibility) -->
+                                        <div class="clay-card w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center flex-shrink-0 relative overflow-hidden border border-amber-400/40 shadow-[0_0_25px_rgba(212,175,55,0.2)]">
+                                            <template x-if="exp.logo">
+                                                <img :src="exp.logo" :alt="exp.company"
+                                                     class="w-full h-full object-cover scale-[1.12] select-none pointer-events-none rounded-2xl"
+                                                     oncontextmenu="return false;"
+                                                     ondragstart="return false;"
+                                                     draggable="false">
+                                            </template>
+                                            <template x-if="!exp.logo">
+                                                <span class="text-amber-400 font-heading font-black text-2xl sm:text-3xl select-none" x-text="exp.company.substring(0,1)"></span>
+                                            </template>
+                                        </div>
+                                        
+                                        <div>
+                                            <h3 class="font-heading font-bold text-2xl text-white leading-tight" x-text="exp.company"></h3>
+                                            <div class="text-amber-400 text-sm font-semibold mt-0.5" x-text="exp.title"></div>
+                                            
+                                            <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-400">
+                                                <div class="flex items-center gap-1 text-slate-400">
+                                                    <svg class="w-3.5 h-3.5 text-amber-500/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                                    <span x-text="exp.type"></span>
+                                                </div>
+                                                <span>•</span>
+                                                <div class="flex items-center gap-1 text-slate-400">
+                                                    <svg class="w-3.5 h-3.5 text-amber-500/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                                    <span x-text="exp.location"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Date Pill Badge (Top Right - Claymorphism style matching Social Links & Hero) -->
+                                    <div class="clay-card flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-400/30 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
+                                        <svg class="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span class="text-xs font-mono font-bold text-amber-300 tracking-wide" x-text="exp.start + ' - ' + exp.end"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Job Description Section -->
+                                <div class="my-6">
+                                    <div class="flex items-center gap-2.5 mb-4">
+                                        <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span>
+                                        <h4 class="text-white font-bold text-xs uppercase tracking-widest">DESKRIPSI PEKERJAAN</h4>
+                                    </div>
+                                    <div class="prose prose-invert prose-sm max-w-none text-slate-300 leading-relaxed list-disc-custom" x-html="exp.desc">
+                                    </div>
+                                </div>
+                                
+                                <!-- Documentation Photos Section (Optional) -->
+                                <div x-show="exp.photos && exp.photos.length > 0" class="pt-6 border-t border-dashed border-slate-800/80">
+                                    <div class="flex items-center justify-between gap-3 mb-4">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span>
+                                            <h4 class="text-white font-bold text-xs uppercase tracking-widest">DOKUMENTASI KEGIATAN</h4>
+                                        </div>
+                                        <div class="px-3 py-1 rounded-full bg-[#111622] border border-slate-800 text-[10px] font-bold text-slate-400">
+                                            <span x-text="exp.photos.length"></span> Foto
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+                                        <template x-for="(photo, index) in exp.photos" :key="index">
+                                            <div class="flex-shrink-0 relative group cursor-pointer" @click="openModal(exp.photos, index)">
+                                                <div class="w-44 h-28 rounded-2xl overflow-hidden border border-slate-700/60 shadow-lg relative">
+                                                    <img :src="photo" 
+                                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 select-none pointer-events-none" 
+                                                         alt="Dokumentasi"
+                                                         oncontextmenu="return false;"
+                                                         ondragstart="return false;"
+                                                         draggable="false">
+                                                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
+
+
             
-            <!-- Visual / Quote area for Experience -->
-            <div class="flex items-center justify-center">
-                <div class="w-full aspect-[4/5] bg-[#14141c] border border-white/5 p-10 flex flex-col justify-center rounded-sm relative overflow-hidden backdrop-blur-sm">
-                    <div class="absolute -bottom-10 -right-10 text-[12rem] opacity-5 font-serif leading-none text-white">"</div>
-                    <div class="text-4xl mb-4 font-serif text-accentlight">"</div>
-                    <p class="text-xl md:text-2xl font-heading italic leading-[1.5] mb-8 relative z-10 text-gray-200">
-                        Teknologi terbaik adalah yang mampu menjembatani kebutuhan manusia dan menciptakan dampak positif pada lingkungan sekitarnya.
-                    </p>
-                    <div class="font-heading text-3xl text-gray-400">Rayhan</div>
+            <div x-show="experiences.length === 0" class="text-center py-12">
+                <p class="text-slate-500 font-mono text-sm">Belum ada pengalaman yang ditambahkan.</p>
+            </div>
+
+            <!-- Image Modal (Lightbox) -->
+            <template x-teleport="body">
+                <div x-show="modalOpen" 
+                     class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 style="display: none;"
+                 @keydown.escape.window="modalOpen = false"
+                 @keydown.right.window="nextImage()"
+                 @keydown.left.window="prevImage()">
+                 
+                <!-- Close Button -->
+                <button @click="modalOpen = false" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors bg-[#111622] rounded-full p-2 border border-slate-700/50 z-[100000]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                
+                <!-- Prev Button -->
+                <button x-show="modalIndex > 0" @click.stop="prevImage()" class="absolute left-4 md:left-10 text-slate-400 hover:text-white transition-colors bg-[#111622]/80 backdrop-blur-sm rounded-full p-3 border border-slate-700/50 z-[100000]">
+                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                
+                <!-- Next Button -->
+                <button x-show="modalIndex < modalImages.length - 1" @click.stop="nextImage()" class="absolute right-4 md:right-10 text-slate-400 hover:text-white transition-colors bg-[#111622]/80 backdrop-blur-sm rounded-full p-3 border border-slate-700/50 z-[100000]">
+                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                
+                <!-- Image Container -->
+                <div class="relative max-w-5xl max-h-[90vh] flex flex-col items-center justify-center z-[99999]" @click.away="modalOpen = false">
+                    <img :src="modalImages[modalIndex]" 
+                         class="max-w-full max-h-[85vh] rounded-xl object-contain shadow-2xl transition-all duration-300 select-none pointer-events-none"
+                         oncontextmenu="return false;"
+                         ondragstart="return false;"
+                         draggable="false">
+                    
+                    <!-- Counter -->
+                    <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 text-slate-400 text-sm font-sans tracking-widest bg-black/50 px-4 py-1.5 rounded-full backdrop-blur-md border border-slate-800/80">
+                        <span x-text="modalIndex + 1"></span> / <span x-text="modalImages.length"></span>
+                    </div>
                 </div>
             </div>
+            </template>
         </div>
+
+        <style>
+            .list-disc-custom ul {
+                list-style-type: none;
+                padding-left: 0;
+            }
+            .list-disc-custom ul li {
+                position: relative;
+                padding-left: 1.5rem;
+                margin-bottom: 0.75rem;
+            }
+            .list-disc-custom ul li::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0.6rem;
+                width: 0.375rem;
+                height: 0.375rem;
+                border-radius: 50%;
+                background-color: #f59e0b;
+                box-shadow: 0 0 8px rgba(245,158,11,0.6);
+            }
+            .hide-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .hide-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        </style>
     </section>
 
     <!-- SECTION: PROYEK -->
-    <section id="proyek" class="px-6 md:px-12 py-24 bg-darker border-t border-white/5 relative z-10">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between md:items-end mb-12">
-            <h3 class="font-heading text-3xl tracking-wide flex items-center gap-4 text-white">
-                <span class="text-accentlight text-4xl leading-none font-sans font-light">+</span> Pilihan Proyek
-            </h3>
-        </div>
+    <section id="proyek" class="px-6 md:px-12 py-8 md:py-10 relative bg-darker futuristic-grid before:absolute before:inset-0 before:bg-darker before:z-[-1] overflow-hidden">
         
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-            
-            @foreach($projects as $index => $project)
-            <div class="group cursor-pointer" onclick="window.open('{{ $project->link ?? '#' }}', '_blank')">
-                <div class="w-full aspect-[16/9] bg-[#0d0d12] border border-white/5 rounded-sm overflow-hidden mb-6 relative flex items-center justify-center">
-                    @if($project->image)
-                        <img src="{{ Storage::url($project->image) }}" alt="{{ $project->title }}" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-60 transition duration-500">
-                    @endif
-                    <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent z-10"></div>
-                    <h2 class="absolute bottom-6 left-6 z-20 font-heading text-4xl font-bold opacity-10 group-hover:opacity-20 transition duration-500 text-white uppercase">{{ Str::slug($project->title, ' ') }}</h2>
-                    <!-- Placeholder visual for project -->
-                    <div class="w-32 h-32 border-2 border-accentlight/30 rounded-full flex items-center justify-center group-hover:scale-110 transition duration-500 z-20">
-                        <svg class="w-12 h-12 text-accentlight" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                    </div>
+        <!-- Ambient Aurora Glow (10% Glow) -->
+        <div class="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+            <!-- Hero Header Showcase Area (2 Columns) -->
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-4 md:mb-6">
+                <!-- Left Column: Title & Subtitle -->
+                <div class="w-full lg:w-1/2 flex flex-col items-start">                  
+                    <h2 class="font-heading text-3xl sm:text-4xl md:text-5xl text-white font-bold tracking-tight mb-4">
+                        Karya &amp; <span class="text-accentlight neon-text-gold">Portofolio.</span>
+                    </h2>
+                    
+                    <p class="text-slate-400 font-sans text-xs md:text-sm max-w-md leading-relaxed mb-6">
+                        Mengubah ide menjadi solusi digital yang fungsional, estetis, dan berdampak nyata.
+                    </p>
                 </div>
-                <div class="flex items-start gap-4 px-2">
-                    <span class="font-heading text-3xl text-accentlight">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
-                    <div>
-                        <h4 class="font-heading text-xl tracking-wider mb-1 text-white">{{ $project->title }}</h4>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-[0.12em] mb-3 font-medium">{{ $project->category ?? 'Proyek' }}</p>
-                        <p class="text-[14px] leading-[1.75] text-gray-400">{{ Str::limit($project->description, 120) }}</p>
+
+                <!-- Right Column: Compact 3D Showcase Podium Component -->
+                <div class="w-full lg:w-1/2 flex items-center justify-center relative min-h-[170px] sm:min-h-[200px] pointer-events-none select-none">
+                    
+                    <!-- Ambient Radial Gold Light -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                        <div class="w-48 h-48 bg-amber-500/10 rounded-full blur-[80px]"></div>
                     </div>
+
+                    <!-- Outer Orbit Ring 1 (Large) -->
+                    <div class="absolute w-[240px] h-[80px] sm:w-[300px] sm:h-[100px] rounded-[50%] border border-amber-400/25 pointer-events-none z-0" style="transform: rotate(-16deg); box-shadow: 0 0 25px rgba(212,175,55,0.08);">
+                        <div class="absolute top-2 left-1/4 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"></div>
+                    </div>
+                    <!-- Outer Orbit Ring 2 (Dashed) -->
+                    <div class="absolute w-[270px] h-[95px] sm:w-[330px] sm:h-[115px] rounded-[50%] border border-dashed border-slate-700/60 pointer-events-none z-0" style="transform: rotate(-16deg);"></div>
+
+                    <!-- 3D Scene Wrapper with Perspective -->
+                    <div class="relative z-10 flex flex-col items-center justify-center w-full py-1 [perspective:1000px]">
+
+                        <!-- 3D Floating Clay Tile (Tilted Sideways in True 3D Perspective) -->
+                        <div class="relative z-20 w-36 h-36 sm:w-44 sm:h-44 rounded-[26px] bg-gradient-to-br from-[#232d44] via-[#141b2b] to-[#0a0d15] border-2 border-amber-400/50 p-3.5 shadow-[-12px_16px_30px_rgba(0,0,0,0.9),inset_2px_2px_8px_rgba(255,255,255,0.2),inset_-3px_-3px_10px_rgba(0,0,0,0.7),0_0_25px_rgba(212,175,55,0.2)] hover:scale-105 transition-all duration-700 ease-out flex flex-col justify-between mb-[-20px] pointer-events-auto"
+                             style="transform: rotateX(20deg) rotateY(-22deg) rotateZ(6deg); transform-style: preserve-3d;">
+                            
+                            <!-- Tile Header: Gold Code Icon + Top Right Clay Switch Widget -->
+                            <div class="flex items-center justify-between">
+                                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400/20 to-amber-500/10 border border-amber-400/30 flex items-center justify-center text-amber-400 font-mono font-black text-base shadow-[inset_0_1px_1px_rgba(255,255,255,0.2),0_4px_12px_rgba(0,0,0,0.4)]">
+                                    &lt;/&gt;
+                                </div>
+                                
+                                <div class="px-2 py-0.5 rounded-lg bg-[#090c14] border border-slate-800 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span class="text-[8px] font-mono font-bold text-slate-300 uppercase tracking-widest">DEV</span>
+                                </div>
+                            </div>
+
+                            <!-- Tile Center/Bottom: Mini Dashboard Analytics Widget Card -->
+                            <div class="p-2 rounded-xl bg-[#080b12]/90 border border-amber-400/20 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05),0_6px_15px_rgba(0,0,0,0.6)]">
+                                <div class="flex items-center justify-between mb-0.5">
+                                    <span class="text-[8px] font-mono text-amber-400 font-semibold uppercase tracking-wider">ANALYTICS</span>
+                                    <span class="text-[8px] font-mono text-emerald-400 font-bold">+28.5%</span>
+                                </div>
+                                
+                                <!-- Mini SVG Trendline Chart -->
+                                <div class="w-full h-6 mb-0.5">
+                                    <svg viewBox="0 0 100 30" fill="none" class="w-full h-full">
+                                        <defs>
+                                            <linearGradient id="chartGradSm2" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                                                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M0 25 Q 20 20, 35 15 T 65 10 T 100 3 L 100 30 L 0 30 Z" fill="url(#chartGradSm2)" />
+                                        <path d="M0 25 Q 20 20, 35 15 T 65 10 T 100 3" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" />
+                                        <circle cx="100" cy="3" r="2.5" fill="#fbbf24" class="animate-ping" />
+                                        <circle cx="100" cy="3" r="2" fill="#f59e0b" />
+                                    </svg>
+                                </div>
+
+                                <!-- Stack Dots -->
+                                <div class="flex items-center justify-between text-[7px] font-mono text-slate-400 pt-0.5 border-t border-slate-800/80">
+                                    <span class="flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-amber-400"></span> Build</span>
+                                    <span class="flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-blue-400"></span> Deploy</span>
+                                    <span class="flex items-center gap-0.5"><span class="w-1 h-1 rounded-full bg-emerald-400"></span> Live</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- 3D Cylinder Podium Base (Bottom Stage) -->
+                        <div class="relative z-10 w-44 sm:w-52 h-9 rounded-[50%] bg-gradient-to-b from-[#1a2336] via-[#101625] to-[#070a12] border-t-2 border-amber-400/50 shadow-[0_10px_20px_rgba(0,0,0,0.95),0_0_20px_rgba(212,175,55,0.25)] flex items-center justify-center">
+                            <!-- Bottom Rim Glow Ring -->
+                            <div class="absolute -bottom-1.5 inset-x-3 h-4 bg-amber-400/30 rounded-[50%] blur-md pointer-events-none"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Decorative Floating 3D Spheres (Amber & Dark Obsidian) -->
+                    <div class="absolute top-2 left-6 w-4 h-4 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 shadow-[0_0_10px_rgba(212,175,55,0.7)] animate-bounce" style="animation-duration: 4.5s;"></div>
+                    <div class="absolute bottom-4 right-4 w-5 h-5 rounded-full bg-gradient-to-br from-slate-600 via-slate-800 to-slate-950 border border-slate-700 shadow-xl"></div>
+                    <div class="absolute top-1/3 right-2 w-2.5 h-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-[0_0_6px_rgba(251,191,36,0.6)] animate-pulse"></div>
                 </div>
             </div>
-            @endforeach
+
+            <!-- Project Cards Grid (2-Column Grid Layout with Hero Clay Card Theme) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                @foreach($projects as $project)
+                <a href="{{ route('project.show', $project->slug) }}"
+                   class="group relative clay-card p-6 md:p-8 rounded-2xl bg-[#0a0d18]/70 border border-amber-400/30 hover:border-amber-400/70 transition-all duration-500 hover:-translate-y-2.5 hover:shadow-[0_0_30px_rgba(212,175,55,0.25)] cursor-pointer flex flex-col justify-between overflow-hidden relative z-10 backdrop-blur-md">
+                    
+                    @if($project->image)
+                        <!-- Visible Project Cover Image Card Background Layer -->
+                        <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
+                            <img src="{{ Storage::disk('public')->url($project->image) }}" alt="" 
+                                 class="w-full h-full object-cover scale-105 group-hover:scale-110 opacity-55 group-hover:opacity-75 transition-all duration-700 select-none pointer-events-none"
+                                 oncontextmenu="return false;"
+                                 ondragstart="return false;"
+                                 draggable="false">
+                            <!-- Vignette Gradients: Darker on left & bottom for crisp text readability -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-[#060815]/95 via-[#060815]/75 to-[#060815]/25"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#060815]/95 via-transparent to-[#060815]/30"></div>
+                        </div>
+                    @endif
+
+                    <!-- Ambient Glowing Orbs Background (Pure Gold Theme matching Hero) -->
+                    <div class="absolute -top-16 -right-16 w-56 h-56 bg-amber-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/30 transition-all duration-700 z-0"></div>
+                    <div class="absolute -bottom-16 -left-16 w-56 h-56 bg-amber-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/25 transition-all duration-700 z-0"></div>
+                    
+                    <!-- Futuristic Grid Pattern & Code Circuit Watermark Overlay -->
+                    <div class="absolute inset-0 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500 pointer-events-none z-0"></div>
+                    
+                    <!-- Decorative Top-Right Tech Circuit Lines -->
+                    <div class="absolute top-0 right-0 w-36 h-36 opacity-15 group-hover:opacity-30 transition-opacity pointer-events-none z-0">
+                        <svg viewBox="0 0 100 100" fill="none" class="w-full h-full text-amber-400">
+                            <path d="M100 0H60L40 20H0" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/>
+                            <circle cx="60" cy="0" r="3" fill="currentColor"/>
+                            <circle cx="40" cy="20" r="3" fill="currentColor"/>
+                        </svg>
+                    </div>
+
+                    <div class="relative z-10">
+                        <!-- Top Bar: Category Tag (Clay Card Pill matching Hero) -->
+                        <div class="flex items-center justify-between gap-4 mb-6">
+                            <span class="clay-card inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-amber-400/35 text-amber-300 font-mono text-[10px] font-bold uppercase tracking-widest shadow-[0_0_12px_rgba(212,175,55,0.15)]">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                {{ $project->category }}
+                            </span>
+                        </div>
+
+                        <!-- Card Body: Left Title & Description, Right Image Frame -->
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center mb-6">
+                            <div class="sm:col-span-6 flex flex-col justify-center">
+                                <h3 class="font-heading font-bold text-2xl text-white group-hover:text-amber-300 transition-colors mb-2.5 leading-tight tracking-tight">
+                                    {{ $project->title }}
+                                </h3>
+                                <p class="text-slate-400 text-xs font-sans leading-relaxed line-clamp-3">
+                                    {{ $project->description }}
+                                </p>
+                            </div>
+
+                            <div class="sm:col-span-6">
+                                <div class="clay-card w-full h-36 sm:h-40 rounded-2xl overflow-hidden border border-amber-400/30 shadow-[0_10px_30px_rgba(0,0,0,0.8),inset_0_1px_3px_rgba(255,255,255,0.1)] relative group-hover:scale-[1.03] group-hover:border-amber-400/60 transition-all duration-500 bg-[#070912]">
+                                    @if($project->image)
+                                        <img src="{{ Storage::disk('public')->url($project->image) }}" alt="{{ $project->title }}"
+                                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 select-none pointer-events-none" loading="lazy"
+                                             oncontextmenu="return false;"
+                                             ondragstart="return false;"
+                                             draggable="false">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center text-slate-600 font-mono text-xs">
+                                            [ No Image ]
+                                        </div>
+                                    @endif
+                                    <div class="absolute inset-0 bg-gradient-to-t from-[#040610]/80 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Bar: Tech Stacks & LIHAT DETAIL CTA -->
+                    <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between gap-4 relative z-10">
+                        <div class="flex flex-wrap items-center gap-2">
+                            @php
+                                $stacks = $project->tech_stack ? array_map('trim', explode(',', $project->tech_stack)) : [];
+                            @endphp
+                            @foreach($stacks as $stack)
+                                <span class="clay-card px-3 py-1 rounded-full border border-amber-400/20 text-[11px] font-mono text-slate-300 inline-flex items-center gap-1.5 shadow-sm group-hover:border-amber-400/40 transition-colors">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400/80"></span>
+                                    {{ $stack }}
+                                </span>
+                            @endforeach
+                        </div>
+                        <span class="text-xs font-mono font-bold text-amber-300 group-hover:text-amber-400 flex items-center gap-1.5 transition-colors flex-shrink-0 neon-text-gold">
+                            <span>LIHAT DETAIL</span>
+                            <svg class="w-3.5 h-3.5 transform group-hover:translate-x-1.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </span>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+
+            <!-- Bottom CTA Button Below Projects Cards Grid -->
+            <div class="mt-12 text-center">
+                <a href="{{ route('projects.index') }}" class="group clay-btn bg-accent hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-xs px-6 py-3.5 cursor-pointer overflow-hidden inline-flex items-center gap-2">
+                    <span>Lihat Semua Proyek</span>
+                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </a>
+            </div>
 
         </div>
     </section>
 
     <!-- SECTION: SERTIFIKAT -->
-    <section id="sertifikat" class="px-6 md:px-12 py-24 bg-dark/90 border-t border-white/5 relative z-10">
-        <div class="max-w-7xl mx-auto">
-            <h3 class="font-heading text-3xl tracking-wide mb-12 flex items-center gap-4 text-white">
-                <span class="text-accentlight text-4xl leading-none font-sans font-light">+</span> Sertifikat & Edukasi
-            </h3>
+    @php
+        $certsArray = $certificates->map(function($cert) {
+            $certUrl = $cert->credential_url ?? $cert->url ?? null;
+            $certImg = $cert->image ? Storage::disk('public')->url($cert->image) : null;
+            return [
+                'id' => $cert->id,
+                'title' => $cert->title,
+                'issuer' => $cert->issuer ?? null,
+                'category' => $cert->certificateCategory?->name ?? $cert->category ?? null,
+                'date' => $cert->issue_date ? \Carbon\Carbon::parse($cert->issue_date)->format('d M Y') : null,
+                'issue_date' => $cert->issue_date ? \Carbon\Carbon::parse($cert->issue_date)->format('Y-m-d') : '',
+                'expiration_date' => $cert->expiration_date ? \Carbon\Carbon::parse($cert->expiration_date)->format('d M Y') : null,
+                'credential_id' => $cert->credential_id ?? null,
+                'description' => $cert->description ?? null,
+                'image' => $certImg,
+                'url' => $certUrl,
+            ];
+        })->values();
+    @endphp
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach($certificates as $cert)
-                <div class="bg-darker border border-white/5 p-8 hover:border-accentlight/50 transition rounded-sm flex flex-col h-full" @if($cert->url) onclick="window.open('{{ $cert->url }}', '_blank')" style="cursor: pointer;" @endif>
-                    <div class="text-accentlight mb-4">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
-                    </div>
-                    <h4 class="font-heading text-xl tracking-wide mb-2 text-white">{{ $cert->title }}</h4>
-                    <p class="text-[10px] text-gray-500 uppercase tracking-[0.1em] mb-4 font-medium">{{ $cert->issuer }} &bull; {{ \Carbon\Carbon::parse($cert->issue_date)->format('M Y') }}</p>
-                    <p class="text-[14px] leading-[1.75] text-gray-400 grow">{{ $cert->description }}</p>
+    <section id="sertifikat" class="px-6 md:px-12 py-8 md:py-10 relative scroll-mt-24 bg-darker overflow-hidden"
+             x-data="{
+                allCerts: {{ json_encode($certsArray) }},
+                totalCertsCount: {{ $totalCertificates ?? \App\Models\Certificate::count() }},
+                activeTab: 'all',
+                search: '',
+                sort: 'newest',
+                activeModalCert: null,
+                zoomScale: 1,
+                zoomX: 0,
+                zoomY: 0,
+                isDragging: false,
+                startX: 0,
+                startY: 0,
+                zoomIn() {
+                    this.zoomScale = Math.min(4, Math.round((this.zoomScale + 0.3) * 100) / 100);
+                },
+                zoomOut() {
+                    this.zoomScale = Math.max(0.6, Math.round((this.zoomScale - 0.3) * 100) / 100);
+                    if (this.zoomScale <= 1) {
+                        this.zoomX = 0;
+                        this.zoomY = 0;
+                    }
+                },
+                resetZoom() {
+                    this.zoomScale = 1;
+                    this.zoomX = 0;
+                    this.zoomY = 0;
+                    this.isDragging = false;
+                },
+                openCertModal(cert) {
+                    this.activeModalCert = cert;
+                    this.resetZoom();
+                },
+                closeCertModal() {
+                    this.activeModalCert = null;
+                    this.resetZoom();
+                },
+                handleWheel(e) {
+                    if (e.deltaY < 0) {
+                        this.zoomIn();
+                    } else {
+                        this.zoomOut();
+                    }
+                },
+                startDrag(e) {
+                    if (this.zoomScale <= 1) return;
+                    this.isDragging = true;
+                    this.startX = e.clientX - this.zoomX;
+                    this.startY = e.clientY - this.zoomY;
+                },
+                onDrag(e) {
+                    if (!this.isDragging) return;
+                    this.zoomX = e.clientX - this.startX;
+                    this.zoomY = e.clientY - this.startY;
+                },
+                stopDrag() {
+                    this.isDragging = false;
+                },
+                filterCert(c) {
+                    if (this.activeTab !== 'all') {
+                        let cat = (c.issuer || c.title || '').toLowerCase();
+                        let tab = this.activeTab.toLowerCase();
+                        if (tab === 'sertifikat' && !cat.includes('certif') && !cat.includes('sertifikat') && !cat.includes('developer') && !cat.includes('llc') && !cat.includes('google') && !cat.includes('aws')) return false;
+                        if (tab === 'kompetisi' && !cat.includes('kompetisi') && !cat.includes('competition') && !cat.includes('juara') && !cat.includes('hackathon')) return false;
+                        if (tab === 'training' && !cat.includes('training') && !cat.includes('bootcamp') && !cat.includes('course') && !cat.includes('webinar')) return false;
+                        if (tab === 'honors' && !cat.includes('honor') && !cat.includes('appreciation') && !cat.includes('award')) return false;
+                    }
+                    if (this.search.trim() !== '') {
+                        let q = this.search.toLowerCase();
+                        let matchTitle = (c.title || '').toLowerCase().includes(q);
+                        let matchIssuer = (c.issuer || '').toLowerCase().includes(q);
+                        let matchId = (c.credential_id || '').toLowerCase().includes(q);
+                        if (!matchTitle && !matchIssuer && !matchId) return false;
+                    }
+                    return true;
+                },
+                get filteredList() {
+                    let res = this.allCerts.filter(c => this.filterCert(c));
+                    if (this.sort === 'oldest') {
+                        return res.sort((a, b) => new Date(a.issue_date || '1970-01-01') - new Date(b.issue_date || '1970-01-01'));
+                    }
+                    return res.sort((a, b) => (new Date(b.issue_date || '1970-01-01') - new Date(a.issue_date || '1970-01-01')) || (b.id - a.id)).slice(0, 6);
+                }
+             }">
+
+        <!-- Background Glow Orbs & Light Beams (Gold & Purple Radial Ambiance) -->
+        <div class="absolute top-1/4 right-10 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[150px] pointer-events-none"></div>
+        <div class="absolute bottom-10 left-10 w-[450px] h-[450px] bg-amber-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+            
+            <!-- ═══════════════════════════════════════
+                 HERO HEADER SHOWCASE (Matching Project Section Style - Open 2 Columns)
+            ═══════════════════════════════════════ -->
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6 mb-4 md:mb-6 relative z-10">
+                
+                <!-- Left Column: Title & Subtitle -->
+                <div class="w-full lg:w-1/2 flex flex-col items-start">
+                    <h2 class="font-heading text-3xl sm:text-4xl md:text-5xl text-white font-bold tracking-tight mb-4">
+                        Sertifikasi &amp; <span class="text-accentlight neon-text-gold">Penghargaan.</span>
+                    </h2>
+
+                    <p class="text-slate-400 font-sans text-xs md:text-sm max-w-md leading-relaxed mb-0">
+                        Validasi keahlian teknis, pencapaian kompetisi, dan sertifikasi resmi terverifikasi.
+                    </p>
                 </div>
-                @endforeach
+
+                <!-- Right Column: 3D Floating Clay Ribbon Medal Podium (PRD Dark Futuristic x Claymorphism Gold Theme) -->
+                <div class="w-full lg:w-1/2 flex items-center justify-center relative min-h-[170px] sm:min-h-[200px] pointer-events-none select-none">
+                    
+                    <!-- Ambient Radial Glow & Vertical Gold Rays -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+                        <div class="w-48 h-48 bg-gradient-to-tr from-amber-500/20 via-amber-400/15 to-amber-300/20 rounded-full blur-[80px]"></div>
+                        <div class="absolute inset-y-0 w-36 bg-gradient-to-b from-amber-400/15 via-amber-500/10 to-transparent blur-xl"></div>
+                    </div>
+
+                    <!-- Orbit Ring 1 (With Floating Orbs) -->
+                    <div class="absolute w-[240px] h-[80px] sm:w-[300px] sm:h-[100px] rounded-[50%] border border-amber-400/30 pointer-events-none z-0" style="transform: rotate(-14deg); box-shadow: 0 0 25px rgba(212,175,55,0.15);">
+                        <!-- Left Shiny Gold Floating Orb -->
+                        <div class="absolute top-2 left-4 w-3 h-3 rounded-full bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 shadow-[0_0_12px_rgba(212,175,55,0.9)] animate-pulse"></div>
+                        <!-- Right Purple Floating Orb -->
+                        <div class="absolute bottom-1 right-4 w-4.5 h-4.5 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-amber-700 shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
+                    </div>
+                    
+                    <!-- Orbit Ring 2 (Outer Glowing Trace) -->
+                    <div class="absolute w-[270px] h-[95px] sm:w-[330px] sm:h-[115px] rounded-[50%] border border-dashed border-amber-400/25 pointer-events-none z-0" style="transform: rotate(-14deg);"></div>
+
+                    <!-- 3D Pedestal & Floating Certificate Scene -->
+                    <div class="relative z-10 flex flex-col items-center justify-center w-full py-1 [perspective:1000px]">
+
+                        <!-- 3D Floating Clay Certificate Card (PRD Dark Clay & Gold Accent) -->
+                        <div class="relative z-20 w-48 h-28 sm:w-56 sm:h-34 rounded-[22px] bg-gradient-to-br from-[#1c1f33] via-[#101324] to-[#070914] border-2 border-amber-400/50 p-4 sm:p-5 shadow-[-14px_18px_35px_rgba(0,0,0,0.95),inset_2px_2px_8px_rgba(255,255,255,0.15),inset_-3px_-3px_10px_rgba(0,0,0,0.8),0_0_30px_rgba(212,175,55,0.25)] hover:scale-105 transition-all duration-700 ease-out flex items-center justify-between mb-[-20px] pointer-events-auto"
+                             style="transform: rotateX(20deg) rotateY(-18deg) rotateZ(5deg); transform-style: preserve-3d;">
+                            
+                            <!-- Left: 4 Embossed Skeleton Text Bars (PRD Claymorphism Lines) -->
+                            <div class="space-y-2 w-1/2 pr-2">
+                                <div class="w-full h-2 rounded-full bg-[#0a0c16] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.06)] border border-amber-400/15"></div>
+                                <div class="w-[85%] h-2 rounded-full bg-[#0a0c16] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.06)] border border-amber-400/15"></div>
+                                <div class="w-[65%] h-2 rounded-full bg-[#0a0c16] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.06)] border border-amber-400/15"></div>
+                                <div class="w-[45%] h-2 rounded-full bg-[#0a0c16] shadow-[inset_0_2px_4px_rgba(0,0,0,0.8),0_1px_1px_rgba(255,255,255,0.06)] border border-amber-400/15"></div>
+                            </div>
+
+                            <!-- Right: 3D Gold Medal Badge with Ribbon Tails hanging below -->
+                            <div class="relative flex flex-col items-center justify-center flex-shrink-0">
+                                <!-- Round Medal Badge -->
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-amber-500 via-amber-300 to-amber-400 p-0.5 shadow-[0_0_20px_rgba(212,175,55,0.5),inset_0_2px_6px_rgba(255,255,255,0.4)] relative z-10 flex items-center justify-center">
+                                    <div class="w-full h-full rounded-full bg-gradient-to-b from-[#1c192d] to-[#0c0919] flex items-center justify-center border border-amber-400/40">
+                                        <!-- Gold Star Icon -->
+                                        <svg class="w-6 h-6 sm:w-7 sm:h-7 text-amber-300 drop-shadow-[0_0_8px_rgba(212,175,55,0.9)]" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hanging Ribbon Tails Below Medal -->
+                                <div class="flex gap-1 -mt-2.5 z-0">
+                                    <div class="w-3 h-5 bg-gradient-to-b from-amber-500 via-amber-700 to-amber-950 rounded-b-md shadow-md border-x border-b border-amber-400/40 transform -rotate-12" style="clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);"></div>
+                                    <div class="w-3 h-5 bg-gradient-to-b from-amber-500 via-amber-700 to-amber-950 rounded-b-md shadow-md border-x border-b border-amber-400/40 transform rotate-12" style="clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);"></div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Dual-Tiered 3D Cylinder Pedestal Stage Base -->
+                        <div class="relative z-10 w-48 sm:w-56 flex flex-col items-center">
+                            <!-- Top Pedestal Tier -->
+                            <div class="w-full h-7 rounded-[50%] bg-gradient-to-b from-[#22263d] via-[#121528] to-[#070914] border-t-2 border-amber-400/50 shadow-[inset_0_2px_8px_rgba(255,255,255,0.1),0_8px_20px_rgba(0,0,0,0.9)] flex items-center justify-center"></div>
+                            
+                            <!-- Bottom Stage Ring with Glowing Gold Rim -->
+                            <div class="w-[110%] h-6 -mt-3.5 rounded-[50%] bg-gradient-to-b from-[#181a2c] via-[#0d0f1e] to-[#04050a] border-b-2 border-amber-400 shadow-[0_0_25px_rgba(212,175,55,0.6),0_8px_20px_rgba(0,0,0,0.95)] relative">
+                                <div class="absolute inset-x-5 -bottom-1 h-3 bg-amber-400/35 rounded-[50%] blur-md pointer-events-none"></div>
+                                <div class="absolute inset-x-10 -bottom-1.5 h-2.5 bg-amber-500/20 rounded-[50%] blur-md pointer-events-none"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
+
+
+
+           
+
+            <!-- ═══════════════════════════════════════
+                 CERTIFICATE CARDS GRID (3-Column Layout - Hero Claymorphism Style)
+            ═══════════════════════════════════════ -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                
+                <template x-for="(cert, index) in filteredList" :key="cert.id || index">
+                    <div class="group relative clay-card p-5 sm:p-6 rounded-2xl bg-[#0a0d18]/70 border border-amber-400/30 hover:border-amber-400/70 transition-all duration-500 hover:-translate-y-2.5 hover:shadow-[0_0_30px_rgba(212,175,55,0.25)] cursor-pointer flex flex-col justify-between overflow-hidden relative z-10 backdrop-blur-md"
+                         @click="openCertModal(cert)">
+                        
+                        <template x-if="cert.image">
+                            <!-- Visible Certificate Cover Image Card Background Layer -->
+                            <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-2xl">
+                                <img :src="cert.image" alt="" 
+                                     class="w-full h-full object-cover scale-105 group-hover:scale-110 opacity-40 group-hover:opacity-60 transition-all duration-700 select-none pointer-events-none"
+                                     oncontextmenu="return false;"
+                                     ondragstart="return false;"
+                                     draggable="false">
+                                <div class="absolute inset-0 bg-gradient-to-r from-[#060815]/95 via-[#060815]/80 to-[#060815]/30"></div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-[#060815]/95 via-transparent to-[#060815]/30"></div>
+                            </div>
+                        </template>
+
+                        <!-- Ambient Glowing Orbs Background (Pure Gold Theme matching Hero) -->
+                        <div class="absolute -top-14 -right-14 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/30 transition-all duration-700 z-0"></div>
+                        <div class="absolute -bottom-14 -left-14 w-48 h-48 bg-amber-500/15 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/25 transition-all duration-700 z-0"></div>
+                        
+                        <!-- Futuristic Grid Pattern Watermark Overlay -->
+                        <div class="absolute inset-0 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500 pointer-events-none z-0"></div>
+
+                        <div class="relative z-10 flex flex-col justify-between h-full">
+                            <div>
+                                <!-- Certificate Image Viewport Frame with Clay Card styling -->
+                                <div class="clay-card relative w-full aspect-[16/10] rounded-2xl overflow-hidden bg-slate-950 border border-amber-400/30 mb-4 shadow-[0_10px_30px_rgba(0,0,0,0.8),inset_0_1px_3px_rgba(255,255,255,0.1)] group-hover:border-amber-400/60 transition-all select-none"
+                                     @contextmenu.prevent
+                                     @dragstart.prevent>
+                                    
+                                    <template x-if="cert.image">
+                                        <div class="w-full h-full relative flex items-center justify-center overflow-hidden">
+                                            <img :src="cert.image" :alt="cert.title" 
+                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none select-none" 
+                                                 oncontextmenu="return false;" 
+                                                 ondragstart="return false;" 
+                                                 loading="lazy">
+                                            
+                                            <!-- Protection Glass Overlay -->
+                                            <div class="absolute inset-0 bg-transparent z-10" @contextmenu.prevent @dragstart.prevent></div>
+                                            
+                                            <!-- Security Watermark Layer -->
+                                            <div class="absolute inset-0 z-20 pointer-events-none opacity-15 flex items-center justify-center rotate-[-25deg] select-none overflow-hidden">
+                                                <span class="font-mono text-[9px] font-bold tracking-[0.3em] uppercase text-amber-300 whitespace-nowrap drop-shadow">VERIFIED PORTFOLIO • PREVIEW ONLY</span>
+                                            </div>
+
+                                            <!-- Hover Sheen Overlay -->
+                                            <div class="absolute inset-0 bg-gradient-to-tr from-amber-400/0 via-amber-400/5 to-amber-400/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-30"></div>
+                                        </div>
+                                    </template>
+                                    <template x-if="!cert.image">
+                                        <!-- Dynamic 3D Holographic Certificate Vector Illustration -->
+                                        <div class="w-full h-full bg-gradient-to-br from-[#12162a] via-[#090b16] to-[#04050a] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+                                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.15)_0,transparent_70%)] pointer-events-none"></div>
+                                            <div class="w-24 h-16 rounded-lg bg-[#181c35] border border-amber-400/30 p-2 shadow-lg flex flex-col justify-between transform -rotate-3 group-hover:rotate-0 transition-transform duration-500 relative z-10">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="w-4 h-4 rounded-full bg-amber-400/20 border border-amber-400/40 flex items-center justify-center">
+                                                        <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+                                                    </div>
+                                                    <div class="w-8 h-1 bg-amber-400/30 rounded-full"></div>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <div class="w-full h-1 bg-slate-700/60 rounded-full"></div>
+                                                    <div class="w-3/4 h-1 bg-slate-700/60 rounded-full"></div>
+                                                </div>
+                                                <div class="flex justify-end">
+                                                    <div class="w-3 h-3 rounded-full bg-amber-500/30 border border-amber-400/40"></div>
+                                                </div>
+                                            </div>
+                                            <span class="font-mono text-[9px] uppercase tracking-widest text-amber-300 font-bold mt-2 relative z-10">OFFICIAL CERTIFICATE</span>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Title & Category Pill -->
+                                <div class="space-y-2">
+                                    <template x-if="cert.category">
+                                        <span class="clay-card inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-400/35 text-amber-300 font-mono text-[10px] font-bold uppercase tracking-widest shadow-[0_0_12px_rgba(212,175,55,0.15)] mb-1">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                            <span x-text="cert.category"></span>
+                                        </span>
+                                    </template>
+
+                                    <div class="flex items-start justify-between gap-3">
+                                        <h3 class="font-heading font-bold text-lg text-white group-hover:text-amber-300 transition-colors leading-snug line-clamp-2"
+                                            x-text="cert.title"></h3>
+
+                                        <a x-show="cert.url" :href="cert.url" target="_blank" @click.stop
+                                           class="clay-circle w-8 h-8 flex items-center justify-center text-amber-300 hover:text-slate-950 hover:bg-amber-400 border border-amber-400/30 transition-all flex-shrink-0 mt-0.5"
+                                           title="Buka Kredensial">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sub-metadata Bottom Bar: Issuer • Date -->
+                            <template x-if="cert.issuer || cert.date || cert.credential_id">
+                                <div class="flex items-center justify-between text-xs font-mono pt-3 mt-3 border-t border-slate-800/80">
+                                    <div class="flex items-center gap-2 truncate pr-2">
+                                        <template x-if="cert.issuer">
+                                            <span class="text-amber-400 font-semibold truncate max-w-[140px]" x-text="cert.issuer"></span>
+                                        </template>
+                                        <template x-if="cert.issuer && cert.date">
+                                            <span class="text-slate-600 font-bold">•</span>
+                                        </template>
+                                        <template x-if="cert.date">
+                                            <span class="text-slate-400" x-text="cert.date"></span>
+                                        </template>
+                                    </div>
+                                    <template x-if="cert.credential_id">
+                                        <span class="text-[10px] font-mono text-slate-400/80 truncate max-w-[90px]" x-text="'ID:' + cert.credential_id"></span>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                    </div>
+                </template>
+
+            </div>
+
+            <template x-if="filteredList.length === 0">
+                <div class="py-16 text-center bg-[#0e101e]/60 rounded-3xl border border-slate-800">
+                    <p class="text-slate-500 font-mono text-sm">Tidak ada sertifikat yang ditemukan.</p>
+                </div>
+            </template>
+
+            <!-- Bottom CTA Button Below Certificate Cards Grid -->
+            <div class="mt-12 text-center">
+                <a href="{{ route('certificates.index') }}" class="group clay-btn bg-accent hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-xs px-6 py-3.5 cursor-pointer overflow-hidden inline-flex items-center gap-2">
+                    <span>Lihat Semua Sertifikat</span>
+                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                </a>
+            </div>
+
         </div>
+
+        <!-- Teleported Lightbox Modal -->
+        <template x-teleport="body">
+            <div x-show="activeModalCert"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 backdrop-blur-0"
+                 x-transition:enter-end="opacity-100 backdrop-blur-xl"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 backdrop-blur-xl"
+                 x-transition:leave-end="opacity-0 backdrop-blur-0"
+                 class="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-8 pt-20 pb-12 overflow-y-auto"
+                 @click.self="closeCertModal()"
+                 @keydown.escape.window="closeCertModal()"
+                 style="display: none;">
+                
+                <div class="relative max-w-5xl w-full bg-gradient-to-b from-[#111528] via-[#0d1020] to-[#070914] rounded-[32px] border border-amber-400/30 p-6 sm:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.9),0_0_50px_rgba(212,175,55,0.15)] overflow-hidden my-auto backdrop-blur-2xl"
+                     x-show="activeModalCert"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                     x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+
+                    <!-- Close Button -->
+                    <button @click="closeCertModal()"
+                            class="absolute top-4 right-4 sm:top-5 sm:right-5 z-30 w-10 h-10 rounded-full bg-[#070914] text-slate-400 hover:text-amber-300 border border-amber-400/30 hover:border-amber-400 flex items-center justify-center transition-all shadow-lg cursor-pointer">
+                        &times;
+                    </button>
+
+                    <template x-if="activeModalCert">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+                            
+                            <!-- LEFT COLUMN (Cols 1-7): Certificate Image / 3D Graphic Preview with Interactive Zoom & Protection -->
+                            <div class="lg:col-span-7 w-full">
+                                <div class="relative w-full aspect-[16/11] rounded-2xl overflow-hidden bg-slate-950 border border-amber-400/25 shadow-[inset_0_2px_10px_rgba(0,0,0,0.8),0_10px_30px_rgba(0,0,0,0.7)] flex items-center justify-center select-none"
+                                     @contextmenu.prevent
+                                     @dragstart.prevent
+                                     @wheel.prevent="handleWheel($event)"
+                                     @mousedown="startDrag($event)"
+                                     @mousemove.window="onDrag($event)"
+                                     @mouseup.window="stopDrag()"
+                                     @mouseleave="stopDrag()"
+                                     :class="zoomScale > 1 ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-zoom-in'"
+                                     @dblclick="zoomScale === 1 ? (zoomScale = 2) : resetZoom()">
+                                    
+                                    <!-- Diagonal Security Watermark Layer -->
+                                    <div class="absolute inset-0 z-20 pointer-events-none opacity-15 flex items-center justify-center rotate-[-25deg] select-none overflow-hidden">
+                                        <span class="font-mono text-[11px] font-bold tracking-[0.35em] uppercase text-amber-300/80 whitespace-nowrap drop-shadow-md">
+                                            {{ $user->name ?? 'REKA ANSORI MUBAROK' }} • VERIFIED CREDENTIAL • PREVIEW ONLY
+                                        </span>
+                                    </div>
+
+                                    <!-- Protection Overlay -->
+                                    <div class="absolute inset-0 z-10 bg-transparent" @contextmenu.prevent @dragstart.prevent></div>
+
+                                    <!-- Floating Zoom Controls Toolbar -->
+                                    <div class="absolute top-3 right-3 z-30 flex items-center gap-1.5 p-1.5 rounded-full bg-[#070914]/85 backdrop-blur-md border border-amber-400/30 shadow-xl"
+                                         @click.stop>
+                                        <!-- Zoom Out Button -->
+                                        <button @click="zoomOut()" 
+                                                :disabled="zoomScale <= 0.6"
+                                                class="w-7 h-7 rounded-full bg-slate-900 hover:bg-amber-400 hover:text-slate-950 text-amber-300 flex items-center justify-center text-sm font-bold transition-all disabled:opacity-30 cursor-pointer"
+                                                title="Zoom Out (-)">
+                                            −
+                                        </button>
+
+                                        <!-- Reset / Scale Badge -->
+                                        <button @click="resetZoom()" 
+                                                class="px-2.5 py-0.5 rounded-full bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 font-mono text-[10px] font-bold tracking-wider transition-all cursor-pointer"
+                                                title="Klik untuk Reset Zoom (100%)">
+                                            <span x-text="Math.round(zoomScale * 100) + '%'">100%</span>
+                                        </button>
+
+                                        <!-- Zoom In Button -->
+                                        <button @click="zoomIn()" 
+                                                :disabled="zoomScale >= 4"
+                                                class="w-7 h-7 rounded-full bg-slate-900 hover:bg-amber-400 hover:text-slate-950 text-amber-300 flex items-center justify-center text-sm font-bold transition-all disabled:opacity-30 cursor-pointer"
+                                                title="Zoom In (+)">
+                                            +
+                                        </button>
+                                    </div>
+
+                                    <!-- Zoomable Inner Wrapper -->
+                                    <div class="w-full h-full relative flex items-center justify-center p-2 origin-center"
+                                         :style="'transform: scale(' + zoomScale + ') translate(' + (zoomX / zoomScale) + 'px, ' + (zoomY / zoomScale) + 'px); ' + (isDragging ? 'transition: none;' : 'transition: transform 0.15s ease-out;')">
+                                        
+                                        <template x-if="activeModalCert.image">
+                                            <img :src="activeModalCert.image" :alt="activeModalCert.title" 
+                                                 class="max-w-full max-h-full object-contain rounded-lg pointer-events-none select-none"
+                                                 oncontextmenu="return false;"
+                                                 ondragstart="return false;">
+                                        </template>
+
+                                        <template x-if="!activeModalCert.image">
+                                            <!-- Holographic 3D Graphic Placeholder if no image -->
+                                            <div class="w-full h-full bg-gradient-to-br from-[#12162a] via-[#090b16] to-[#04050a] flex flex-col items-center justify-center p-6 relative overflow-hidden pointer-events-none select-none">
+                                                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.15)_0,transparent_70%)] pointer-events-none"></div>
+                                                <div class="w-36 h-24 rounded-xl bg-[#181c35] border border-amber-400/40 p-3 shadow-2xl flex flex-col justify-between relative z-10">
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="w-5 h-5 rounded-full bg-amber-400/20 border border-amber-400/50 flex items-center justify-center">
+                                                            <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                                                        </div>
+                                                        <div class="w-12 h-1.5 bg-amber-400/30 rounded-full"></div>
+                                                    </div>
+                                                    <div class="space-y-1.5">
+                                                        <div class="w-full h-1.5 bg-slate-700/60 rounded-full"></div>
+                                                        <div class="w-3/4 h-1.5 bg-slate-700/60 rounded-full"></div>
+                                                    </div>
+                                                    <div class="flex justify-end">
+                                                        <div class="w-4 h-4 rounded-full bg-amber-500/30 border border-amber-400/40"></div>
+                                                    </div>
+                                                </div>
+                                                <span class="font-mono text-xs uppercase tracking-widest text-amber-300 font-bold mt-4 relative z-10">VERIFIED OFFICIAL CREDENTIAL</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT COLUMN (Cols 8-12): Certificate Details -->
+                            <div class="lg:col-span-5 flex flex-col justify-between space-y-4 w-full">
+                                <div class="space-y-4">
+                                    <!-- Category Badge Tag -->
+                                    <template x-if="activeModalCert.category">
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 font-mono text-[10px] font-bold uppercase tracking-wider"
+                                                  x-text="activeModalCert.category"></span>
+                                        </div>
+                                    </template>
+
+                                    <!-- Certificate Title -->
+                                    <h3 class="font-heading font-bold text-xl sm:text-2xl text-white leading-snug" x-text="activeModalCert.title"></h3>
+
+                                    <!-- Issuer & Date Info Card (Strict Conditional Rendering) -->
+                                    <template x-if="activeModalCert.issuer || activeModalCert.date || activeModalCert.expiration_date || activeModalCert.credential_id">
+                                        <div class="bg-[#070914]/80 border border-slate-800 p-3.5 rounded-xl space-y-2.5 font-mono text-xs">
+                                            <template x-if="activeModalCert.issuer">
+                                                <div class="flex items-center justify-between text-slate-300">
+                                                    <span class="text-slate-400">Penerbit:</span>
+                                                    <span class="text-amber-400 font-bold" x-text="activeModalCert.issuer"></span>
+                                                </div>
+                                            </template>
+                                            <template x-if="activeModalCert.date">
+                                                <div class="flex items-center justify-between text-slate-300 pt-2 border-t border-slate-800/80">
+                                                    <span class="text-slate-400">Tanggal Terbit:</span>
+                                                    <span class="text-slate-200" x-text="activeModalCert.date"></span>
+                                                </div>
+                                            </template>
+                                            <template x-if="activeModalCert.expiration_date">
+                                                <div class="flex items-center justify-between text-slate-300 pt-2 border-t border-slate-800/80">
+                                                    <span class="text-slate-400">Masa Berlaku:</span>
+                                                    <span class="text-slate-200" x-text="activeModalCert.expiration_date"></span>
+                                                </div>
+                                            </template>
+                                            <template x-if="activeModalCert.credential_id">
+                                                <div class="flex items-center justify-between text-slate-300 pt-2 border-t border-slate-800/80">
+                                                    <span class="text-slate-400">ID Kredensial:</span>
+                                                    <span class="text-amber-300/90 font-mono text-[11px]" x-text="activeModalCert.credential_id"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Description -->
+                                    <template x-if="activeModalCert.description && activeModalCert.description.trim() !== ''">
+                                        <div class="space-y-1 pt-1">
+                                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold block">Deskripsi:</span>
+                                            <p class="text-slate-300 font-sans text-xs leading-relaxed max-h-32 overflow-y-auto pr-1" x-text="activeModalCert.description"></p>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- External Link Button -->
+                                <template x-if="activeModalCert.url">
+                                    <div class="pt-3 border-t border-slate-800">
+                                        <a :href="activeModalCert.url" target="_blank"
+                                           class="w-full py-3 px-5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 text-slate-950 font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] transition-all">
+                                            <span>Buka Kredensial Resmi</span>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        </a>
+                                    </div>
+                                </template>
+                            </div>
+
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
     </section>
 
     <!-- SECTION: KONTAK (Footer) -->
-    <footer id="kontak" class="px-6 md:px-12 py-24 bg-darker border-t border-white/5 relative z-10">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
-            
-            <!-- Left Info -->
-            <div class="max-w-md">
-                <h2 class="font-heading text-5xl md:text-6xl font-light leading-none tracking-tight mb-6 text-white">
-                    Mari Bekerja Sama <span class="text-accentlight text-4xl align-top font-sans font-light">+</span>
-                </h2>
-                <p class="text-gray-400 text-[14px] leading-[1.75] mb-12">
-                    Saya selalu terbuka untuk mendiskusikan peluang proyek web development, desain UI/UX, maupun analisis data. Mari ciptakan sebuah produk digital yang memukau dan fungsional bersama.
-                </p>
-                
-                <div class="flex items-center gap-4 text-[11px] uppercase tracking-[0.1em] text-accentlight font-medium">
-                    <div class="w-10 h-10 rounded-full border border-accentlight/30 flex items-center justify-center">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    <footer id="kontak" class="px-6 md:px-12 py-16 relative bg-darker overflow-hidden">
+        <!-- Ambient Glowing Orbs Background (Pure Gold & Dark Theme) -->
+        <div class="absolute top-1/4 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute bottom-10 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+
+            <!-- Top Row Grid (Left Info & Right Form) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+                <!-- LEFT COLUMN (Cols 1-6): Heading, Text, Clay Info Cards & Social Links -->
+                <div class="lg:col-span-6 flex flex-col justify-between space-y-8">
+                    <div class="space-y-6">
+                        
+                        <!-- Main Title (Gold Accent) -->
+                        <h2 class="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.08] tracking-tight">
+                            Mari Bekerja<br>
+                            <span class="text-accentlight neon-text-gold">Sama.</span><sup class="text-amber-400 text-3xl sm:text-4xl font-light font-sans ml-1">+</sup>
+                        </h2>
+
+                        <!-- Subdescription -->
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans max-w-lg">
+                            Saya selalu terbuka untuk peluang proyek, kolaborasi, atau sekadar ngobrol tentang ide menarik. Kirim pesan dan mari wujudkan sesuatu bersama.
+                        </p>
                     </div>
-                    Tersedia Untuk Magang
+
+                    <!-- 3 Clay Contact Cards (Availability, Response Time, Email) -->
+                    <div class="space-y-3.5 max-w-md">
+                        
+                        <!-- Card 1: Availability -->
+                        <div class="group clay-card p-4 rounded-2xl bg-[#090b1c]/90 border border-amber-400/20 hover:border-amber-400/50 transition-all duration-300 flex items-center justify-between shadow-[inset_1.5px_1.5px_5px_rgba(255,255,255,0.06),inset_-2px_-2px_6px_rgba(0,0,0,0.8),0_10px_25px_rgba(0,0,0,0.6)] hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] relative">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(212,175,55,0.2)] group-hover:scale-105 transition-transform flex-shrink-0">
+                                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2H4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-mono text-slate-400 block font-medium">Ketersediaan</span>
+                                    <span class="text-sm font-sans font-bold text-amber-300 block">Buka untuk Freelance</span>
+                                    <span class="text-[11px] font-sans text-slate-400 block mt-0.5">Siap mengerjakan proyek baru</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Response Time -->
+                        <div class="group clay-card p-4 rounded-2xl bg-[#090b1c]/90 border border-amber-400/20 hover:border-amber-400/50 transition-all duration-300 flex items-center justify-between shadow-[inset_1.5px_1.5px_5px_rgba(255,255,255,0.06),inset_-2px_-2px_6px_rgba(0,0,0,0.8),0_10px_25px_rgba(0,0,0,0.6)] hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] relative">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(212,175,55,0.2)] group-hover:scale-105 transition-transform flex-shrink-0">
+                                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-mono text-slate-400 block font-medium">Waktu Respon</span>
+                                    <span class="text-sm font-sans font-bold text-amber-300 block">Dalam 24 Jam</span>
+                                    <span class="text-[11px] font-sans text-slate-400 block mt-0.5">Saya akan membalas secepat mungkin</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Email -->
+                        <a href="mailto:{{ $user->email ?? 'rekaansori@example.com' }}"
+                           class="group clay-card p-4 rounded-2xl bg-[#090b1c]/90 border border-amber-400/20 hover:border-amber-400/50 transition-all duration-300 flex items-center justify-between shadow-[inset_1.5px_1.5px_5px_rgba(255,255,255,0.06),inset_-2px_-2px_6px_rgba(0,0,0,0.8),0_10px_25px_rgba(0,0,0,0.6)] hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] relative cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(212,175,55,0.2)] group-hover:scale-105 transition-transform flex-shrink-0">
+                                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-mono text-slate-400 block font-medium">Email</span>
+                                    <span class="text-sm font-sans font-bold text-white group-hover:text-amber-300 transition-colors block">{{ $user->email ?? 'rekaansori@example.com' }}</span>
+                                    <span class="text-[11px] font-sans text-slate-400 block mt-0.5">Email terbaik untuk menghubungi saya</span>
+                                </div>
+                            </div>
+                        </a>
+
+                    </div>
+
+                    <!-- Connect With Me Social Buttons (Reusable Blade Component) -->
+                    <div class="pt-2">
+                        <span class="text-xs font-mono uppercase tracking-widest text-slate-400 block mb-3 font-semibold">Terhubung Dengan Saya</span>
+                        <x-social-links :links="$user->socialLinks ?? null" />
+                    </div>
                 </div>
+
+                <!-- RIGHT COLUMN (Cols 7-12): 3D Claymorphism Contact Form Card (Gold Theme) -->
+                <div class="lg:col-span-6 w-full">
+                    <div class="relative clay-card rounded-[32px] bg-gradient-to-b from-[#10132a] via-[#090b1e] to-[#040612] border border-amber-400/25 p-6 sm:p-8 shadow-[inset_2px_2px_8px_rgba(255,255,255,0.08),inset_-4px_-4px_12px_rgba(0,0,0,0.9),0_25px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
+                        
+                        <!-- Form Header with Amber/Gold Icon & Orb -->
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800/80">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                                </div>
+                                <h3 class="font-heading font-bold text-xl sm:text-2xl text-white">Kirim Pesan</h3>
+                            </div>
+                            <!-- Glowing Orb Indicator -->
+                            <div class="w-3.5 h-3.5 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(212,175,55,0.9)] animate-pulse"></div>
+                        </div>
+
+                        <!-- Inline Alerts (Success / Error / Validation) -->
+                        @if(session('contact_success'))
+                            <div class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center gap-3 text-emerald-200 text-xs font-mono shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="font-bold block text-white text-sm">Pesan Berhasil Terkirim!</span>
+                                    <span class="text-emerald-300 text-xs">{{ session('contact_success') }}</span>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if(session('contact_error'))
+                            <div class="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-center gap-3 text-red-200 text-xs font-mono shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                                <div class="w-8 h-8 rounded-xl bg-red-500/20 border border-red-400/40 flex items-center justify-center text-red-400 flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="font-bold block text-white text-sm">Gagal Mengirim Pesan!</span>
+                                    <span class="text-red-300 text-xs">{{ session('contact_error') }}</span>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($errors->any())
+                            <div class="mb-6 p-4 bg-red-900/30 border border-red-500/40 rounded-2xl text-xs font-mono text-red-300 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+                                <div class="flex items-center gap-2 mb-2 font-bold text-red-200 text-sm">
+                                    <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Pesan Gagal Terkirim — Harap Perbaiki:</span>
+                                </div>
+                                <ul class="list-disc pl-6 space-y-1 text-red-300/90">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form action="{{ route('contact.store') }}" method="POST" class="space-y-4">
+                            @csrf
+                            
+                            <!-- Input Nama -->
+                            <div>
+                                <label for="name" class="block text-xs font-mono text-slate-300 mb-1.5 font-medium">Nama</label>
+                                <div class="relative">
+                                    <input type="text" id="name" name="name" value="{{ old('name') }}" required
+                                           placeholder="Masukkan nama Anda"
+                                           class="w-full bg-[#060816] border border-amber-400/20 focus:border-amber-400 rounded-2xl px-4 py-3.5 pr-11 text-xs font-sans text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.7)]">
+                                    <svg class="w-4 h-4 text-slate-500 absolute right-4 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Input Email -->
+                            <div>
+                                <label for="email" class="block text-xs font-mono text-slate-300 mb-1.5 font-medium">Email</label>
+                                <div class="relative">
+                                    <input type="email" id="email" name="email" value="{{ old('email') }}" required
+                                           placeholder="Masukkan email Anda"
+                                           class="w-full bg-[#060816] border border-amber-400/20 focus:border-amber-400 rounded-2xl px-4 py-3.5 pr-11 text-xs font-sans text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.7)]">
+                                    <svg class="w-4 h-4 text-slate-500 absolute right-4 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Input Subject -->
+                            <div>
+                                <label for="subject" class="block text-xs font-mono text-slate-300 mb-1.5 font-medium">Subject (opsional)</label>
+                                <div class="relative">
+                                    <input type="text" id="subject" name="subject" value="{{ old('subject') }}"
+                                           placeholder="Topik pesan"
+                                           class="w-full bg-[#060816] border border-amber-400/20 focus:border-amber-400 rounded-2xl px-4 py-3.5 pr-11 text-xs font-sans text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.7)]">
+                                    <svg class="w-4 h-4 text-slate-500 absolute right-4 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Textarea Pesan -->
+                            <div>
+                                <label for="message" class="block text-xs font-mono text-slate-300 mb-1.5 font-medium">Pesan</label>
+                                <div class="relative">
+                                    <textarea id="message" name="message" rows="4" required
+                                              placeholder="Tulis pesan Anda di sini..."
+                                              class="w-full bg-[#060816] border border-amber-400/20 focus:border-amber-400 rounded-2xl p-4 pr-11 text-xs font-sans text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.7)] resize-none">{{ old('message') }}</textarea>
+                                    <svg class="w-4 h-4 text-slate-500 absolute right-4 bottom-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button (Matches Download CV Button Clay Accent Style) -->
+                            <button type="submit"
+                                    class="group clay-btn bg-accent hover:bg-accentlight text-slate-950 font-sans font-bold text-xs tracking-wider uppercase w-full py-4 px-6 rounded-2xl flex items-center justify-center gap-3 cursor-pointer transition-all duration-300 active:scale-[0.99] mt-2">
+                                <span>Kirim Pesan</span>
+                                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform stroke-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            </button>
+
+                            <!-- Security Note Below Button -->
+                            <div class="flex items-center justify-center gap-2 pt-2 text-slate-400 font-sans text-xs">
+                                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                <span>Pesan Anda aman dan tidak akan dibagikan ke pihak lain.</span>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            <!-- Footer Copyright Bar -->
+            <div class="mt-14 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-slate-500 uppercase tracking-[0.1em] font-mono">
+                <p>&copy; {{ date('Y') }} {{ $user->name ?? 'Reka Ansori Mubarok' }}. All Rights Reserved.</p>
+                <p>Built with Laravel & Tailwind CSS</p>
             </div>
 
-            <!-- Middle Contacts -->
-            <div class="flex flex-col gap-8 pt-4">
-                <a href="mailto:{{ $user->email ?? 'hello@example.com' }}" class="flex items-center gap-6 text-gray-300 hover:text-white transition group">
-                    <div class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:border-accentlight group-hover:bg-accentlight/10 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] text-gray-500 uppercase tracking-[0.1em] mb-1 font-medium">Email</span>
-                        <span class="text-[14px] tracking-wide text-white">{{ $user->email ?? 'hello@example.com' }}</span>
-                    </div>
-                </a>
-                
-                <a href="{{ $user->linkedin_url ?? '#' }}" target="_blank" class="flex items-center gap-6 text-gray-300 group cursor-pointer hover:text-white transition">
-                    <div class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:border-accentlight group-hover:bg-accentlight/10 transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"></path><circle cx="4" cy="4" r="2" stroke="none" fill="currentColor"></circle></svg>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] text-gray-500 uppercase tracking-[0.1em] mb-1 font-medium">LinkedIn</span>
-                        <span class="text-[14px] tracking-wide text-white">Hubungi di LinkedIn</span>
-                    </div>
-                </a>
-
-                <div class="flex items-center gap-6 text-gray-300">
-                    <div class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] text-gray-500 uppercase tracking-[0.1em] mb-1 font-medium">Lokasi</span>
-                        <span class="text-[14px] tracking-wide text-white">{{ $user->location ?? 'Indonesia' }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex justify-between items-center text-[10px] text-gray-600 uppercase tracking-[0.1em] font-medium">
-            <p>&copy; 2026 Rayhan Aditya. All Rights Reserved.</p>
-            <p>Built with Tailwind & Three.js</p>
         </div>
     </footer>
 

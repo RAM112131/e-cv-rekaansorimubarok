@@ -1,11 +1,13 @@
 <div data-widget="stats" style="display:flex;gap:0.75rem;width:100%;box-sizing:border-box;">
     @php
-        $totalVisitors = \App\Models\Visitor::count();
-        $todayVisitors = \App\Models\Visitor::whereDate('visited_at', today())->count();
-        $unreadMessages = \App\Models\Message::where('is_read', false)->count();
-        $totalProjects = \App\Models\Project::count();
-        $totalSkills = \App\Models\Skill::count();
-        $totalCerts = \App\Models\Certificate::count();
+        use Illuminate\Support\Facades\Cache;
+
+        $totalVisitors = Cache::remember('stats.total_visitors', 300, fn() => \App\Models\Visitor::count());
+        $todayVisitors = Cache::remember('stats.today_visitors', 300, fn() => \App\Models\Visitor::whereDate('visited_at', today())->count());
+        $unreadMessages = Cache::remember('stats.unread_messages', 300, fn() => \App\Models\Message::where('is_read', false)->count());
+        $totalProjects = Cache::remember('stats.total_projects', 300, fn() => \App\Models\Project::count());
+        $totalSkills = Cache::remember('stats.total_skills', 300, fn() => \App\Models\Skill::count());
+        $totalCerts = Cache::remember('stats.total_certs', 300, fn() => \App\Models\Certificate::count());
 
         $cards = [
             [

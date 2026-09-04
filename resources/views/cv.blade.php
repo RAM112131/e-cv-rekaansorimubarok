@@ -273,78 +273,10 @@
 
 @php
     $cvData = $user->cv_data ?? [];
-    $cvSkills = $cvData['cv_skills'] ?? [
-        ['name' => 'PHP / Laravel', 'level' => 'Dasar', 'percentage' => 40],
-        ['name' => 'MySQL', 'level' => 'Dasar', 'percentage' => 35],
-        ['name' => 'HTML & CSS', 'level' => 'Menengah', 'percentage' => 60],
-        ['name' => 'JavaScript', 'level' => 'Dasar', 'percentage' => 25],
-        ['name' => 'Git & GitHub', 'level' => 'Menengah', 'percentage' => 70],
-        ['name' => 'Python', 'level' => 'Dasar', 'percentage' => 45],
-    ];
-    $cvTools = $cvData['cv_tools'] ?? [
-        ['name' => 'Figma'],
-        ['name' => 'VS Code'],
-        ['name' => 'Antigravity'],
-        ['name' => 'Laragon'],
-        ['name' => 'Tailwind CSS'],
-        ['name' => 'Bootstrap'],
-    ];
-    $cvLanguages = $cvData['cv_languages'] ?? [
-        ['name' => 'Indonesia', 'rating' => 5],
-        ['name' => 'Inggris', 'rating' => 3],
-    ];
-    $cvCertifications = $cvData['cv_certifications'] ?? [
-        ['name' => 'Belajar Dasar Pemrograman Web', 'issuer' => 'Dicoding', 'year' => '2023'],
-        ['name' => 'Database Design & SQL', 'issuer' => 'MySkill', 'year' => '2023'],
-        ['name' => 'Laravel Framework', 'issuer' => 'BuildWith Angga', 'year' => '2024'],
-        ['name' => 'Google IT Support', 'issuer' => 'Google / Coursera', 'year' => '2024'],
-    ];
-    $cvProjects = $cvData['cv_projects'] ?? [
-        [
-            'name' => 'Sistem Informasi Bersih Bumi (Manajemen Pengelolaan Sampah)',
-            'badge' => '2026',
-            'sub' => 'Tugas Kuliah',
-            'desc' => "• Membangun platform manajemen iuran pengangkutan sampah berbasis web untuk membantu RT/RW mengelola data warga dan pembayaran secara digital.\n• Mengintegrasikan Midtrans Payment Gateway (QRIS & Virtual Account) untuk kemudahan transaksi non-tunai.\n• Menerapkan autentikasi multi-role (Admin, Petugas, Warga) menggunakan Laravel Jetstream.",
-        ],
-        [
-            'name' => 'Website Smart Tourism Guide Kota Banjar',
-            'badge' => '2025',
-            'sub' => 'Tugas Kuliah',
-            'desc' => "• Mengembangkan Web Pemandu Wisata Online Berbasis QR Code untuk meningkatkan aksesibilitas informasi wisata.\n• Menyediakan sistem pemesanan tiket secara online",
-        ],
-        [
-            'name' => 'Sistem Informasi Pemilihan OSIS',
-            'badge' => '2025',
-            'sub' => 'Proyek Mandiri',
-            'desc' => 'Membangun website pemilihan OSIS responsif dengan fitur pemilihan online dan manajemen kandidat.',
-        ],
-        [
-            'name' => 'Mengikuti Kegiatan Webinar "Membuat Sistem Task Manager Team dengan Laravel"',
-            'badge' => '2025',
-            'sub' => 'Webinar',
-            'desc' => 'Mengikuti webinar yang diselenggarakan oleh ID-Networkers. Mempelajari dasar-dasar pengembangan sistem manajemen tugas tim menggunakan framework Laravel, termasuk struktur proyek, manajemen database, autentikasi, dan implementasi alur kerja kolaboratif.',
-        ],
-        [
-            'name' => 'Staf Gudang di Anyar CCTV Bandung',
-            'badge' => 'September 2023 - Juli 2024',
-            'sub' => 'Pengalaman Kerja',
-            'desc' => 'Melakukan tugas-tugas administrasi gudang secara menyeluruh, termasuk inventarisasi barang, pencatatan masuk-keluar stok, pengelolaan persediaan, dan pengaturan tata letak penyimpanan agar efisien. Berkoordinasi dengan tim operasional, memastikan kelengkapan barang, membantu proses pengiriman, dan menyusun laporan bulanan untuk mendukung kelancaran aktivitas gudang.',
-        ],
-    ];
-    $cvOrgs = $cvData['cv_orgs'] ?? [
-        [
-            'name' => 'Divisi HUMAS – Himpunan Mahasiswa Sistem Informasi',
-            'badge' => 'Januari - Desember 2025',
-            'sub' => 'Pengurus · UBSI Kota Tasikmalaya',
-            'desc' => 'Bertugas membangun dan menjaga citra organisasi melalui komunikasi eksternal dan internal, mengelola hubungan dengan media dan platform digital.',
-        ],
-        [
-            'name' => 'Panitia Bakti Sosial Kemasyarakatan',
-            'badge' => '4-24 Agustus 2025',
-            'sub' => 'Divisi Konsumsi · KMC Galuh Taruna Bandung',
-            'desc' => 'Bertanggung jawab atas pengelolaan konsumsi, termasuk perencanaan menu, koordinasi katering, dan distribusi makanan untuk seluruh panitia atau dalam kegiatan.',
-        ],
-    ];
+    $cvLanguages = $cvData['cv_languages'] ?? [];
+    $cvCertifications = $cvData['cv_certifications'] ?? [];
+    $cvProjects = $cvData['cv_projects'] ?? [];
+    $cvOrgs = $cvData['cv_orgs'] ?? [];
 
     if (!function_exists('formatCvDescription')) {
         function formatCvDescription(?string $text): string
@@ -398,7 +330,9 @@
     </div>
     <div class="header-text">
       <h1>{{ strtoupper($cvData['cv_name'] ?? $user->name) }}</h1>
-      <p class="subtitle">{{ $user->cv_subtitle ?? 'Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya' }}</p>
+      @if(!blank($user->cv_subtitle))
+      <p class="subtitle">{{ $user->cv_subtitle }}</p>
+      @endif
       <div class="contacts">
         @if($user->phone)
         <a href="tel:{{ preg_replace('/[^0-9+]/', '', $user->phone) }}">
@@ -413,7 +347,7 @@
         </a>
 
         @php
-            $linkedinUrl = $user->linkedin_url ?? ($socialLinks->where('platform', 'linkedin')->first()?->url ?? 'https://www.linkedin.com/in/reka-ansori-mubarok-a5508427a');
+            $linkedinUrl = $user->linkedin_url ?? $socialLinks->where('platform', 'linkedin')->first()?->url;
         @endphp
 
         @if($linkedinUrl)
@@ -440,18 +374,21 @@
     <aside class="sidebar">
 
       <!-- Profil Singkat -->
+      @if(!blank($user->cv_about))
       <div class="s-section">
         <div class="s-title">Tentang Saya</div>
         <p class="s-about">
-          {{ $user->cv_about ?? 'Mahasiswa aktif Sistem Informasi di UBSI yang antusias dalam pengembangan web. Memiliki pengalaman membangun aplikasi berbasis Laravel dengan integrasi pembayaran digital. Berkomitmen untuk terus belajar dan berkontribusi di lingkungan kerja profesional.' }}
+          {{ $user->cv_about }}
         </p>
       </div>
+      @endif
 
       <!-- Keahlian Teknis -->
+      @if($skills->count())
       <div class="s-section">
         <div class="s-title">Keahlian Teknis</div>
 
-        @forelse($skills as $skill)
+        @foreach($skills as $skill)
         @php
             $levelLabel = is_numeric($skill->level) 
                 ? ($skill->level >= 80 ? 'Lanjutan' : ($skill->level >= 50 ? 'Menengah' : 'Dasar')) 
@@ -467,23 +404,9 @@
             <div class="skill-fill" style="width: {{ $percentage }}%"></div>
           </div>
         </div>
-        @empty
-        <div class="skill">
-          <div class="skill-label"><span>PHP / Laravel</span><span>Dasar</span></div>
-          <div class="skill-track"><div class="skill-fill" style="width:40%"></div></div>
-        </div>
-        @endforelse
+        @endforeach
       </div>
-
-      <!-- Tools & Platform -->
-      <div class="s-section">
-        <div class="s-title">Tools &amp; Platform</div>
-        <div class="tags">
-          @foreach($cvTools as $tool)
-          <span class="tag">{{ $tool['name'] }}</span>
-          @endforeach
-        </div>
-      </div>
+      @endif
 
       <!-- Bahasa (Opsional) -->
       @if(!empty($cvLanguages) && count($cvLanguages) > 0)
@@ -514,16 +437,6 @@
         </div>
         @endforeach
       </div>
-      @elseif($certificates->count() > 0)
-      <div class="s-section">
-        <div class="s-title">Sertifikasi</div>
-        @foreach($certificates as $cert)
-        <div class="cert">
-          <div class="cert-name">{{ $cert->title }}</div>
-          <div class="cert-by">{{ $cert->issuer }} @if($cert->issue_date) · {{ \Carbon\Carbon::parse($cert->issue_date)->format('Y') }} @endif</div>
-        </div>
-        @endforeach
-      </div>
       @endif
 
     </aside>
@@ -532,13 +445,14 @@
     <main class="main">
 
       <!-- Pendidikan -->
+      @if(count($educations) > 0)
       <div class="m-section">
         <div class="m-title">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
           Pendidikan
         </div>
 
-        @forelse($educations as $edu)
+        @foreach($educations as $edu)
         <div class="tl-item">
           <div class="tl-head">
             <div class="tl-name">{{ $edu->institution }}</div>
@@ -565,31 +479,11 @@
           </div>
           @endif
         </div>
-        @empty
-        <div class="tl-item">
-          <div class="tl-head">
-            <div class="tl-name">Universitas Bina Sarana Informatika (UBSI) Kota Tasikmalaya</div>
-            <div class="tl-badge">2024 – Sekarang</div>
-          </div>
-          <div class="tl-sub">S1 Sistem Informasi &nbsp;·&nbsp; Kampus Kota Tasikmalaya</div>
-          <div class="info-row">
-            <div class="info-chip">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span>Semester: <strong>4</strong></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tl-item">
-          <div class="tl-head">
-            <div class="tl-name">MAN 5 Ciamis</div>
-            <div class="tl-badge">2020 – 2023</div>
-          </div>
-          <div class="tl-sub">MIPA</div>
-        </div>
-        @endforelse
+        @endforeach
       </div>
+      @endif
 
+      @if(!empty($cvProjects) && count($cvProjects) > 0)
       <!-- Proyek & Pengalaman -->
       <div class="m-section">
         <div class="m-title">
@@ -616,6 +510,7 @@
         </div>
         @endforeach
       </div>
+      @endif
 
       <!-- Organisasi & Kepanitiaan -->
       @if(count($cvOrgs) > 0)

@@ -14,6 +14,10 @@ class RecentMessagesWidget extends BaseWidget
     protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = 'Pesan Kontak Terbaru';
 
+    // Lazy dinonaktifkan karena di php artisan serve (single-thread), 
+    // request concurrent AJAX malah bikin antrian panjang dan loading lama.
+    protected static bool $isLazy = false;
+
     public function table(Table $table): Table
     {
         return $table

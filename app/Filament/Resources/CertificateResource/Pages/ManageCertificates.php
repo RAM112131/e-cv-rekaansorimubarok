@@ -21,6 +21,8 @@ class ManageCertificates extends ManageRecords
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['user_id'] = Auth::id() ?? 1;
 
+                    $data['user_id'] = Auth::id() ?? 1;
+
                     return $data;
                 }),
         ];

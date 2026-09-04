@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Visitor;
+use App\Jobs\TrackVisitorJob;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,17 +23,17 @@ class TrackVisitor
             return $response;
         }
 
+        // Dispatch ke background job agar tidak memblokir response
         try {
-            Visitor::create([
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->header('User-Agent'),
-                'page_url' => $request->fullUrl(),
-                'referrer' => $request->header('referer'),
-                'session_id' => $request->session()->getId(),
-                'visited_at' => now(),
-            ]);
+            TrackVisitorJob::dispatch(
+                $request->ip(),
+                $request->header('User-Agent'),
+                $request->fullUrl(),
+                $request->header('referer'),
+                $request->session()->getId(),
+            );
         } catch (\Throwable $e) {
-            // Log silent jika terjadi kegagalan pencatatan agar tidak mengganggu pengunjung
+            // Silent fail
         }
 
         return $response;

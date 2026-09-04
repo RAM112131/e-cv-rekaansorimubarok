@@ -88,6 +88,7 @@ class ProjectResource extends Resource
                             ->label('Gambar Cover / Thumbnail Utama')
                             ->image()
                             ->imagePreviewHeight('140px')
+                            ->disk('public')
                             ->directory('projects/covers'),
 
                         FileUpload::make('gallery')
@@ -97,6 +98,7 @@ class ProjectResource extends Resource
                             ->reorderable()
                             ->panelLayout('grid')
                             ->imagePreviewHeight('120px')
+                            ->disk('public')
                             ->directory('projects/gallery'),
                     ])
                     ->columnSpan(1),

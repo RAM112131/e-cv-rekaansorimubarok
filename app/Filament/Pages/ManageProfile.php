@@ -60,13 +60,6 @@ class ManageProfile extends Page implements HasSchemas
                 Section::make('Informasi Utama Hero & Landing Page')
                     ->description('Pengaturan nama, headline hero, dan bio yang akan tampil langsung di website portofolio utama.')
                     ->components([
-                        FileUpload::make('avatar')
-                            ->label('Foto Profil Website (Landing Page - Kasual)')
-                            ->image()
-                            ->disk('public')
-                            ->directory('avatars')
-                            ->imageEditor()
-                            ->circleCropper(),
 
                         TextInput::make('name')
                             ->label('Nama Lengkap')
@@ -78,15 +71,6 @@ class ManageProfile extends Page implements HasSchemas
                             ->maxLength(255)
                             ->placeholder('mis. Fullstack Web Developer & Student'),
 
-                        TextInput::make('phone')
-                            ->label('Nomor Telepon / WhatsApp')
-                            ->maxLength(50)
-                            ->placeholder('+62 882118269212'),
-
-                        TextInput::make('location')
-                            ->label('Lokasi Domisili')
-                            ->maxLength(255)
-                            ->placeholder('Ciamis, Jawa Barat'),
 
                         Textarea::make('bio')
                             ->label('Bio / Perkenalan Singkat (Hero Section)')
@@ -107,8 +91,17 @@ class ManageProfile extends Page implements HasSchemas
                                         'instagram' => 'Instagram',
                                         'twitter' => 'X / Twitter',
                                         'youtube' => 'YouTube',
-                                        'website' => 'Website Pribadi',
+                                        'tiktok' => 'TikTok',
+                                        'whatsapp' => 'WhatsApp',
+                                        'telegram' => 'Telegram',
+                                        'behance' => 'Behance',
+                                        'facebook' => 'Facebook',
+                                        'dribbble' => 'Dribbble',
+                                        'medium' => 'Medium',
+                                        'discord' => 'Discord',
+                                        'website' => 'Website / Link Lainnya',
                                     ])
+                                    ->searchable()
                                     ->required(),
                                 TextInput::make('url')
                                     ->label('URL Akun / Profil')

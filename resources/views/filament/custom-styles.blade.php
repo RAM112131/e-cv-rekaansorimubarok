@@ -150,7 +150,7 @@
         background-color: #ffffff !important;
         border-bottom: 1px solid rgba(0,0,0,0.05) !important;
         position: relative !important;
-        z-index: 100 !important;
+        z-index: 30 !important;
     }
 
     /* 9. BADGE (Seperti angka 1 di Message) */
@@ -181,32 +181,50 @@
             grid-column: 1 !important;
             grid-row: 1 / span 2 !important;
             height: 100vh !important;
-            z-index: 40 !important;
+            z-index: 20 !important;
         }
 
         .fi-sidebar {
             height: 100vh !important;
             top: 0 !important;
-            z-index: 10 !important;
+            z-index: 20 !important;
+            position: relative !important;
+            overflow: visible !important;
             box-shadow: 4px 0 10px rgba(0,0,0,0.05) !important;
             padding-top: 0 !important;
         }
         
+        .fi-sidebar-header {
+            position: relative !important;
+            overflow: visible !important;
+        }
+
         /* Topbar Container */
         .fi-topbar-ctn {
             grid-column: 2 !important;
             grid-row: 1 !important;
             height: 4rem !important; /* Fixed height for topbar row */
             width: 100% !important;
-            z-index: 100 !important; /* Must be above sidebar so floating button isn't clipped */
+            z-index: 10 !important; /* Above sidebar background but below modals */
             overflow: visible !important; /* Prevent left half from being clipped by the grid cell */
         }
 
         .fi-topbar {
-            z-index: 9999 !important;
+            z-index: 10 !important;
             overflow: visible !important; /* Allow the floating button to extend past the topbar edge */
         }
 
+        .fi-topbar .fi-dropdown-panel,
+        .fi-user-menu .fi-dropdown-panel,
+        .fi-topbar .fi-user-menu .fi-dropdown-panel,
+        .fi-topbar .fi-global-search-results-ctn {
+            z-index: 100 !important;
+            position: absolute !important;
+        }
+        /* Ensure Filament notifications float above the topbar and admin UI */
+        .fi-no {
+            z-index: 101 !important;
+        }
         .fi-topbar-start {
             overflow: visible !important;
         }
@@ -217,7 +235,7 @@
             grid-row: 2 !important; /* Start below topbar */
             height: calc(100vh - 4rem) !important; /* Exact remaining height */
             overflow: visible !important; /* Prevent clipping the left half of the button */
-            z-index: 45 !important; /* Above sidebar wrapper but below topbar */
+            z-index: auto !important; /* Do not constrain modal stacking contexts */
             display: flex !important;
             flex-direction: column !important;
             background-color: #f9fafb !important; /* Give the whole right side a background to prevent bleed */
@@ -261,50 +279,55 @@
             overflow: visible !important;
         }
         
-        /* Float the collapse button on the sidebar right edge (when expanded) */
-        /* left: 0 relative to .fi-topbar automatically puts it on the border regardless of width */
-        .fi-topbar-close-collapse-sidebar-btn {
-            position: absolute !important;
-            top: 4rem !important;
-            left: 0 !important;
-            transform: translate(-50%, -50%) !important;
-            z-index: 200 !important;
-            background-color: #ffffff !important;
-            color: #f59e0b !important;
-            border: 1px solid #e5e7eb !important;
-            border-radius: 0.5rem !important;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15) !important;
-            width: 2rem !important;
-            height: 2rem !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        /* Float the expand button on the sidebar right edge (when collapsed/icons only) */
+        /* Hide native topbar collapse buttons */
+        .fi-topbar-close-collapse-sidebar-btn,
         .fi-topbar-open-collapse-sidebar-btn {
+            display: none !important;
+        }
+
+        /* Custom toggle button rendered INSIDE sidebar HTML DOM, floating on the middle boundary */
+        .sidebar-toggle-btn-container {
             position: absolute !important;
             top: 4rem !important;
-            left: 0 !important;
-            transform: translate(-50%, -50%) !important;
-            z-index: 200 !important;
+            right: 0 !important;
+            z-index: 30 !important;
+            pointer-events: auto !important;
+        }
+
+        .custom-sidebar-toggle-btn {
+            position: absolute !important;
+            top: 0 !important;
+            right: 0 !important;
+            transform: translate(50%, -50%) !important;
+            z-index: 30 !important;
             background-color: #ffffff !important;
             color: #f59e0b !important;
             border: 1px solid #e5e7eb !important;
-            border-radius: 0.5rem !important;
+            border-radius: 9999px !important; /* Circular pill shape */
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15) !important;
             width: 2rem !important;
             height: 2rem !important;
+            display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             padding: 0 !important;
             margin: 0 !important;
+            cursor: pointer !important;
+            transition: background-color 0.2s ease, transform 0.2s ease !important;
         }
 
-        /* Adjust icon inside the collapse/expand buttons */
-        .fi-topbar-close-collapse-sidebar-btn svg,
-        .fi-topbar-open-collapse-sidebar-btn svg {
+        .custom-sidebar-toggle-btn[style*="display: none"],
+        .custom-sidebar-toggle-btn[style*="display:none"] {
+            display: none !important;
+            pointer-events: none !important;
+        }
+
+        .custom-sidebar-toggle-btn:hover {
+            background-color: #fff8f0 !important;
+            transform: translate(50%, -50%) scale(1.08) !important;
+        }
+
+        .custom-sidebar-toggle-btn svg {
             color: #f59e0b !important;
             width: 1rem !important;
             height: 1rem !important;
@@ -340,5 +363,14 @@
     }
     html.dark .stat-card-label {
         color: #94a3b8;
+    }
+
+    /* 11. ENSURE MODALS APPEAR ABOVE NAVBAR/SIDEBAR WITHOUT BREAKING INNER INTERACTIVITY */
+    .fi-modal-ctn,
+    .fi-modal,
+    .filament-modal,
+    div[role="dialog"],
+    div[aria-modal="true"] {
+        z-index: 1000 !important;
     }
 </style>

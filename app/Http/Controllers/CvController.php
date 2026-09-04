@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Certificate;
-use App\Models\Experience;
-use App\Models\Project;
 use App\Models\Skill;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CvController extends Controller
 {
     public function preview()
     {
-        $user = User::where('role', 'admin')->first() ?? User::first();
+        $user = User::where('role', 'admin')->with(['educations', 'socialLinks'])->first() ?? User::with(['educations', 'socialLinks'])->first();
 
         if (! $user) {
             abort(404, 'User profile not found');
@@ -22,25 +18,19 @@ class CvController extends Controller
 
         $educations = $user->educations;
         $skills = Skill::orderBy('order')->get();
-        $experiences = Experience::orderBy('order')->get();
-        $projects = Project::where('is_published', true)->orderBy('order')->get();
-        $certificates = Certificate::orderBy('order')->get();
         $socialLinks = $user->socialLinks;
 
         return view('cv', compact(
             'user',
             'educations',
             'skills',
-            'experiences',
-            'projects',
-            'certificates',
             'socialLinks'
         ));
     }
 
     public function download()
     {
-        $user = User::where('role', 'admin')->first() ?? User::first();
+        $user = User::where('role', 'admin')->with(['educations', 'socialLinks'])->first() ?? User::with(['educations', 'socialLinks'])->first();
 
         if ($user && $user->cv_file && Storage::disk('public')->exists($user->cv_file)) {
             return Storage::disk('public')->download($user->cv_file, 'CV_' . str_replace(' ', '_', $user->name) . '.pdf');

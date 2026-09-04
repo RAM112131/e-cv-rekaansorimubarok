@@ -43,6 +43,11 @@ class AdminPanelProvider extends PanelProvider
             PanelsRenderHook::BODY_START,
             fn (): string => view('filament.simple-back-button')->render()
         );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_NAV_START,
+            fn (): string => view('filament.sidebar-toggle-button')->render()
+        );
     }
 
     public function panel(Panel $panel): Panel
@@ -54,12 +59,12 @@ class AdminPanelProvider extends PanelProvider
             ->login(\App\Filament\Pages\Auth\CustomLogin::class)
             ->brandName('Portfolio Admin')
             ->font('Outfit')
+            ->spa()                              // SPA mode: pindah halaman tanpa reload/kedip
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('14.5rem')
             ->collapsedSidebarWidth('4.5rem')
             ->globalSearch()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
-            ->spa()
             ->colors([
                 'primary' => Color::Amber,
                 'gray' => Color::Slate,
@@ -114,13 +119,28 @@ class AdminPanelProvider extends PanelProvider
                             ->with(['prompt' => 'select_account'])
                             ->stateless(),
                     ])
-                    ->registration(fn (string $provider, SocialiteUserContract $oauthUser, ?\Illuminate\Contracts\Auth\Authenticatable $user) => $user !== null)
-                    ->resolveUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
-                        \Illuminate\Support\Facades\Log::info('Google OAuth login attempt', [
-                            'email_from_google' => $oauthUser->getEmail(),
+                    ->authorizeUserUsing(function (FilamentSocialitePlugin $plugin, SocialiteUserContract $oauthUser) {
+                        $email = trim($oauthUser->getEmail());
+
+                        \Illuminate\Support\Facades\Log::info('Google OAuth authorize attempt', [
+                            'email_from_google' => $email,
                         ]);
 
-                        return \App\Models\User::where('email', trim($oauthUser->getEmail()))->first();
+                        return \App\Models\User::where('email', $email)
+                            ->where('role', 'admin')
+                            ->exists();
+                    })
+                    ->registration(false)
+                    ->resolveUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
+                        $email = trim($oauthUser->getEmail());
+
+                        \Illuminate\Support\Facades\Log::info('Google OAuth login attempt', [
+                            'email_from_google' => $email,
+                        ]);
+
+                        return \App\Models\User::where('email', $email)
+                            ->where('role', 'admin')
+                            ->first();
                     })
             );
     }

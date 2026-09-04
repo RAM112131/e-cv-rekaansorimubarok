@@ -19,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use UnitEnum;
 
@@ -34,7 +35,10 @@ class MessageResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        $count = static::getModel()::where('is_read', false)->count();
+        // Cache selama 60 detik agar tidak query DB di setiap page navigation
+        $count = Cache::remember('nav.badge.unread_messages', 60, function () {
+            return static::getModel()::where('is_read', false)->count();
+        });
 
         return $count > 0 ? (string) $count : null;
     }

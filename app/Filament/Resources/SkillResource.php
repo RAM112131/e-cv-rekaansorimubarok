@@ -54,6 +54,12 @@ class SkillResource extends Resource
                             ->label('Urutan Tampilan')
                             ->numeric()
                             ->placeholder('Kosongkan untuk urutan terakhir'),
+                            
+                        \Filament\Forms\Components\Textarea::make('description')
+                            ->label('Deskripsi Keahlian')
+                            ->placeholder('Jelaskan pengalaman atau tingkat keahlian Anda di bidang ini...')
+                            ->rows(3)
+                            ->columnSpanFull(),
                     ])
                     ->columns(2)
                     ->columnSpan(1),
@@ -63,6 +69,7 @@ class SkillResource extends Resource
                         FileUpload::make('icon')
                             ->label('Upload Logo / Icon Asli (PNG / SVG / WEBP)')
                             ->image()
+                            ->disk('public')
                             ->directory('skills/icons')
                             ->imagePreviewHeight('140px')
                             ->helperText('Unggah gambar logo asli dari teknologi atau skill ini.'),
@@ -78,6 +85,7 @@ class SkillResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('icon')
                     ->label('Logo')
+                    ->disk('public')
                     ->circular(),
 
                 Tables\Columns\TextColumn::make('name')
@@ -123,5 +131,11 @@ class SkillResource extends Resource
         return [
             'index' => Pages\ManageSkills::route('/'),
         ];
+    }
+
+    public static function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['user_id'] = auth()->id();
+        return $data;
     }
 }
