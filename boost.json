@@ -9,8 +9,11 @@
     "sail": false,
     "skills": [
         "laravel-best-practices",
+        "octane-development",
         "socialite-development",
         "pest-testing",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "laravel-filament-v5",
+        "laravel-performance"
     ]
 }

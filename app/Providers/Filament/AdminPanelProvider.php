@@ -2,7 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\CustomEditProfile;
+use App\Filament\Pages\Auth\CustomLogin;
 use App\Filament\Pages\Dashboard as CustomDashboard;
+use App\Models\User;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use DutchCodingCompany\FilamentSocialite\Provider;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
@@ -22,6 +25,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 
@@ -56,9 +60,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login(\App\Filament\Pages\Auth\CustomLogin::class)
+            ->login(CustomLogin::class)
             ->brandName('Portfolio Admin')
             ->font('Outfit')
+            ->darkMode(false)
             ->spa()                              // SPA mode: pindah halaman tanpa reload/kedip
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('14.5rem')
@@ -105,7 +110,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->profile(\App\Filament\Pages\Auth\CustomEditProfile::class)
+            ->profile(CustomEditProfile::class)
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),
                 EmailAuthentication::make(),
@@ -122,11 +127,11 @@ class AdminPanelProvider extends PanelProvider
                     ->authorizeUserUsing(function (FilamentSocialitePlugin $plugin, SocialiteUserContract $oauthUser) {
                         $email = trim($oauthUser->getEmail());
 
-                        \Illuminate\Support\Facades\Log::info('Google OAuth authorize attempt', [
+                        Log::info('Google OAuth authorize attempt', [
                             'email_from_google' => $email,
                         ]);
 
-                        return \App\Models\User::where('email', $email)
+                        return User::where('email', $email)
                             ->where('role', 'admin')
                             ->exists();
                     })
@@ -134,11 +139,11 @@ class AdminPanelProvider extends PanelProvider
                     ->resolveUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
                         $email = trim($oauthUser->getEmail());
 
-                        \Illuminate\Support\Facades\Log::info('Google OAuth login attempt', [
+                        Log::info('Google OAuth login attempt', [
                             'email_from_google' => $email,
                         ]);
 
-                        return \App\Models\User::where('email', $email)
+                        return User::where('email', $email)
                             ->where('role', 'admin')
                             ->first();
                     })

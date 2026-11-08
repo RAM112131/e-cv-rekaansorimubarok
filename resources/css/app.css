@@ -22,6 +22,52 @@
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
+.lanyard-loading-card {
+    position: absolute;
+    top: clamp(7.25rem, 16vh, 10.5rem);
+    left: 50%;
+    z-index: 11;
+    width: clamp(6.5rem, 24vw, 10rem);
+    aspect-ratio: 591 / 1004;
+    transform: translateX(-50%);
+    pointer-events: none;
+    transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.lanyard-loading-card.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.lanyard-loading-card__strap {
+    position: absolute;
+    bottom: calc(100% - 1px);
+    left: 50%;
+    width: 0.45rem;
+    height: clamp(3rem, 7vh, 4.5rem);
+    transform: translateX(-50%);
+    border-radius: 0.25rem 0.25rem 0 0;
+    background: repeating-linear-gradient(135deg, #f8fafc 0 3px, #2563eb 3px 6px, #0f172a 6px 9px);
+}
+
+.lanyard-loading-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgb(255 255 255 / 55%);
+    border-radius: 0.45rem;
+    object-fit: cover;
+    box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 35%);
+}
+
+@media (min-width: 1024px) {
+    .lanyard-loading-card {
+        top: clamp(3rem, 10vh, 8rem);
+        left: calc(50% + 15vw);
+        width: clamp(8rem, 13vw, 11rem);
+    }
+}
+
 /* ============================================
    CLAYMORPHISM UTILITIES
    ============================================ */
@@ -270,8 +316,410 @@
     0%, 100% { transform: translateY(-12px) translateX(-4px) rotate(-1deg); }
     50% { transform: translateY(12px) translateX(4px) rotate(5deg); }
 }
-@keyframes float-6 {
-    0%, 100% { transform: translateY(4px) translateX(0px) rotate(-7deg); }
-    50% { transform: translateY(-18px) translateX(-5px) rotate(-2deg); }
+
+/* ============================================
+   LIGHT MODE STYLES (WARM LUXURY GOLD #FAFAF9)
+   ============================================ */
+html.light body {
+    background-color: #FAFAF9 !important;
+    color: #0C0A09 !important;
 }
 
+html.light .bg-darker,
+html.light .bg-dark {
+    background-color: #FAFAF9 !important;
+}
+
+/* Section specific background & grid overrides */
+html.light section,
+html.light section::before,
+html.light .before\:bg-darker::before {
+    background-color: #FAFAF9 !important;
+}
+
+html.light .futuristic-grid::after {
+    opacity: 0.15 !important;
+}
+
+/* Global Dark Hex Background Overrides -> Light Mode White / Cream */
+html.light .bg-\[\#0a1610\],
+html.light .bg-\[\#0a0d18\],
+html.light .bg-\[\#0c1022\],
+html.light .bg-\[\#0a0e20\],
+html.light .bg-\[\#0a0c16\],
+html.light .bg-\[\#0c1020\],
+html.light .bg-\[\#090c14\],
+html.light .bg-\[\#080b12\],
+html.light .bg-\[\#070912\],
+html.light .bg-\[\#0e101e\],
+html.light .bg-\[\#070914\],
+html.light .bg-\[\#090b1c\],
+html.light .bg-\[\#060816\],
+html.light .bg-\[\#080a15\],
+html.light .bg-\[\#090c13\],
+html.light .bg-\[\#080718\],
+html.light .bg-\[\#111622\],
+html.light .bg-\[\#1c1f33\],
+html.light .bg-\[\#101324\],
+html.light .bg-slate-900,
+html.light .bg-slate-950,
+html.light .bg-slate-900\/90,
+html.light .bg-slate-900\/80,
+html.light .bg-slate-950\/90 {
+    background-color: #FFFFFF !important;
+    border-color: rgba(217, 119, 6, 0.25) !important;
+}
+
+/* Certificate & Image Spotlight Lightbox Modal Overrides in Light Mode */
+html.light [class*="bg-black/95"],
+html.light [class*="bg-black/90"],
+html.light [class*="bg-black/85"] {
+    background-color: rgba(250, 250, 249, 0.88) !important;
+}
+
+html.light [class*="from-[#111528]"] {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFAF9 100%) !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12), 0 0 40px rgba(217, 119, 6, 0.15) !important;
+}
+
+html.light [class*="bg-[#070914]"],
+html.light [class*="bg-[#070914]/80"],
+html.light [class*="bg-[#070914]/85"] {
+    background: rgba(254, 243, 199, 0.88) !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+    color: #44403C !important;
+}
+
+html.light [class*="bg-[#070914]/85"] button,
+html.light [class*="bg-[#070914]"] button {
+    background: #FFFFFF !important;
+    color: #D97706 !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+}
+
+/* Attribute Selector Overrides for Index Pages & Containers in Light Mode */
+html.light [class*="bg-[#090c13]"],
+html.light [class*="bg-[#0a0d18]"],
+html.light [class*="bg-[#080a15]"],
+html.light [class*="bg-[#111528]"],
+html.light [class*="bg-[#0d1020]"],
+html.light [class*="bg-[#060815]"],
+html.light [class*="bg-[#040610]"] {
+    background: #FFFFFF !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+    color: #0C0A09 !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light [class*="bg-[#090c13]"] h4,
+html.light [class*="bg-[#090c13]"] p,
+html.light [class*="bg-[#090c13]"] span {
+    color: #0C0A09 !important;
+}
+
+/* Attribute Selector Overrides for Arbitrary Tailwind Hex Colors in Light Mode */
+html.light [class*="bg-[#090c14]"],
+html.light [class*="bg-[#080b12]"],
+html.light [class*="bg-[#111622]"],
+html.light [class*="bg-[#0a0c16]"] {
+    background: rgba(254, 243, 199, 0.95) !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+    color: #D97706 !important;
+}
+
+html.light [class*="bg-[#232d44]"],
+html.light [class*="bg-[#141b2b]"],
+html.light [class*="bg-[#0a0d15]"],
+html.light [class*="bg-[#1c1f33]"],
+html.light [class*="bg-[#101324]"],
+html.light [class*="bg-[#12162a]"],
+html.light [class*="bg-[#181c35]"] {
+    background: linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(253, 230, 138, 0.9) 100%) !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+}
+
+/* 3D Floating Career, Project & Certificate Graphics */
+html.light .bg-gradient-to-br.from-\[\#1c1f33\],
+html.light .bg-gradient-to-br.from-\[\#232d44\],
+html.light .bg-gradient-to-br.from-\[\#12162a\],
+html.light .bg-gradient-to-b.from-\[\#1a2336\],
+html.light .bg-gradient-to-b.from-\[\#22263d\],
+html.light .bg-gradient-to-b.from-\[\#181a2c\],
+html.light .bg-gradient-to-b.from-\[\#1c192d\] {
+    background: linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(253, 230, 138, 0.9) 100%) !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+    box-shadow: -10px 14px 25px rgba(217, 119, 6, 0.12), inset 2px 2px 8px rgba(255, 255, 255, 1) !important;
+}
+
+/* Card Cover Image Vignette Overlays in Light Mode */
+html.light .from-\[\#060815\]\/95,
+html.light .from-\[\#040610\]\/80 {
+    --tw-gradient-from: rgba(250, 250, 249, 0.92) var(--tw-gradient-from-position) !important;
+}
+
+html.light .via-\[\#060815\]\/75,
+html.light .via-\[\#060815\]\/80 {
+    --tw-gradient-via: rgba(250, 250, 249, 0.7) var(--tw-gradient-via-position) !important;
+}
+
+html.light .to-\[\#060815\]\/25,
+html.light .to-\[\#060815\]\/30 {
+    --tw-gradient-to: rgba(250, 250, 249, 0.2) var(--tw-gradient-to-position) !important;
+}
+
+/* Certificate Placeholder Box when no image is present */
+html.light .bg-\[\#181c35\] {
+    background-color: #FFFFFF !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+/* Skill Section 3D Podium & 3D Icons */
+html.light .podium-3d {
+    background: radial-gradient(ellipse at center, rgba(254, 243, 199, 0.95) 0%, rgba(253, 230, 138, 0.6) 80%) !important;
+    box-shadow: 
+        inset 0 4px 15px rgba(255, 255, 255, 0.9),
+        inset 0 -10px 25px rgba(217, 119, 6, 0.2),
+        0 20px 40px rgba(217, 119, 6, 0.15),
+        0 0 40px rgba(245, 158, 11, 0.25) !important;
+    border-top: 1.5px solid rgba(217, 119, 6, 0.35) !important;
+}
+
+html.light .clay-icon-3d {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1.5px solid rgba(217, 119, 6, 0.3) !important;
+    box-shadow: 
+        inset -2px -2px 8px rgba(0, 0, 0, 0.03),
+        inset 2px 2px 8px rgba(255, 255, 255, 1),
+        0 10px 25px rgba(217, 119, 6, 0.12) !important;
+}
+
+html.light .clay-icon-3d span {
+    color: #44403C !important;
+}
+
+html.light #sun-skill-level {
+    background: linear-gradient(180deg, #D97706 0%, #B45309 60%, #78350F 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    text-shadow: none !important;
+}
+
+html.light #dynamic-percentage {
+    filter: drop-shadow(0 8px 20px rgba(217, 119, 6, 0.25)) !important;
+}
+
+/* Cards & Containers */
+html.light .clay-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(217, 119, 6, 0.25) !important;
+    box-shadow: 
+        inset 1px 1px 4px rgba(255, 255, 255, 1),
+        0 10px 25px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .clay-circle {
+    background: rgba(254, 243, 199, 0.85) !important;
+    border: 1.5px solid rgba(217, 119, 6, 0.35) !important;
+    box-shadow: 
+        inset 1px 1px 3px rgba(255, 255, 255, 1),
+        0 4px 12px rgba(217, 119, 6, 0.12) !important;
+}
+
+html.light .glass-nav {
+    background: rgba(250, 250, 249, 0.92) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Form Inputs in Light Mode */
+html.light input,
+html.light textarea,
+html.light select {
+    background-color: #FFFFFF !important;
+    color: #0C0A09 !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+    color: #78716C !important;
+}
+
+/* Badges & Pills */
+html.light .rounded-full.bg-\[\#111622\],
+html.light .rounded-full.bg-\[\#0a0c16\] {
+    background-color: rgba(254, 243, 199, 0.9) !important;
+    color: #D97706 !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+/* Timeline vertical line & dots in Karier section */
+html.light .bg-slate-800\/80,
+html.light .bg-slate-700 {
+    background-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+html.light .border-slate-800,
+html.light .border-slate-700 {
+    border-color: rgba(217, 119, 6, 0.2) !important;
+}
+
+/* Prose for Rich Text / Job Description */
+html.light .prose-invert,
+html.light .prose {
+    color: #44403C !important;
+}
+
+html.light .prose-invert strong,
+html.light .prose-invert h1,
+html.light .prose-invert h2,
+html.light .prose-invert h3,
+html.light .prose-invert h4 {
+    color: #0C0A09 !important;
+}
+
+/* Text readability overrides */
+html.light .text-white {
+    color: #0C0A09 !important;
+}
+
+html.light .text-gray-100,
+html.light .text-gray-200,
+html.light .text-gray-300 {
+    color: #44403C !important;
+}
+
+html.light .text-gray-400 {
+    color: #57534E !important;
+}
+
+html.light .text-gray-500 {
+    color: #78716C !important;
+}
+
+html.light .text-slate-100,
+html.light .text-slate-200,
+html.light .text-slate-300 {
+    color: #292524 !important;
+}
+
+html.light .text-slate-400 {
+    color: #57534E !important;
+}
+
+html.light .text-amber-300,
+html.light .text-amber-400 {
+    color: #D97706 !important;
+}
+
+html.light .text-accentlight {
+    color: #CA8A04 !important;
+}
+
+html.light .neon-text-gold {
+    text-shadow: none !important;
+}
+
+/* ============================================
+   UNIFIED ACCENT BUTTON STYLES (GOLD GRADIENT)
+   ============================================ */
+.bg-accent,
+.bg-accent\/90 {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+    color: #020617 !important;
+    border-color: rgba(251, 191, 36, 0.4) !important;
+    box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3) !important;
+}
+
+.bg-accent:hover,
+.bg-accent\/90:hover,
+.hover\:bg-accentlight:hover {
+    background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%) !important;
+    color: #020617 !important;
+    box-shadow: 0 6px 22px rgba(217, 119, 6, 0.45) !important;
+}
+
+/* Secondary Button (Source Code, White Glass) in Light Mode */
+html.light .bg-white\/10 {
+    background-color: rgba(254, 243, 199, 0.9) !important;
+    border-color: rgba(217, 119, 6, 0.35) !important;
+    color: #D97706 !important;
+}
+
+html.light .bg-white\/10:hover,
+html.light .bg-white\/20:hover {
+    background-color: rgba(253, 230, 138, 0.95) !important;
+    color: #B45309 !important;
+}
+
+/* ============================================
+   PROJECT DETAIL PAGE LIGHT MODE OVERRIDES
+   ============================================ */
+
+html.light .hero-overlay {
+    background: 
+        linear-gradient(to top, #FAFAF9 0%, rgba(250, 250, 249, 0.4) 40%, transparent 100%),
+        linear-gradient(45deg, #FAFAF9 0%, #FAFAF9 25%, rgba(250, 250, 249, 0.85) 50%, rgba(250, 250, 249, 0.3) 75%, transparent 100%) !important;
+}
+
+html.light .bg-gradient-to-br.from-slate-900.via-\[\#0a0d15\].to-\[\#010010\] {
+    background: linear-gradient(135deg, #FAFAF9 0%, #F5F5F4 50%, #E7E5E4 100%) !important;
+}
+
+html.light .clay-detail-card {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border: 1.5px solid rgba(217, 119, 6, 0.25) !important;
+    box-shadow: 
+        inset 1px 1px 4px rgba(255, 255, 255, 1),
+        0 10px 30px rgba(0, 0, 0, 0.06) !important;
+    color: #0C0A09 !important;
+}
+
+html.light .feature-card {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid rgba(217, 119, 6, 0.2) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.light .feature-card:hover {
+    border-color: rgba(217, 119, 6, 0.4) !important;
+    box-shadow: 0 8px 24px rgba(217, 119, 6, 0.12) !important;
+}
+
+html.light .related-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(217, 119, 6, 0.25) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light .related-card:hover {
+    border-color: rgba(217, 119, 6, 0.45) !important;
+    box-shadow: 0 15px 35px rgba(217, 119, 6, 0.15) !important;
+}
+
+html.light .tech-badge {
+    background: rgba(254, 243, 199, 0.85) !important;
+    border: 1px solid rgba(217, 119, 6, 0.3) !important;
+    color: #D97706 !important;
+}
+
+html.light .dot-inactive {
+    background: rgba(0, 0, 0, 0.2) !important;
+}
+
+html.light [class*="bg-[#080718]"] {
+    background: #FFFFFF !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.1) !important;
+}
+
+html.light .project-category-badge {
+    background: #FEF3C7 !important;
+    color: #92400E !important;
+}
+
+html.light .project-tech-badge {
+    background: #FAFAF9 !important;
+    color: #57534E !important;
+}

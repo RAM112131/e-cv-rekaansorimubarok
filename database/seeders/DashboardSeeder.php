@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Visitor;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use RuntimeException;
 
 class DashboardSeeder extends Seeder
 {
@@ -19,12 +20,28 @@ class DashboardSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::first();
+        $admin = User::query()->where('role', 'admin')->first();
+
         if (! $admin) {
+            $adminName = config('auth.seed_admin.name');
+            $adminEmail = config('auth.seed_admin.email');
+            $adminPassword = config('auth.seed_admin.password');
+
+            if (
+                ! is_string($adminEmail)
+                || ! filter_var($adminEmail, FILTER_VALIDATE_EMAIL)
+                || ! is_string($adminPassword)
+                || strlen($adminPassword) < 12
+            ) {
+                throw new RuntimeException(
+                    'Set a valid SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD with at least 12 characters before seeding when no admin user exists.'
+                );
+            }
+
             $admin = User::create([
-                'name' => 'Ram Admin',
-                'email' => 'admin@example.com',
-                'password' => bcrypt('password'),
+                'name' => is_string($adminName) && $adminName !== '' ? $adminName : 'Portfolio Admin',
+                'email' => $adminEmail,
+                'password' => $adminPassword,
                 'role' => 'admin',
             ]);
         }
@@ -37,11 +54,11 @@ class DashboardSeeder extends Seeder
 
                 for ($j = 0; $j < $visitorCount; $j++) {
                     Visitor::create([
-                        'ip_address' => '127.0.0.' . rand(1, 100),
+                        'ip_address' => '127.0.0.'.rand(1, 100),
                         'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0',
                         'page_url' => '/',
                         'referrer' => rand(0, 1) ? 'https://google.com' : 'https://github.com',
-                        'session_id' => 'sess_' . bin2hex(random_bytes(8)),
+                        'session_id' => 'sess_'.bin2hex(random_bytes(8)),
                         'visited_at' => $date->copy()->addMinutes(rand(10, 1300)),
                     ]);
                 }

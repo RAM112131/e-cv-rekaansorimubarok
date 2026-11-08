@@ -1,3 +1,15 @@
+<script>
+    (function() {
+        function forceAdminLightMode() {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+        }
+        forceAdminLightMode();
+        window.addEventListener('DOMContentLoaded', forceAdminLightMode);
+        document.addEventListener('livewire:navigated', forceAdminLightMode);
+    })();
+</script>
+
 <style>
     /* ============================================
      * REBUILT CSS BERDASARKAN SCREENSHOT DESAIN
@@ -332,37 +344,6 @@
             width: 1rem !important;
             height: 1rem !important;
         }
-    }
-
-    /* --- DARK MODE FALLBACKS --- */
-    html.dark .fi-sidebar {
-        background-color: #18181b !important;
-    }
-    html.dark .fi-sidebar .fi-sidebar-item-active > a,
-    html.dark .fi-sidebar .fi-sidebar-item-active {
-        background-color: rgba(245, 158, 11, 0.2) !important;
-    }
-    html.dark .fi-sidebar .fi-sidebar-item-active span {
-        color: #fbbf24 !important;
-    }
-    html.dark .cv-button {
-        background-color: transparent !important;
-        color: #fbbf24 !important;
-        border-color: #fbbf24 !important;
-    }
-    html.dark .cv-button:hover {
-        background-color: #fbbf24 !important;
-        color: #000 !important;
-    }
-    html.dark .stat-card {
-        background-color: #1e293b;
-        border-color: #334155;
-    }
-    html.dark .stat-card-value {
-        color: #f8fafc;
-    }
-    html.dark .stat-card-label {
-        color: #94a3b8;
     }
 
     /* 11. ENSURE MODALS APPEAR ABOVE NAVBAR/SIDEBAR WITHOUT BREAKING INNER INTERACTIVITY */

@@ -20,6 +20,12 @@ return [
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
+    'seed_admin' => [
+        'name' => env('SEED_ADMIN_NAME', 'Portfolio Admin'),
+        'email' => env('SEED_ADMIN_EMAIL'),
+        'password' => env('SEED_ADMIN_PASSWORD'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Guards

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
 use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
@@ -15,14 +16,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable implements
-    FilamentUser,
-    HasAppAuthentication,
-    HasAppAuthenticationRecovery,
-    HasEmailAuthentication
+class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasEmailAuthentication
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
     use InteractsWithAppAuthentication;
     use InteractsWithAppAuthenticationRecovery;
     use InteractsWithEmailAuthentication;
@@ -47,10 +45,9 @@ class User extends Authenticatable implements
         ];
     }
 
-    // Hanya user dengan role 'admin' yang boleh masuk panel (Admin Tunggal)
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role === 'admin';
+        return $panel->getId() === 'admin' && $this->role === 'admin';
     }
 
     public function socialLinks(): HasMany

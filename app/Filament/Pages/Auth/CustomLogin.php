@@ -60,6 +60,18 @@ class CustomLogin extends BaseLogin
         return $response;
     }
 
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function getCredentialsFromFormData(#[\SensitiveParameter] array $data): array
+    {
+        return [
+            ...parent::getCredentialsFromFormData($data),
+            'role' => 'admin',
+        ];
+    }
+
     protected function buildAuthNotificationMessage(array $errors): string
     {
         $messages = [];

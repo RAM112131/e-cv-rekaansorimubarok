@@ -3,11 +3,12 @@
 namespace App\Filament\Pages;
 
 use App\Models\Education;
+use App\Services\PublicContentCache;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -17,7 +18,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
-
 use UnitEnum;
 
 class ManageCv extends Page implements HasSchemas
@@ -358,7 +358,7 @@ class ManageCv extends Page implements HasSchemas
                                 Textarea::make('desc')
                                     ->label('Deskripsi Peran & Tanggung Jawab')
                                     ->rows(4)
-                                    ->helperText('Fleksibel: paragraf atau daftar poin untuk menggambarkan kontribusi Anda.' )
+                                    ->helperText('Fleksibel: paragraf atau daftar poin untuk menggambarkan kontribusi Anda.')
                                     ->placeholder("Contoh Paragraf:\nBertugas membangun dan menjaga citra organisasi melalui komunikasi eksternal.\n\nContoh List:\n• Mengelola komunikasi eksternal dan internal.\n• Mengatur distribusi konsumsi panitia."),
                             ])
                             ->columns(2)
@@ -393,21 +393,32 @@ class ManageCv extends Page implements HasSchemas
             ],
         ]);
 
-        // Simpan educations
         $user->educations()->delete();
-        foreach ($state['educations'] ?? [] as $index => $edu) {
-            Education::create([
+
+        $timestamp = now();
+        $educations = [];
+
+        foreach (array_values($state['educations'] ?? []) as $order => $education) {
+            $educations[] = [
                 'user_id' => $user->id,
-                'institution' => $edu['institution'],
-                'degree' => $edu['degree'] ?? null,
-                'major' => $edu['major'] ?? null,
-                'start_year' => $edu['start_year'] ?? null,
-                'end_year' => $edu['end_year'] ?? null,
-                'semester' => $edu['semester'] ?? null,
-                'gpa' => $edu['gpa'] ?? null,
-                'order' => $index,
-            ]);
+                'institution' => $education['institution'],
+                'degree' => $education['degree'] ?? null,
+                'major' => $education['major'] ?? null,
+                'start_year' => $education['start_year'] ?? null,
+                'end_year' => $education['end_year'] ?? null,
+                'semester' => $education['semester'] ?? null,
+                'gpa' => $education['gpa'] ?? null,
+                'order' => $order,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
         }
+
+        if ($educations !== []) {
+            Education::query()->insert($educations);
+        }
+
+        PublicContentCache::clear();
 
         Notification::make()
             ->title('Seluruh Konten CV berhasil diperbarui')

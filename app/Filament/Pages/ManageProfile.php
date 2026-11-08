@@ -3,8 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Models\SocialLink;
+use App\Services\PublicContentCache;
 use BackedEnum;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -15,7 +15,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
-
 use UnitEnum;
 
 class ManageProfile extends Page implements HasSchemas
@@ -70,7 +69,6 @@ class ManageProfile extends Page implements HasSchemas
                             ->label('Headline Hero (Landing Page)')
                             ->maxLength(255)
                             ->placeholder('mis. Fullstack Web Developer & Student'),
-
 
                         Textarea::make('bio')
                             ->label('Bio / Perkenalan Singkat (Hero Section)')
@@ -131,16 +129,27 @@ class ManageProfile extends Page implements HasSchemas
             'avatar' => $state['avatar'] ?? $user->avatar,
         ]);
 
-        // Simpan social links
         $user->socialLinks()->delete();
-        foreach ($state['social_links'] ?? [] as $index => $link) {
-            SocialLink::create([
+
+        $timestamp = now();
+        $socialLinks = [];
+
+        foreach (array_values($state['social_links'] ?? []) as $order => $link) {
+            $socialLinks[] = [
                 'user_id' => $user->id,
                 'platform' => $link['platform'],
                 'url' => $link['url'],
-                'order' => $index,
-            ]);
+                'order' => $order,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
         }
+
+        if ($socialLinks !== []) {
+            SocialLink::query()->insert($socialLinks);
+        }
+
+        PublicContentCache::clear();
 
         Notification::make()
             ->title('Profil Landing Page berhasil diperbarui')

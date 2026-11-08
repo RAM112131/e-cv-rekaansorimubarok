@@ -12,29 +12,40 @@ class TrackVisitor
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
         // Jangan catat request admin, API, atau aset statis
-        if ($request->is('admin*') || $request->is('livewire*') || $request->ajax()) {
+        $requestPurpose = strtolower(implode(' ', [
+            (string) $request->header('Purpose'),
+            (string) $request->header('Sec-Purpose'),
+        ]));
+
+        if (
+            $request->is('admin*')
+            || $request->is('livewire*')
+            || $request->ajax()
+            || str_contains($requestPurpose, 'prefetch')
+        ) {
             return $response;
         }
 
-        // Dispatch ke background job agar tidak memblokir response
-        try {
-            TrackVisitorJob::dispatch(
-                $request->ip(),
-                $request->header('User-Agent'),
-                $request->fullUrl(),
-                $request->header('referer'),
-                $request->session()->getId(),
-            );
-        } catch (\Throwable $e) {
-            // Silent fail
-        }
+        $ipAddress = $request->ip();
+        $userAgent = $request->header('User-Agent');
+        $pageUrl = $request->fullUrl();
+        $referrer = $request->header('referer');
+        $sessionId = $request->session()->getId();
+
+        TrackVisitorJob::dispatch(
+            $ipAddress,
+            $userAgent,
+            $pageUrl,
+            $referrer,
+            $sessionId,
+        )->onConnection('deferred');
 
         return $response;
     }

@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Http\Controllers\HomeController;
+use App\Services\PublicContentCache;
 
 /**
  * HomepageCacheObserver
@@ -15,21 +15,21 @@ class HomepageCacheObserver
 {
     public function created($model): void
     {
-        HomeController::clearCache();
+        PublicContentCache::clear();
     }
 
     public function updated($model): void
     {
-        HomeController::clearCache();
+        PublicContentCache::clear();
     }
 
     public function deleted($model): void
     {
-        HomeController::clearCache();
+        PublicContentCache::clear();
     }
 
     public function restored($model): void
     {
-        HomeController::clearCache();
+        PublicContentCache::clear();
     }
 }

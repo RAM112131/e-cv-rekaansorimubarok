@@ -11,10 +11,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -120,6 +119,7 @@ class ExperienceResource extends Resource
                             ->label('Upload Foto Dokumentasi (Bisa Banyak / Slide)')
                             ->image()
                             ->multiple()
+                            ->maxParallelUploads(4)
                             ->reorderable()
                             ->panelLayout('grid')
                             ->imagePreviewHeight('120px')

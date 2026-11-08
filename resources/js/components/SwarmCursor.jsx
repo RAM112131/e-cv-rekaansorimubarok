@@ -340,6 +340,7 @@ const SwarmCursor = ({
     window.addEventListener('pointerdown', onDown);
 
     let raf = 0;
+    let scrollTimeout = 0;
     let last = performance.now();
 
     const frame = now => {
@@ -554,11 +555,39 @@ const SwarmCursor = ({
       compProgram.uniforms.tField.value = target.texture;
       renderer.render({ scene: compMesh });
     };
+
+    const resumeAnimation = () => {
+      last = performance.now();
+
+      if (!document.hidden && !raf) {
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      window.clearTimeout(scrollTimeout);
+      scrollTimeout = window.setTimeout(resumeAnimation, 160);
+    };
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        resumeAnimation();
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
     raf = requestAnimationFrame(frame);
 
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(scrollTimeout);
       ro.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerenter', onMove);
       window.removeEventListener('pointerleave', onLeave);

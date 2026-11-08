@@ -2,41 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Skill;
-use App\Models\User;
-use Illuminate\Support\Facades\Storage;
+use App\Services\CvPageService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CvController extends Controller
 {
-    public function preview()
+    public function __construct(private CvPageService $cvPageService) {}
+
+    public function preview(): View
     {
-        $user = User::where('role', 'admin')->with(['educations', 'socialLinks'])->first() ?? User::with(['educations', 'socialLinks'])->first();
+        $data = $this->cvPageService->getPreviewData();
 
-        if (! $user) {
-            abort(404, 'User profile not found');
-        }
+        abort_if($data === null, 404, 'User profile not found');
 
-        $educations = $user->educations;
-        $skills = Skill::orderBy('order')->get();
-        $socialLinks = $user->socialLinks;
-
-        return view('cv', compact(
-            'user',
-            'educations',
-            'skills',
-            'socialLinks'
-        ));
+        return view('cv', $data);
     }
 
-    public function download()
+    public function download(): StreamedResponse|RedirectResponse
     {
-        $user = User::where('role', 'admin')->with(['educations', 'socialLinks'])->first() ?? User::with(['educations', 'socialLinks'])->first();
+        $file = $this->cvPageService->getDownloadFile();
 
-        if ($user && $user->cv_file && Storage::disk('public')->exists($user->cv_file)) {
-            return Storage::disk('public')->download($user->cv_file, 'CV_' . str_replace(' ', '_', $user->name) . '.pdf');
+        if ($file === null) {
+            return redirect()->route('cv.preview');
         }
 
-        // Return preview page if no custom PDF file is uploaded
-        return redirect()->route('cv.preview');
+        return $this->cvPageService->download($file);
     }
 }

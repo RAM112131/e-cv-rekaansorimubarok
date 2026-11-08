@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth bg-slate-950">
+<html lang="id" class="scroll-smooth bg-slate-950 dark">
 <head>
+    <x-theme-preference />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @include('components.navigation-prefetch')
     <title>Semua Sertifikat — {{ $user->name ?? 'Portfolio' }}</title>
     <meta name="description" content="Kumpulan sertifikat, penghargaan, dan validasi keahlian teknis. Jelajahi seluruh pencapaian {{ $user->name ?? '' }}.">
     <meta name="robots" content="index, follow">
@@ -14,8 +16,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ route('certificates.index') }}">
 
-    @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/app.jsx'])
+    @vite('resources/css/app.css')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
@@ -46,67 +47,38 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
 
-        .glass-nav {
-            background: rgba(3, 0, 20, 0.8);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
-        }
-
-        /* Nav link active/hover underline glow */
-        .nav-link-futuristic {
-            position: relative;
-            padding-bottom: 4px;
-        }
-        .nav-link-futuristic::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: linear-gradient(90deg, #d4af37, #00d4ff);
-            box-shadow: 0 0 6px rgba(212, 175, 55, 0.3);
-            transition: width 0.3s ease;
-        }
-        .nav-link-futuristic:hover::after,
-        .nav-link-futuristic.active::after {
-            width: 100%;
-        }
-
         /* Grid fade-in */
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        .card-anim { animation: fadeUp 0.45s ease both; }
     </style>
 
     {{-- Alpine.js --}}
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 </head>
 <body class="bg-slate-950 text-white font-sans antialiased overflow-x-hidden selection:bg-amber-400/30 selection:text-white min-h-screen flex flex-col">
 
     <!-- Swarm Cursor Root -->
-    <div id="react-swarm-cursor-root" class="fixed inset-0 z-0 pointer-events-none"></div>
 
     {{-- ══════════════════════════════════════════
          NAVBAR — identical to welcome.blade.php
     ══════════════════════════════════════════ --}}
     <!-- Fixed Navigation Menu -->
     <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 transition-all duration-300">
-        <nav x-data="{ mobileMenuOpen: false, scrolled: false }" 
-             @scroll.window="scrolled = (window.pageYOffset > 20)"
-             :class="scrolled ? 'glass-nav py-3 px-8 rounded-full shadow-2xl max-w-6xl w-full' : 'bg-transparent py-5 px-4 w-full'"
+        <nav x-data="{ 
+                 mobileMenuOpen: false, 
+                 scrolled: false,
+             }" 
+             x-effect="document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''"
+             @scroll.window="if (!mobileMenuOpen) scrolled = (window.pageYOffset > 20)"
+             :class="scrolled ? 'glass-nav py-2.5 sm:py-3 px-4 sm:px-8 rounded-full shadow-2xl max-w-6xl w-full' : 'bg-transparent py-4 sm:py-5 px-4 w-full'"
              class="transition-all duration-300 flex justify-between items-center max-w-7xl mx-auto">
             <!-- Logo -->
-            <a href="{{ route('home') }}#beranda" class="font-heading text-2xl font-bold tracking-widest uppercase text-white cursor-pointer hover:opacity-85 transition">
+            <a href="{{ route('home') }}#beranda" class="font-heading text-xl sm:text-2xl font-bold tracking-widest uppercase text-white cursor-pointer hover:opacity-85 transition shrink-0">
                 {{ ucfirst(strtolower(explode(' ', $user->name ?? '')[0] ?? 'REKA')) }}<span class="text-accentlight" style="text-shadow: 0 0 8px rgba(212,175,55,0.4);">.</span>
             </a>
             
-            <!-- Desktop Menu -->
-            <div class="hidden md:flex items-center gap-8">
-                <ul class="flex gap-8 text-xs uppercase tracking-[0.15em] text-gray-400 font-medium items-center">
+            <!-- Right Container: Desktop Links + Actions -->
+            <div class="flex items-center gap-6 sm:gap-8 ml-auto">
+                <!-- Desktop Links (Right-aligned next to Download CV) -->
+                <ul class="hidden md:flex gap-6 lg:gap-8 text-xs uppercase tracking-[0.15em] text-gray-400 font-medium items-center">
                     <li><a href="{{ route('home') }}#beranda" class="nav-link-futuristic hover:text-accentlight transition duration-200 cursor-pointer">Beranda</a></li>
                     <li><a href="{{ route('projects.index') }}" class="nav-link-futuristic hover:text-accentlight transition duration-200 cursor-pointer">Proyek</a></li>
                     <li><a href="{{ route('certificates.index') }}" class="nav-link-futuristic text-accentlight font-bold active cursor-pointer">Sertifikat</a></li>
@@ -116,48 +88,147 @@
                     @endauth
                 </ul>
                 
-                <!-- Download CV Button (Clay) -->
-                @if(Route::has('cv.download'))
-                <a href="{{ route('cv.download') }}" class="clay-btn bg-accent/90 hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-xs px-5 py-2.5 inline-flex items-center gap-2 cursor-pointer">
-                    <span>Download CV</span>
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                </a>
-                @endif
-            </div>
-
-            <!-- Mobile Menu Button -->
-            <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-300 focus:outline-none cursor-pointer">
-                <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-                <svg x-show="mobileMenuOpen" style="display: none;" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-            
-            <!-- Mobile Menu Dropdown -->
-            <div x-show="mobileMenuOpen"
-                 x-transition
-                 style="display: none;"
-                 class="md:hidden clay-card absolute left-4 right-4 top-full mt-2 shadow-2xl z-50">
-                <ul class="flex flex-col text-xs uppercase tracking-widest text-gray-400 p-6 gap-6 text-center">
-                    <li><a @click="mobileMenuOpen = false" href="{{ route('home') }}#beranda" class="hover:text-accentlight transition block cursor-pointer">Beranda</a></li>
-                    <li><a @click="mobileMenuOpen = false" href="{{ route('projects.index') }}" class="hover:text-accentlight transition block cursor-pointer">Proyek</a></li>
-                    <li><a @click="mobileMenuOpen = false" href="{{ route('certificates.index') }}" class="text-accentlight font-bold transition block cursor-pointer">Sertifikat</a></li>
-                    <li><a @click="mobileMenuOpen = false" href="{{ route('home') }}#kontak" class="hover:text-accentlight transition block cursor-pointer">Kontak</a></li>
-                    @auth
-                        <li><a @click="mobileMenuOpen = false" href="{{ url('/admin') }}" class="text-accentlight font-bold block cursor-pointer">Admin Panel</a></li>
-                    @endauth
+                <!-- Actions (Download CV + Theme Toggle + Mobile Hamburger) -->
+                <div class="flex items-center gap-2 sm:gap-3">
                     @if(Route::has('cv.download'))
-                    <li>
-                        <a @click="mobileMenuOpen = false" href="{{ route('cv.download') }}" class="clay-btn bg-accent/90 text-slate-950 font-bold uppercase tracking-wider text-xs px-5 py-2.5 inline-flex items-center justify-center gap-2 cursor-pointer mx-auto">
-                            <span>Download CV</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        </a>
-                    </li>
+                    <a href="{{ route('cv.download') }}" class="clay-btn bg-accent/90 hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-[10px] sm:text-xs px-3 py-1.5 sm:px-5 sm:py-2.5 inline-flex items-center gap-1.5 cursor-pointer shadow-md">
+                        <span>Download CV</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </a>
                     @endif
-                </ul>
+
+                    <!-- Light / Dark Mode Toggle Button -->
+                    <button @click="$store.theme.toggle()"
+                            class="clay-btn p-2 sm:p-2.5 rounded-full bg-white/10 dark:bg-[#0a0d18]/90 border border-amber-500/40 hover:border-amber-400 text-amber-600 dark:text-amber-300 transition-all duration-300 cursor-pointer shadow-md flex items-center justify-center group"
+                            :title="$store.theme.mode === 'dark' ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'">
+                        <!-- Moon Icon (Shown in Light Mode) -->
+                        <svg x-show="$store.theme.mode === 'light'" class="w-4 h-4 text-amber-600 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                        <!-- Sun Icon (Shown in Dark Mode - Default) -->
+                        <svg x-show="$store.theme.mode === 'dark'" class="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Mobile Menu Button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-300 hover:text-amber-400 focus:outline-none cursor-pointer p-2 rounded-lg bg-white/5 hover:bg-white/10 transition">
+                        <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg x-show="mobileMenuOpen" style="display: none;" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
+            
+            <!-- Mobile Menu Teleport to Body -->
+            <template x-teleport="body">
+                <div>
+                    <!-- Mobile Menu Backdrop -->
+                    <div x-show="mobileMenuOpen"
+                         x-transition:enter="transition-opacity ease-out duration-300"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition-opacity ease-in duration-200"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         @click="mobileMenuOpen = false"
+                         @touchmove.prevent
+                         style="display: none;"
+                         class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9990] md:hidden">
+                    </div>
+
+                    <!-- Mobile Menu Right Sidebar Drawer -->
+                    <div x-show="mobileMenuOpen"
+                         x-transition:enter="transition ease-out duration-300 transform"
+                         x-transition:enter-start="translate-x-full"
+                         x-transition:enter-end="translate-x-0"
+                         x-transition:leave="transition ease-in duration-200 transform"
+                         x-transition:leave-start="translate-x-0"
+                         x-transition:leave-end="translate-x-full"
+                         style="display: none;"
+                         class="fixed top-0 right-0 bottom-0 w-72 sm:w-80 bg-[#0a0d18]/98 backdrop-blur-2xl border-l border-amber-500/20 shadow-2xl z-[9991] flex flex-col justify-between p-6 overflow-y-auto md:hidden text-left">
+                        
+                        <div>
+                            <!-- Sidebar Header -->
+                            <div class="flex items-center justify-between pb-6 border-b border-amber-500/10 mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400 font-heading font-bold text-sm">
+                                        R
+                                    </div>
+                                    <span class="font-heading font-bold text-white text-base tracking-wider">NAVIGASI</span>
+                                </div>
+                                <button @click="mobileMenuOpen = false" class="text-gray-400 hover:text-white p-2 rounded-lg bg-white/5 hover:bg-white/10 transition cursor-pointer">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Navigation Links -->
+                            <ul class="flex flex-col gap-3 text-xs uppercase tracking-[0.15em] text-gray-300 font-medium">
+                                <li>
+                                    <a @click="mobileMenuOpen = false" 
+                                       href="{{ route('home') }}#beranda" 
+                                       class="transition flex items-center pl-4 py-3 hover:text-amber-400 hover:bg-white/5 rounded-r-lg cursor-pointer">
+                                        <svg class="w-4 h-4 mr-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                        Beranda
+                                    </a>
+                                </li>
+                                <li>
+                                    <a @click="mobileMenuOpen = false" 
+                                       href="{{ route('projects.index') }}" 
+                                       class="transition flex items-center pl-4 py-3 hover:text-amber-400 hover:bg-white/5 rounded-r-lg cursor-pointer">
+                                        <svg class="w-4 h-4 mr-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                        Proyek
+                                    </a>
+                                </li>
+                                <li>
+                                    <a @click="mobileMenuOpen = false" 
+                                       href="{{ route('certificates.index') }}" 
+                                       class="transition flex items-center text-amber-400 bg-amber-400/10 border-l-2 border-amber-400 font-bold pl-4 py-3 rounded-r-lg cursor-pointer">
+                                        <svg class="w-4 h-4 mr-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                                        Sertifikat
+                                    </a>
+                                </li>
+                                <li>
+                                    <a @click="mobileMenuOpen = false" 
+                                       href="{{ route('home') }}#kontak" 
+                                       class="transition flex items-center pl-4 py-3 hover:text-amber-400 hover:bg-white/5 rounded-r-lg cursor-pointer">
+                                        <svg class="w-4 h-4 mr-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                        Kontak
+                                    </a>
+                                </li>
+                                @auth
+                                <li>
+                                    <a @click="mobileMenuOpen = false" 
+                                       href="{{ url('/admin') }}" 
+                                       class="transition flex items-center pl-4 py-3 text-amber-400 font-bold hover:bg-amber-400/10 rounded-lg cursor-pointer">
+                                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                        Admin Panel
+                                    </a>
+                                </li>
+                                @endauth
+                            </ul>
+                        </div>
+
+                        <!-- Sidebar Footer -->
+                        <div class="pt-6 border-t border-amber-500/10 mt-auto">
+                            @if(Route::has('cv.download'))
+                            <a @click="mobileMenuOpen = false" href="{{ route('cv.download') }}" class="w-full clay-btn bg-accent hover:bg-accentlight text-slate-950 font-sans font-bold uppercase tracking-wider text-xs px-5 py-3 flex items-center justify-center gap-2 cursor-pointer shadow-lg">
+                                <span>Download CV</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </nav>
+    </div>
+    </div>
         </nav>
     </div>
 
@@ -287,59 +358,89 @@
 
         <div class="max-w-7xl mx-auto">
 
+            <!-- Back to Homepage Button -->
+            <div class="mb-6">
+                <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#0a0d18]/90 border border-amber-400/30 hover:border-amber-400 text-amber-300 hover:text-amber-400 text-xs font-mono font-bold transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.1)] hover:shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:-translate-x-1 backdrop-blur-md cursor-pointer group">
+                    <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    <span>Kembali ke Beranda</span>
+                </a>
+            </div>
+
             <!-- Subheader & Filter Control Header -->
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h3 class="font-heading text-2xl sm:text-3xl text-white font-bold tracking-tight mb-1">
+                    <h1 class="font-heading text-2xl sm:text-4xl text-white font-bold tracking-tight mb-1">
                         Semua Sertifikat
-                    </h3>
-                    <p class="text-slate-400 font-sans text-xs">Jelajahi dan filter daftar sertifikasi resmi yang terdaftar.</p>
+                    </h1>
+                    <p class="text-slate-400 font-sans text-xs sm:text-sm">Jelajahi dan filter daftar sertifikasi resmi yang terdaftar.</p>
                 </div>
 
-                <!-- Right Controls: Search Input, Kategori Filter, Penerbit Filter, & Sort Order -->
-                <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto lg:flex-nowrap shrink-0">
+                <!-- Right Controls Container -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
                     <!-- Live Search Input -->
-                    <div class="relative w-full sm:w-52 lg:w-56 shrink-0">
+                    <div class="relative w-full sm:w-56">
                         <input type="text" x-model="search" placeholder="Cari sertifikat..."
-                               class="w-full bg-[#080a15] border border-amber-400/20 focus:border-amber-400 rounded-xl px-4 py-2 pl-10 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
-                        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="w-full bg-[#080a15]/90 border border-amber-400/25 focus:border-amber-400 rounded-xl px-4 py-2.5 pl-10 pr-8 text-xs font-sans text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400/50 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
+                        <svg class="w-4 h-4 text-amber-400/60 absolute left-3.5 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
+                        <button x-show="search.length > 0" @click="search = ''" class="absolute right-3 top-3 text-slate-500 hover:text-white transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
 
-                    <!-- Filter Kategori Select Dropdown (Fully Dynamic from CertificateCategory Table) -->
-                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-                        <span class="text-xs font-mono text-slate-400 whitespace-nowrap">Kategori:</span>
-                        <select x-model="selectedCategory" class="bg-[#080a15] border border-amber-400/30 text-xs font-mono text-amber-300 rounded-xl px-3.5 py-2 focus:outline-none focus:border-amber-400 cursor-pointer shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),0_4px_10px_rgba(0,0,0,0.4)]">
-                            <option value="all">Semua Kategori</option>
-                            <template x-for="cat in categories" :key="cat">
-                                <option :value="cat" x-text="cat"></option>
-                            </template>
-                        </select>
-                    </div>
+                    <!-- Dropdowns Row (2 Columns on Mobile, Flex on Desktop) -->
+                    <div class="grid grid-cols-2 sm:flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                        <!-- Filter Penerbit Dropdown -->
+                        <template x-if="issuers.length > 0">
+                            <div class="relative w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-1">
+                                <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 sm:hidden">Penerbit</label>
+                                <select x-model="selectedIssuer" class="w-full sm:w-auto bg-[#080a15]/90 border border-amber-400/30 text-amber-300 text-xs font-mono rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-400 cursor-pointer shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),0_4px_10px_rgba(0,0,0,0.4)]">
+                                    <option value="all">Semua Penerbit</option>
+                                    <template x-for="issuer in issuers" :key="issuer">
+                                        <option :value="issuer" x-text="issuer"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </template>
 
-                    <!-- Filter Penerbit Select Dropdown -->
-                    <template x-if="issuers.length > 0">
-                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-                            <span class="text-xs font-mono text-slate-400 whitespace-nowrap">Penerbit:</span>
-                            <select x-model="selectedIssuer" class="bg-[#080a15] border border-amber-400/30 text-xs font-mono text-amber-300 rounded-xl px-3.5 py-2 focus:outline-none focus:border-amber-400 cursor-pointer shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),0_4px_10px_rgba(0,0,0,0.4)]">
-                                <option value="all">Semua Penerbit</option>
-                                <template x-for="issuer in issuers" :key="issuer">
-                                    <option :value="issuer" x-text="issuer"></option>
-                                </template>
+                        <!-- Sort Order Dropdown -->
+                        <div class="relative w-full sm:w-auto flex flex-col sm:flex-row sm:items-center gap-1">
+                            <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 sm:hidden">Urutkan</label>
+                            <select x-model="sort" class="w-full sm:w-auto bg-[#080a15]/90 border border-amber-400/30 text-amber-300 text-xs font-mono rounded-xl px-3 py-2.5 focus:outline-none focus:border-amber-400 cursor-pointer shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),0_4px_10px_rgba(0,0,0,0.4)]">
+                                <option value="newest">Terbaru</option>
+                                <option value="oldest">Terlama</option>
                             </select>
                         </div>
-                    </template>
-
-                    <!-- Urutkan Select Dropdown -->
-                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-                        <span class="text-xs font-mono text-slate-400 whitespace-nowrap">Urutkan:</span>
-                        <select x-model="sort" class="bg-[#080a15] border border-amber-400/30 text-xs font-mono text-amber-300 rounded-xl px-3.5 py-2 focus:outline-none focus:border-amber-400 cursor-pointer shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),0_4px_10px_rgba(0,0,0,0.4)]">
-                            <option value="newest">Terbaru</option>
-                            <option value="oldest">Terlama</option>
-                        </select>
                     </div>
                 </div>
+            </div>
+
+            <!-- Category Filter Pills (Horizontal Scroll on Mobile, Flex Wrap on Desktop) -->
+            <div class="flex items-center gap-2 overflow-x-auto snap-x hide-scrollbar pb-3 mb-8 -mx-4 px-4 sm:mx-0 sm:px-0 flex-nowrap md:flex-wrap">
+                <!-- Button SEMUA -->
+                <button @click="selectedCategory = 'all'"
+                        :class="selectedCategory === 'all' 
+                            ? 'bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-[0_0_15px_rgba(212,175,55,0.35)] scale-[1.02]' 
+                            : 'bg-[#0a0d18]/80 text-slate-300 hover:text-amber-300 border-amber-400/20 hover:border-amber-400/50 hover:bg-amber-400/5'"
+                        class="clay-card px-3.5 py-2 rounded-full border text-xs font-mono uppercase tracking-wider transition-all duration-300 cursor-pointer shrink-0 snap-start flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full" :class="selectedCategory === 'all' ? 'bg-slate-950' : 'bg-amber-400 animate-pulse'"></span>
+                    <span>Semua Kategori</span>
+                </button>
+
+                <!-- Dynamic Category Buttons -->
+                <template x-for="cat in categories" :key="cat">
+                    <button @click="selectedCategory = cat"
+                            :class="selectedCategory === cat 
+                                ? 'bg-amber-400 text-slate-950 font-bold border-amber-400 shadow-[0_0_15px_rgba(212,175,55,0.35)] scale-[1.02]' 
+                                : 'bg-[#0a0d18]/80 text-slate-300 hover:text-amber-300 border-amber-400/20 hover:border-amber-400/50 hover:bg-amber-400/5'"
+                            class="clay-card px-3.5 py-2 rounded-full border text-xs font-mono uppercase tracking-wider transition-all duration-300 cursor-pointer shrink-0 snap-start flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full" :class="selectedCategory === cat ? 'bg-slate-950' : 'bg-amber-400'"></span>
+                        <span x-text="cat"></span>
+                    </button>
+                </template>
             </div>
 
             <!-- 3-Column Grid (Hero Claymorphism Style) -->
@@ -477,34 +578,7 @@
                 </div>
             </template>
 
-            <!-- ═══════════════════════════════════════
-                 BOTTOM BANNER (PRD Claymorphism)
-            ═══════════════════════════════════════ -->
-            <div class="rounded-[28px] bg-[#0e101e]/90 border border-amber-400/20 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[inset_-2px_-2px_6px_rgba(0,0,0,0.4),inset_2px_2px_6px_rgba(255,255,255,0.03),0_12px_32px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-                
-                <!-- Left: Shield Verification Info -->
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-amber-400/10 border border-amber-400/30 flex items-center justify-center flex-shrink-0 text-amber-400 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-heading font-semibold text-sm sm:text-base leading-snug">Semua sertifikat telah diverifikasi keasliannya.</h4>
-                        <p class="text-slate-400 text-xs font-sans mt-0.5">Terus tingkatkan kompetensi dan raih pencapaian terbaik.</p>
-                    </div>
-                </div>
-
-                <!-- Right: CTA Button -->
-                <a href="{{ route('home') }}#sertifikat"
-                   class="px-6 py-3.5 rounded-full bg-[#070914] hover:bg-amber-400/15 text-amber-300 hover:text-white font-mono text-xs font-bold uppercase tracking-wider border border-amber-400/30 transition-all duration-300 flex items-center gap-2.5 shadow-[0_0_15px_rgba(212,175,55,0.15)] group cursor-pointer flex-shrink-0">
-                    <span>KEMBALI KE BERANDA</span>
-                    <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                    </svg>
-                </a>
-
-            </div>
+            
 
             <!-- Spotlight Lightbox Modal (Teleported to Body) -->
              <template x-teleport="body">

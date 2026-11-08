@@ -95,6 +95,7 @@ class ProjectResource extends Resource
                             ->label('Galeri Screenshot Review (Grid / Slide)')
                             ->image()
                             ->multiple()
+                            ->maxParallelUploads(4)
                             ->reorderable()
                             ->panelLayout('grid')
                             ->imagePreviewHeight('120px')

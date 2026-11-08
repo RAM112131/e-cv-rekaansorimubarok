@@ -2,22 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Certificate;
-use App\Models\CertificateCategory;
-use App\Models\User;
+use App\Services\CertificatePageService;
+use Illuminate\View\View;
 
 class CertificateController extends Controller
 {
-    /**
-     * Halaman listing semua sertifikat — /certificates
-     */
-    public function index()
-    {
-        $certificates = Certificate::with('certificateCategory')->orderBy('issue_date', 'desc')->get();
-        $categories   = CertificateCategory::orderBy('order', 'asc')->get();
-        $user         = User::with('socialLinks')->first();
-        $total        = $certificates->count();
+    public function __construct(private CertificatePageService $certificatePageService) {}
 
-        return view('certificates.index', compact('certificates', 'categories', 'user', 'total'));
+    public function index(): View
+    {
+        return view('certificates.index', $this->certificatePageService->getIndexData());
     }
 }
