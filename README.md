@@ -1,58 +1,107 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# ✦ Portofolio Digital
 
-## About Laravel
+### Ruang personal untuk profil, karya, dan perjalanan profesional
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Catatan internal proyek **e-CV Rekaansori Mubarok**  
+*Dokumentasi untuk memahami isi dan struktur proyek — bukan panduan penggunaan publik.*
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+<br>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)
+![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
+![React](https://img.shields.io/badge/React-19-149ECA?style=for-the-badge&logo=react&logoColor=white)
+![Three.js](https://img.shields.io/badge/Three.js-3D-black?style=for-the-badge&logo=threedotjs&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
-## Learning Laravel
+<br>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+<a href="#gambaran">Gambaran</a> &nbsp;·&nbsp;
+<a href="#isi-portofolio">Isi portofolio</a> &nbsp;·&nbsp;
+<a href="#peta-aplikasi">Peta aplikasi</a> &nbsp;·&nbsp;
+<a href="#teknologi">Teknologi</a>
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+</div>
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+<a id="gambaran"></a>
+## ◈ Gambaran
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Website ini menjadi satu tempat untuk menyajikan profil profesional, proyek, pengalaman, pendidikan, keahlian, sertifikat, dan CV. Konten publik dikelola melalui panel admin; pengunjung dapat menjelajahi karya dan mengirim pesan dari halaman kontak.
 
-```bash
-composer require laravel/boost --dev
+| Area | Ringkasan |
+|:--|:--|
+| **Tampilan publik** | Portofolio responsif dengan tema visual gelap dan elemen interaktif 3D. |
+| **Konten** | Data profil dan karya ditampilkan dari aplikasi, bukan ditulis sebagai halaman statis di README. |
+| **Pengelolaan** | Konten portofolio dan pesan dikelola melalui area administrasi internal. |
 
-php artisan boost:install
-```
+> [!NOTE]
+> README ini berfungsi sebagai ringkasan proyek pribadi dan tidak mencantumkan lokasi berkas atau tautan ke area internal.
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+<a id="isi-portofolio"></a>
+## ✧ Isi portofolio
 
-## Contributing
+<details open>
+<summary><strong>Yang ditampilkan di website</strong></summary>
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Halaman | Isi |
+|:--|:--|
+| **Beranda** · `/` | Profil, pengenalan, keahlian, pengalaman, pendidikan, dan kontak. |
+| **Proyek** · `/projects` | Kumpulan karya, pencarian, filter kategori, dan halaman detail. |
+| **Sertifikat** · `/certificates` | Sertifikat dan pencapaian profesional. |
+| **CV** · `/cv` | Pratinjau CV dan opsi unduh. |
 
-## Code of Conduct
+</details>
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+<details>
+<summary><strong>Fitur pendukung</strong></summary>
 
-## Security Vulnerabilities
+- Tautan media sosial dan profil profesional.
+- Formulir kontak untuk menerima pesan.
+- Elemen visual 3D dan interaksi pada pengalaman menjelajah.
+- Pengelolaan konten melalui area administrasi internal.
+- Pencatatan kunjungan dan pengelolaan pesan masuk.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+</details>
 
-## License
+<a id="peta-aplikasi"></a>
+## ⌘ Peta aplikasi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+<details>
+<summary><strong>Halaman publik</strong></summary>
+
+| Halaman | Isi |
+|:--|:--|
+| Beranda | Profil dan pengenalan |
+| Proyek | Kumpulan karya dan detail proyek |
+| Sertifikat | Sertifikat dan pencapaian |
+| CV | Pratinjau dan unduhan CV |
+
+</details>
+
+<a id="teknologi"></a>
+## ⟡ Teknologi
+
+<details>
+<summary><strong>Lihat stack proyek</strong></summary>
+
+| Teknologi | Peran |
+|:--|:--|
+| **Laravel 13** · PHP 8.3+ | Aplikasi backend, rute, dan pengelolaan data |
+| **Filament 4** · Livewire 3 | Panel administrasi |
+| **React 19** · Three.js · React Three Fiber | Elemen interaktif dan visual 3D |
+| **Tailwind CSS 4** · Vite 8 | Styling dan bundling aset frontend |
+| **Laravel Socialite** | Autentikasi sosial untuk admin |
+| **SQLite** | Database bawaan untuk pengembangan lokal |
+
+</details>
+
+---
+
+<div align="center">
+
+<sub>Dibuat sebagai rumah digital untuk perjalanan dan karya profesional.</sub>
+
+</div>
