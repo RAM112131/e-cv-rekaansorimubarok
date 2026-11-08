@@ -393,29 +393,20 @@ class ManageCv extends Page implements HasSchemas
             ],
         ]);
 
+        // Simpan educations
         $user->educations()->delete();
-
-        $timestamp = now();
-        $educations = [];
-
-        foreach (array_values($state['educations'] ?? []) as $order => $education) {
-            $educations[] = [
+        foreach ($state['educations'] ?? [] as $index => $edu) {
+            Education::create([
                 'user_id' => $user->id,
-                'institution' => $education['institution'],
-                'degree' => $education['degree'] ?? null,
-                'major' => $education['major'] ?? null,
-                'start_year' => $education['start_year'] ?? null,
-                'end_year' => $education['end_year'] ?? null,
-                'semester' => $education['semester'] ?? null,
-                'gpa' => $education['gpa'] ?? null,
-                'order' => $order,
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ];
-        }
-
-        if ($educations !== []) {
-            Education::query()->insert($educations);
+                'institution' => $edu['institution'],
+                'degree' => $edu['degree'] ?? null,
+                'major' => $edu['major'] ?? null,
+                'start_year' => $edu['start_year'] ?? null,
+                'end_year' => $edu['end_year'] ?? null,
+                'semester' => $edu['semester'] ?? null,
+                'gpa' => $edu['gpa'] ?? null,
+                'order' => $index,
+            ]);
         }
 
         PublicContentCache::clear();

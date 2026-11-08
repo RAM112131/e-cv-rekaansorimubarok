@@ -129,24 +129,15 @@ class ManageProfile extends Page implements HasSchemas
             'avatar' => $state['avatar'] ?? $user->avatar,
         ]);
 
+        // Simpan social links
         $user->socialLinks()->delete();
-
-        $timestamp = now();
-        $socialLinks = [];
-
-        foreach (array_values($state['social_links'] ?? []) as $order => $link) {
-            $socialLinks[] = [
+        foreach ($state['social_links'] ?? [] as $index => $link) {
+            SocialLink::create([
                 'user_id' => $user->id,
                 'platform' => $link['platform'],
                 'url' => $link['url'],
-                'order' => $order,
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ];
-        }
-
-        if ($socialLinks !== []) {
-            SocialLink::query()->insert($socialLinks);
+                'order' => $index,
+            ]);
         }
 
         PublicContentCache::clear();
