@@ -30,8 +30,22 @@
     width: clamp(6.5rem, 24vw, 10rem);
     aspect-ratio: 591 / 1004;
     transform: translateX(-50%);
-    pointer-events: none;
+    pointer-events: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
     transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.lanyard-loading-card:disabled {
+    cursor: default;
+}
+
+.lanyard-loading-card:focus-visible {
+    outline: 2px solid #f8fafc;
+    outline-offset: 4px;
 }
 
 .lanyard-loading-card.is-hidden {
@@ -62,7 +76,7 @@
 
 @media (min-width: 1024px) {
     .lanyard-loading-card {
-        top: clamp(3rem, 10vh, 8rem);
+        top: clamp(7.5rem, 16vh, 10.5rem);
         left: calc(50% + 15vw);
         width: clamp(8rem, 13vw, 11rem);
     }

@@ -18,7 +18,7 @@ class HomePageService
      */
     public function getViewData(): array
     {
-        $data = Cache::flexible('homepage_data.v3', [300, 900], fn (): array => $this->fetchHomepageData());
+        $data = Cache::flexible('homepage_data.v3', [300, 86400], fn (): array => $this->fetchHomepageData());
 
         return $this->hydrateHomepageData($data);
     }

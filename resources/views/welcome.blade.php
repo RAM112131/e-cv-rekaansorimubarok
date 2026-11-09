@@ -78,7 +78,11 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
     @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+    @vite([
+        'resources/css/app.css',
+        'resources/css/home.css',
+        'resources/js/app.jsx',
+    ])
     
     <style>
         html.light .skill-modal {
@@ -193,7 +197,7 @@
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="homepage antialiased">
 
     <!-- Global Floating Toast Notification (Success / Error) -->
     @if(session('contact_success') || session('contact_error') || $errors->any())
@@ -269,10 +273,11 @@
     <div id="react-swarm-cursor-root" class="fixed inset-0 z-[5] pointer-events-none"></div>
     <!-- 3D Background Canvas -->
     <div id="react-id-card-root" class="absolute top-0 left-0 w-full h-screen z-10 opacity-100 pointer-events-auto" data-name="{{ $firstName . ' ' . $lastName }}" data-headline="{{ $user->headline }}" data-avatar="{{ $user->avatar ? Storage::url($user->avatar) : 'null' }}"></div>
-    <div class="lanyard-loading-card" data-id-card-fallback aria-hidden="true">
+    <button type="button" class="lanyard-loading-card" data-id-card-fallback disabled title="Aktifkan kartu 3D">
         <span class="lanyard-loading-card__strap"></span>
         <img src="{{ asset('images/gambar-depan.webp') }}" alt="" fetchpriority="high" decoding="async">
-    </div>
+        <span class="sr-only">Aktifkan kartu 3D interaktif</span>
+    </button>
 
     <!-- Fixed Navigation Menu -->
     <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 transition-all duration-300">

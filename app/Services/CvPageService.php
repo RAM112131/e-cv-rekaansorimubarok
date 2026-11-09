@@ -22,7 +22,7 @@ class CvPageService
      */
     public function getPreviewData(): ?array
     {
-        $data = Cache::flexible('portfolio.cv_preview.v3', [300, 900], function (): ?array {
+        $data = Cache::flexible('portfolio.cv_preview.v3', [300, 86400], function (): ?array {
             $profile = PortfolioProfile::query()
                 ->with([
                     'educations',
@@ -105,7 +105,7 @@ class CvPageService
      */
     public function getDownloadFile(): ?array
     {
-        $data = Cache::flexible('portfolio.cv_download.v3', [300, 900], fn (): ?array => PortfolioProfile::query()
+        $data = Cache::flexible('portfolio.cv_download.v3', [300, 86400], fn (): ?array => PortfolioProfile::query()
             ->whereNotNull('cv_file')
             ->where('cv_file', '!=', '')
             ->first(['cv_file', 'name'])

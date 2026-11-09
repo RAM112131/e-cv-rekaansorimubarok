@@ -14,7 +14,7 @@ class ProjectPageService
      */
     public function getIndexData(): array
     {
-        $projectData = Cache::flexible('portfolio.projects.index.v3', [300, 900], function (): array {
+        $projectData = Cache::flexible('portfolio.projects.index.v3', [300, 86400], function (): array {
             $profile = PortfolioProfile::query()->firstOrFail();
 
             return [

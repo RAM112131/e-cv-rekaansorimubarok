@@ -15,7 +15,7 @@ class CertificatePageService
      */
     public function getIndexData(): array
     {
-        $content = Cache::flexible('portfolio.certificates.index.v3', [300, 900], function (): array {
+        $content = Cache::flexible('portfolio.certificates.index.v3', [300, 86400], function (): array {
             $profile = PortfolioProfile::query()->firstOrFail();
 
             return [

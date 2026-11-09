@@ -1,5 +1,16 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+async function renderComponent(root, componentLoader, props) {
+    const [{ createRoot }, { createElement }, { default: Component }] = await Promise.all([
+        import('react-dom/client'),
+        import('react'),
+        componentLoader(),
+    ]);
+
+    if (!root.isConnected) {
+        return;
+    }
+
+    createRoot(root).render(createElement(Component, props));
+}
 
 // Wait for the DOM to load
 document.addEventListener('DOMContentLoaded', () => {
@@ -7,59 +18,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (rootElement && hasFinePointer && !prefersReducedMotion) {
+    if (rootElement) {
         const fallback = document.querySelector('[data-id-card-fallback]');
         const loadIdCard = () => {
-            import('./components/IdCard')
-                .then(({ default: IdCard }) => {
-                    if (!rootElement.isConnected) {
-                        return;
-                    }
+            if (rootElement.dataset.loading === 'true') {
+                return;
+            }
 
-                    const onReady = () => fallback?.classList.add('is-hidden');
+            rootElement.dataset.loading = 'true';
 
-                    createRoot(rootElement).render(
-                        <IdCard
-                            name={rootElement.dataset.name || 'USER'}
-                            headline={rootElement.dataset.headline || 'Web Developer'}
-                            avatar={rootElement.dataset.avatar || null}
-                            onReady={onReady}
-                        />
-                    );
-                })
+            renderComponent(rootElement, () => import('./components/IdCard'), {
+                name: rootElement.dataset.name || 'USER',
+                headline: rootElement.dataset.headline || 'Web Developer',
+                avatar: rootElement.dataset.avatar || null,
+                onReady: () => fallback?.classList.add('is-hidden'),
+            })
                 .catch((error) => {
+                    delete rootElement.dataset.loading;
                     console.error('Unable to load the interactive ID card.', error);
                 });
         };
 
-        loadIdCard();
+        if (fallback instanceof HTMLButtonElement) {
+            fallback.disabled = false;
+            fallback.addEventListener('click', loadIdCard);
+
+            if (!prefersReducedMotion) {
+                if (typeof window.requestIdleCallback === 'function') {
+                    window.requestIdleCallback(loadIdCard, { timeout: 2000 });
+                } else {
+                    window.setTimeout(loadIdCard, 700);
+                }
+            }
+        }
     }
 
     const swarmCursorRoot = document.getElementById('react-swarm-cursor-root');
     if (swarmCursorRoot && hasFinePointer && !prefersReducedMotion) {
         document.addEventListener('pointermove', () => {
             const loadSwarmCursor = () => {
-                import('./components/SwarmCursor')
-                    .then(({ default: SwarmCursor }) => {
-                        if (!swarmCursorRoot.isConnected) {
-                            return;
-                        }
-
-                        createRoot(swarmCursorRoot).render(
-                            <SwarmCursor
-                                color="#eebb1b"
-                                accentColor="#f9c833"
-                                opacity={0.75}
-                                count={10}
-                                size={5}
-                                speed={2.5}
-                                spread={100}
-                                wander={0.25}
-                                trail={0.75}
-                                scatterOnClick
-                            />
-                        );
-                    })
+                renderComponent(swarmCursorRoot, () => import('./components/SwarmCursor'), {
+                    color: '#eebb1b',
+                    accentColor: '#f9c833',
+                    opacity: 0.75,
+                    count: 10,
+                    size: 5,
+                    speed: 2.5,
+                    spread: 100,
+                    wander: 0.25,
+                    trail: 0.75,
+                    scatterOnClick: true,
+                })
                     .catch((error) => {
                         console.error('Unable to load the interactive cursor.', error);
                     });
