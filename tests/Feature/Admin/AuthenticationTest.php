@@ -1,10 +1,20 @@
 <?php
 
 use App\Filament\Pages\Auth\CustomLogin;
+use App\Models\Certificate;
+use App\Models\CvEntry;
+use App\Models\Education;
+use App\Models\Experience;
+use App\Models\Message;
+use App\Models\PortfolioProfile;
+use App\Models\Project;
 use App\Models\User;
-use Database\Seeders\DashboardSeeder;
+use App\Models\VisitorEvent;
+use Database\Seeders\DatabaseSeeder;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
@@ -68,32 +78,41 @@ test('non-admin users are forbidden from the admin panel', function () {
     $this->actingAs($member)->get('/admin')->assertForbidden();
 });
 
-test('seeding an empty users table requires explicit strong admin credentials', function () {
-    config([
-        'auth.seed_admin.email' => null,
-        'auth.seed_admin.password' => null,
+test('seeding sets development admin credentials and adds portfolio content without demo records', function () {
+    Artisan::call('db:seed', [
+        '--class' => DatabaseSeeder::class,
+        '--no-interaction' => true,
     ]);
 
-    expect(fn () => app(DashboardSeeder::class)->run())
-        ->toThrow(RuntimeException::class, 'SEED_ADMIN_EMAIL');
+    $output = Artisan::output();
 
-    expect(User::query()->exists())->toBeFalse();
-});
-
-test('seeding creates an admin from explicitly configured credentials', function () {
-    config([
-        'auth.seed_admin.name' => 'Configured Admin',
-        'auth.seed_admin.email' => 'configured-admin@example.test',
-        'auth.seed_admin.password' => 'strong-password-123',
-    ]);
-
-    app(DashboardSeeder::class)->run();
-
-    $admin = User::query()->where('email', 'configured-admin@example.test')->first();
+    $admin = User::query()->where('email', 'admin@portofolio.test')->first();
 
     expect($admin)->not->toBeNull();
     expect($admin?->role)->toBe('admin');
-    expect($admin?->name)->toBe('Configured Admin');
+    expect($admin?->name)->toBe('Portfolio Admin');
+    expect($output)->toContain('Password: RekaAdmin#2026');
+    expect(Hash::check('RekaAdmin#2026', $admin->password))->toBeTrue();
+    expect(PortfolioProfile::query()->where('name', 'Reka Ansori Mubarok')->exists())->toBeTrue();
+    expect(Project::query()->count())->toBe(3);
+    expect(Experience::query()->count())->toBe(1);
+    expect(Education::query()->count())->toBe(2);
+    expect(Certificate::query()->count())->toBe(4);
+    expect(CvEntry::query()->count())->toBe(6);
+    expect(Message::query()->count())->toBe(0);
+    expect(VisitorEvent::query()->count())->toBe(0);
+    $this->get('/')->assertOk();
+
+    $admin->forceFill(['password' => Hash::make('a-different-password')])->save();
+
+    Artisan::call('db:seed', [
+        '--class' => DatabaseSeeder::class,
+        '--no-interaction' => true,
+    ]);
+
+    expect(User::query()->count())->toBe(1);
+    expect(Project::query()->count())->toBe(3);
+    expect(Hash::check('RekaAdmin#2026', $admin->fresh()->password))->toBeTrue();
 });
 
 test('the admin panel rejects users without the admin role', function () {

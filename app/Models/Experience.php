@@ -11,7 +11,7 @@ class Experience extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'portfolio_profile_id',
         'title',
         'company',
         'company_logo',
@@ -41,21 +41,29 @@ class Experience extends Model
     {
         static::creating(function (Experience $experience): void {
             if ($experience->order !== null && (int) $experience->order > 0) {
-                static::where('order', '>=', $experience->order)->increment('order');
+                static::query()
+                    ->where('portfolio_profile_id', $experience->portfolio_profile_id)
+                    ->where('order', '>=', $experience->order)
+                    ->increment('order');
             } else {
-                $experience->order = (static::max('order') ?? 0) + 1;
+                $experience->order = (static::query()
+                    ->where('portfolio_profile_id', $experience->portfolio_profile_id)
+                    ->max('order') ?? 0) + 1;
             }
         });
 
         static::deleted(function (Experience $experience): void {
             if ($experience->order !== null && $experience->order > 0) {
-                static::where('order', '>', $experience->order)->decrement('order');
+                static::query()
+                    ->where('portfolio_profile_id', $experience->portfolio_profile_id)
+                    ->where('order', '>', $experience->order)
+                    ->decrement('order');
             }
         });
     }
 
-    public function user(): BelongsTo
+    public function portfolioProfile(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(PortfolioProfile::class);
     }
 }

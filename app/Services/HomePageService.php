@@ -4,10 +4,10 @@ namespace App\Services;
 
 use App\Models\Certificate;
 use App\Models\Experience;
+use App\Models\PortfolioProfile;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\SocialLink;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
@@ -18,7 +18,7 @@ class HomePageService
      */
     public function getViewData(): array
     {
-        $data = Cache::flexible('homepage_data.v2', [300, 900], fn (): array => $this->fetchHomepageData());
+        $data = Cache::flexible('homepage_data.v3', [300, 900], fn (): array => $this->fetchHomepageData());
 
         return $this->hydrateHomepageData($data);
     }
@@ -28,30 +28,48 @@ class HomePageService
      */
     private function fetchHomepageData(): array
     {
-        $skills = Skill::query()->orderBy('category')->get();
+        $profile = PortfolioProfile::query()->with('socialLinks')->firstOrFail();
+        $profileId = $profile->id;
+
+        $skills = Skill::query()
+            ->where('portfolio_profile_id', $profileId)
+            ->orderBy('category')
+            ->orderBy('order')
+            ->get();
         $groupedSkills = $skills->groupBy('category')
             ->map(fn ($categorySkills) => $categorySkills->toArray())
             ->toArray();
 
-        $experiences = Experience::query()->orderByDesc('start_date')->get();
-        $totalProjects = Project::query()->where('is_published', true)->count();
+        $experiences = Experience::query()
+            ->where('portfolio_profile_id', $profileId)
+            ->orderByDesc('start_date')
+            ->get();
+        $totalProjects = Project::query()
+            ->where('portfolio_profile_id', $profileId)
+            ->where('is_published', true)
+            ->count();
         $projects = Project::query()
+            ->where('portfolio_profile_id', $profileId)
             ->where('is_published', true)
             ->orderBy('order')
             ->orderByDesc('created_at')
             ->take(6)
             ->get();
         $certificates = Certificate::query()
+            ->where('portfolio_profile_id', $profileId)
+            ->where('is_published', true)
             ->with('certificateCategory')
             ->orderBy('order')
             ->orderByDesc('created_at')
             ->orderByDesc('issue_date')
             ->take(3)
             ->get();
-        $totalCertificates = Certificate::query()->count();
-        $user = User::query()->with('socialLinks')->first();
+        $totalCertificates = Certificate::query()
+            ->where('portfolio_profile_id', $profileId)
+            ->where('is_published', true)
+            ->count();
 
-        $names = explode(' ', $user->name ?? 'Rayhan Aditya');
+        $names = explode(' ', $profile->name);
         $count = count($names);
         $firstName = $count > 1
             ? implode(' ', array_slice($names, 0, $count - 1))
@@ -69,7 +87,7 @@ class HomePageService
             'projects' => $projects->toArray(),
             'certificates' => $certificates->toArray(),
             'totalCertificates' => $totalCertificates,
-            'user' => $user?->toArray(),
+            'user' => $profile->toArray(),
             'firstName' => $firstName,
             'lastName' => $lastName,
             'yearsExperience' => $yearsExperience,
@@ -108,7 +126,7 @@ class HomePageService
             $socialLinks = $userData['social_links'] ?? [];
             unset($userData['social_links']);
 
-            $user = (new User)->forceFill($userData);
+            $user = (new PortfolioProfile)->forceFill($userData);
             $user->setRelation('socialLinks', SocialLink::hydrate($socialLinks));
             $data['user'] = $user;
         }

@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('visitors', function (Blueprint $table) {
+        Schema::create('visitor_events', function (Blueprint $table) {
             $table->id();
-            $table->string('ip_address')->nullable();
-            $table->text('user_agent')->nullable();
-            $table->string('page_url')->nullable();
-            $table->string('referrer')->nullable();
-            $table->string('session_id')->nullable();
+            $table->char('session_hash', 64);
+            $table->string('page_path', 255);
+            $table->string('referrer_host')->nullable();
             $table->timestamp('visited_at')->useCurrent();
             $table->timestamps();
+
+            $table->index('visited_at');
+            $table->index(['session_hash', 'visited_at']);
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('visitors');
+        Schema::dropIfExists('visitor_events');
     }
 };

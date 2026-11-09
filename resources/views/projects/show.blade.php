@@ -644,7 +644,7 @@
                             <span class="text-xs font-mono uppercase tracking-[0.2em] text-amber-400 font-bold">TECHNOLOGIES</span>
                         </div>
                         <div class="grid grid-cols-3 sm:grid-cols-4 gap-x-4 gap-y-6">
-                            @foreach(explode(',', $project->tech_stack) as $tech)
+                            @foreach(is_array($project->tech_stack) ? $project->tech_stack : [] as $tech)
                                 @php
                                     $techTrimmed = trim($tech);
                                     $normalized = strtolower($techTrimmed);

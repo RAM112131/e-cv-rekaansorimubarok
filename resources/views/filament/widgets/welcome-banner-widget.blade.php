@@ -7,10 +7,10 @@
                 Portofolio Aktif &amp; Publik
             </div>
             <h2 style="font-size:1.5rem;font-weight:700;color:#0f172a;letter-spacing:-0.02em;margin:0;" class="dark:text-slate-100">
-                Selamat Datang, {{ auth()->user()->name ?? 'Admin' }}! 👋
+                Selamat Datang,                 {{ auth()->user()->portfolioProfile?->name ?? 'Admin' }}! 👋
             </h2>
             <p style="font-size:0.875rem;color:#64748b;line-height:1.6;margin:0;">
-                {{ auth()->user()->headline ?? 'Kelola karya, keahlian, pengalaman, dan sertifikat profesional Anda.' }}
+                {{ auth()->user()->portfolioProfile?->headline ?? 'Kelola karya, keahlian, pengalaman, dan sertifikat profesional Anda.' }}
             </p>
         </div>
 

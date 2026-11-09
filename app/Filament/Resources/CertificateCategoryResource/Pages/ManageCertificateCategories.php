@@ -15,7 +15,12 @@ class ManageCertificateCategories extends ManageRecords
         return [
             CreateAction::make()
                 ->label('Tambah Kategori Sertifikat')
-                ->modalWidth('md'),
+                ->modalWidth('md')
+                ->mutateFormDataUsing(function (array $data): array {
+                    $data['portfolio_profile_id'] = auth()->user()->portfolioProfile->id;
+
+                    return $data;
+                }),
         ];
     }
 }

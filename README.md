@@ -52,7 +52,7 @@ Website ini menjadi satu tempat untuk menyajikan profil profesional, proyek, pen
 | **Proyek** · `/projects` | Kumpulan karya, pencarian, filter kategori, dan halaman detail. |
 | **Sertifikat** · `/certificates` | Sertifikat dan pencapaian profesional. |
 | **CV** · `/cv` | Pratinjau CV dan opsi unduh. |
-
+| **Kontak** · `/cv` | Pratinjau CV dan opsi unduh. |
 </details>
 
 <details>

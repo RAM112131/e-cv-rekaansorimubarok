@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Models\Certificate;
 use App\Models\CertificateCategory;
+use App\Models\CvEntry;
+use App\Models\CvLanguage;
 use App\Models\Education;
 use App\Models\Experience;
+use App\Models\PortfolioProfile;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\SocialLink;
@@ -39,7 +42,10 @@ class AppServiceProvider extends ServiceProvider
         CertificateCategory::observe(HomepageCacheObserver::class);
         SocialLink::observe(HomepageCacheObserver::class);
         User::observe(HomepageCacheObserver::class);
+        PortfolioProfile::observe(HomepageCacheObserver::class);
         Education::observe(HomepageCacheObserver::class);
+        CvEntry::observe(HomepageCacheObserver::class);
+        CvLanguage::observe(HomepageCacheObserver::class);
 
         Socialite::extend('google', function ($app) {
             $config = $app['config']['services.google'];

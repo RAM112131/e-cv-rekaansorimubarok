@@ -5,7 +5,7 @@ use App\Models\Certificate;
 use App\Models\Project;
 use App\Models\SocialLink;
 use App\Models\User;
-use App\Models\Visitor;
+use App\Models\VisitorEvent;
 use App\Services\CertificatePageService;
 use App\Services\HomePageService;
 use App\Services\ProjectPageService;
@@ -20,9 +20,10 @@ test('project listing reuses cached data and refreshes it when projects change',
     Cache::flush();
 
     $user = User::factory()->create(['role' => 'admin']);
+    $profileId = $user->portfolioProfile->id;
 
     Project::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'First Project',
         'slug' => 'first-project',
         'is_published' => true,
@@ -45,8 +46,9 @@ test('project listing reuses cached data and refreshes it when projects change',
         ->and($queries)->toBeEmpty()
         ->and($cachedResponse['projects'])->toHaveCount(1);
 
+    request()->attributes->remove('public_content_cache_cleared');
     Project::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'Second Project',
         'slug' => 'second-project',
         'is_published' => true,
@@ -65,9 +67,10 @@ test('certificate listing reuses cached data and refreshes it when certificates 
     Cache::flush();
 
     $user = User::factory()->create(['role' => 'admin']);
+    $profileId = $user->portfolioProfile->id;
 
     Certificate::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'First Certificate',
         'issuer' => 'Issuer',
         'issue_date' => '2025-01-01',
@@ -90,8 +93,9 @@ test('certificate listing reuses cached data and refreshes it when certificates 
         ->and($queries)->toBeEmpty()
         ->and($cachedResponse['certificates'])->toHaveCount(1);
 
+    request()->attributes->remove('public_content_cache_cleared');
     Certificate::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'Second Certificate',
         'issuer' => 'Issuer',
         'issue_date' => '2025-02-01',
@@ -109,8 +113,9 @@ test('certificate listing reuses cached data and refreshes it when certificates 
 test('saving profile clears the cached profile after social links are removed', function () {
     Cache::flush();
 
-    $user = User::factory()->create([
-        'role' => 'admin',
+    $user = User::factory()->create(['role' => 'admin']);
+    $profile = $user->portfolioProfile;
+    $profile->update([
         'headline' => 'Developer',
         'bio' => 'Portfolio profile',
         'phone' => '+62 81234567890',
@@ -118,11 +123,13 @@ test('saving profile clears the cached profile after social links are removed', 
     ]);
 
     SocialLink::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profile->id,
         'platform' => 'github',
         'url' => 'https://github.com/example',
+        'sort_order' => 0,
     ]);
 
+    request()->attributes->remove('public_content_cache_cleared');
     Cache::put('portfolio.public_profile', 'stale profile', 300);
     Cache::put('portfolio.public_profile_name', 'stale profile name', 300);
 
@@ -134,16 +141,17 @@ test('saving profile clears the cached profile after social links are removed', 
 
     expect(Cache::get('portfolio.public_profile'))->toBeNull()
         ->and(Cache::get('portfolio.public_profile_name'))->toBeNull()
-        ->and(SocialLink::query()->where('user_id', $user->id)->exists())->toBeFalse();
+        ->and(SocialLink::query()->where('portfolio_profile_id', $profile->id)->exists())->toBeFalse();
 });
 
 test('public project and certificate pages render successfully with their Vite assets', function () {
     Cache::flush();
 
     $user = User::factory()->create(['role' => 'admin']);
+    $profileId = $user->portfolioProfile->id;
 
     Project::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'Navigation Test Project',
         'slug' => 'navigation-test-project',
         'description' => 'A project used to verify public page navigation.',
@@ -152,7 +160,7 @@ test('public project and certificate pages render successfully with their Vite a
     ]);
 
     Certificate::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'Navigation Test Certificate',
         'issuer' => 'Test Issuer',
         'issue_date' => '2025-01-01',
@@ -183,8 +191,8 @@ test('public project and certificate pages render successfully with their Vite a
             ->assertSee('dark-default-v1', false)
             ->assertSee("Alpine.store('theme'", false);
     } finally {
-        Cache::forget('portfolio.projects.index.v2');
-        Cache::forget('portfolio.certificates.index.v2');
+        Cache::forget('portfolio.projects.index.v3');
+        Cache::forget('portfolio.certificates.index.v3');
         Cache::forget('portfolio.projects.index');
         Cache::forget('portfolio.certificates.index');
         Cache::forget('portfolio.public_profile_name');
@@ -196,9 +204,10 @@ test('homepage uses the real certificate total instead of an estimated client co
     Cache::flush();
 
     $user = User::factory()->create(['role' => 'admin']);
+    $profileId = $user->portfolioProfile->id;
 
     Certificate::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'Verified Certificate',
         'issuer' => 'Test Issuer',
         'issue_date' => '2025-01-01',
@@ -220,14 +229,15 @@ test('project listing exposes working sort, pagination, and empty-result control
     Cache::flush();
 
     $user = User::factory()->create(['role' => 'admin']);
+    $profileId = $user->portfolioProfile->id;
 
     Project::create([
-        'user_id' => $user->id,
+        'portfolio_profile_id' => $profileId,
         'title' => 'Filterable Project',
         'slug' => 'filterable-project',
         'description' => 'A searchable project.',
         'category' => 'Web',
-        'tech_stack' => 'Laravel, Alpine.js',
+        'tech_stack' => ['Laravel', 'Alpine.js'],
         'is_published' => true,
         'order' => 1,
     ]);
@@ -253,9 +263,8 @@ test('CV pages render repeatedly with cacheable profile data', function () {
         $this->get('/cv')->assertSuccessful();
         $this->get('/cv/download')->assertRedirect(route('cv.preview'));
     } finally {
-        Cache::forget('portfolio.cv_profile.v2');
-        Cache::forget('portfolio.cv_skills.v2');
-        Cache::forget('portfolio.cv_download_profile.v2');
+        Cache::forget('portfolio.cv_preview.v3');
+        Cache::forget('portfolio.cv_download.v3');
     }
 });
 
@@ -284,21 +293,23 @@ test('contact form stores the validated message through the application service'
 });
 
 test('public page visitor tracking uses the deferred queue connection', function () {
-    $visitorCount = Visitor::query()->count();
+    User::factory()->create(['role' => 'admin']);
+    $visitorCount = VisitorEvent::query()->count();
 
     $this->get('/projects')->assertSuccessful();
 
-    expect(Visitor::query()->count())->toBe($visitorCount + 1);
+    expect(VisitorEvent::query()->count())->toBe($visitorCount + 1);
 });
 
 test('prefetch requests do not dispatch visitor tracking jobs', function () {
-    $visitorCount = Visitor::query()->count();
+    User::factory()->create(['role' => 'admin']);
+    $visitorCount = VisitorEvent::query()->count();
 
     $this->withHeader('Purpose', 'prefetch')
         ->get('/projects')
         ->assertSuccessful();
 
-    expect(Visitor::query()->count())->toBe($visitorCount);
+    expect(VisitorEvent::query()->count())->toBe($visitorCount);
 });
 
 test('homepage cache contains serialized-safe content data', function () {
@@ -309,7 +320,7 @@ test('homepage cache contains serialized-safe content data', function () {
     try {
         $this->get('/')->assertSuccessful();
 
-        $cachedData = Cache::get('homepage_data.v2');
+        $cachedData = Cache::get('homepage_data.v3');
 
         expect($cachedData['user'])->toBeArray()
             ->and($cachedData['projects'])->toBeArray()
@@ -317,6 +328,6 @@ test('homepage cache contains serialized-safe content data', function () {
 
         $this->get('/')->assertSuccessful();
     } finally {
-        Cache::forget('homepage_data.v2');
+        Cache::forget('homepage_data.v3');
     }
 });

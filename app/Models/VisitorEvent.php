@@ -2,19 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Visitor extends Model
+class VisitorEvent extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'ip_address',
-        'user_agent',
-        'page_url',
-        'referrer',
-        'session_id',
+        'session_hash',
+        'page_path',
+        'referrer_host',
         'visited_at',
     ];
 

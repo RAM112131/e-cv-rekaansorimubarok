@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Visitor;
+use App\Models\VisitorEvent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,22 +14,18 @@ class TrackVisitorJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
-        protected string $ipAddress,
-        protected ?string $userAgent,
-        protected string $pageUrl,
-        protected ?string $referrer,
-        protected string $sessionId,
+        protected string $sessionHash,
+        protected string $pagePath,
+        protected ?string $referrerHost,
     ) {}
 
     public function handle(): void
     {
-        Visitor::create([
-            'ip_address'  => $this->ipAddress,
-            'user_agent'  => $this->userAgent,
-            'page_url'    => $this->pageUrl,
-            'referrer'    => $this->referrer,
-            'session_id'  => $this->sessionId,
-            'visited_at'  => now(),
+        VisitorEvent::create([
+            'session_hash' => $this->sessionHash,
+            'page_path' => $this->pagePath,
+            'referrer_host' => $this->referrerHost,
+            'visited_at' => now(),
         ]);
     }
 }

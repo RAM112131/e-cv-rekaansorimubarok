@@ -1589,7 +1589,7 @@
                     <div class="pt-3.5 sm:pt-4 border-t border-slate-800/80 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 sm:gap-4 relative z-10">
                         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             @php
-                                $stacks = $project->tech_stack ? array_map('trim', explode(',', $project->tech_stack)) : [];
+                                $stacks = is_array($project->tech_stack) ? $project->tech_stack : [];
                             @endphp
                             @foreach($stacks as $stack)
                                 <span class="clay-card px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-amber-400/20 text-[10px] sm:text-[11px] font-mono text-slate-300 inline-flex items-center gap-1 sm:gap-1.5 shadow-sm group-hover:border-amber-400/40 transition-colors">

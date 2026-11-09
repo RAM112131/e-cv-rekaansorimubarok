@@ -13,15 +13,22 @@ return new class extends Migration
     {
         Schema::create('experiences', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('portfolio_profile_id')->constrained()->cascadeOnDelete();
             $table->string('title');
             $table->string('company');
-            $table->string('type')->nullable();
+            $table->string('company_logo')->nullable();
+            $table->string('location')->nullable();
+            $table->string('type', 80)->nullable();
             $table->date('start_date');
             $table->date('end_date')->nullable();
-            $table->text('description')->nullable();
-            $table->integer('order')->default(0);
+            $table->boolean('is_current')->default(false);
+            $table->longText('description')->nullable();
+            $table->json('documentation_photos')->nullable();
+            $table->unsignedSmallInteger('order')->default(0);
             $table->timestamps();
+
+            $table->index(['portfolio_profile_id', 'start_date']);
+            $table->index(['portfolio_profile_id', 'order']);
         });
     }
 

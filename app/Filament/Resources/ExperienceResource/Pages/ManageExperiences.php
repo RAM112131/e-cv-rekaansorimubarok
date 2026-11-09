@@ -5,7 +5,6 @@ namespace App\Filament\Resources\ExperienceResource\Pages;
 use App\Filament\Resources\ExperienceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
-use Illuminate\Support\Facades\Auth;
 
 class ManageExperiences extends ManageRecords
 {
@@ -19,7 +18,7 @@ class ManageExperiences extends ManageRecords
                 ->icon('heroicon-o-plus')
                 ->modalWidth('5xl')
                 ->mutateFormDataUsing(function (array $data): array {
-                    $data['user_id'] = Auth::id() ?? 1;
+                    $data['portfolio_profile_id'] = auth()->user()->portfolioProfile->id;
 
                     return $data;
                 }),

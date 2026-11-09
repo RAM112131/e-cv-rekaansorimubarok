@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -18,6 +19,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use UnitEnum;
 
@@ -52,13 +54,35 @@ class ProjectResource extends Resource
                             ->label('Kategori')
                             ->placeholder('misal: Web Application, Mobile App, 3D Design'),
 
-                        TextInput::make('tech_stack')
+                        TagsInput::make('tech_stack')
                             ->label('Tech Stack')
-                            ->placeholder('misal: Laravel, Livewire, Tailwind CSS, Three.js'),
+                            ->placeholder('Laravel, Livewire, Tailwind CSS, Three.js'),
+
+                        TextInput::make('year')
+                            ->label('Tahun Proyek')
+                            ->numeric()
+                            ->minValue(1900)
+                            ->maxValue(now()->year + 10),
+
+                        TextInput::make('duration')
+                            ->label('Durasi')
+                            ->maxLength(100),
+
+                        TextInput::make('role')
+                            ->label('Peran')
+                            ->maxLength(150),
+
+                        TextInput::make('client')
+                            ->label('Klien')
+                            ->maxLength(150),
 
                         Textarea::make('description')
                             ->label('Deskripsi Proyek')
                             ->rows(4)
+                            ->columnSpanFull(),
+
+                        TagsInput::make('features')
+                            ->label('Fitur Utama')
                             ->columnSpanFull(),
 
                         TextInput::make('project_url')
@@ -73,6 +97,10 @@ class ProjectResource extends Resource
                             ->label('Publish ke Website')
                             ->default(true)
                             ->helperText('Aktifkan untuk Publish ke website utama. Nonaktifkan jika hanya simpan sebagai Draft.'),
+
+                        Toggle::make('is_featured')
+                            ->label('Tampilkan sebagai Proyek Unggulan')
+                            ->default(false),
 
                         TextInput::make('order')
                             ->label('Urutan Tampilan')
@@ -127,6 +155,19 @@ class ProjectResource extends Resource
 
                 Tables\Columns\TextColumn::make('tech_stack')
                     ->label('Tech Stack')
+                    ->formatStateUsing(function ($state): string {
+                        if (is_array($state)) {
+                            return implode(', ', $state);
+                        }
+
+                        if (! is_string($state)) {
+                            return '';
+                        }
+
+                        $decoded = json_decode($state, true);
+
+                        return is_array($decoded) ? implode(', ', $decoded) : $state;
+                    })
                     ->limit(30),
 
                 Tables\Columns\ToggleColumn::make('is_published')
@@ -159,6 +200,13 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $profileId = auth()->user()?->portfolioProfile?->getKey();
+
+        return parent::getEloquentQuery()->where('portfolio_profile_id', $profileId);
     }
 
     public static function getPages(): array

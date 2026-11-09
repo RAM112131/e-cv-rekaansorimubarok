@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\PortfolioProfile;
 use App\Models\Project;
-use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,20 +14,24 @@ class ProjectPageService
      */
     public function getIndexData(): array
     {
-        $projectData = Cache::flexible('portfolio.projects.index.v2', [300, 900], fn (): array => Project::query()
-            ->select(['id', 'title', 'slug', 'description', 'image', 'category', 'tech_stack', 'order', 'created_at'])
-            ->where('is_published', true)
-            ->orderBy('order')
-            ->orderByDesc('created_at')
-            ->get()
-            ->toArray());
-        $projects = collect($projectData)->map(fn (array $project) => (object) $project);
+        $projectData = Cache::flexible('portfolio.projects.index.v3', [300, 900], function (): array {
+            $profile = PortfolioProfile::query()->firstOrFail();
+
+            return [
+                'profile_name' => $profile->name,
+                'projects' => Project::query()
+                    ->select(['id', 'portfolio_profile_id', 'title', 'slug', 'description', 'image', 'category', 'tech_stack', 'order', 'created_at'])
+                    ->where('portfolio_profile_id', $profile->id)
+                    ->where('is_published', true)
+                    ->orderBy('order')
+                    ->orderByDesc('created_at')
+                    ->get()
+                    ->toArray(),
+            ];
+        });
+        $projects = collect($projectData['projects'])->map(fn (array $project) => (object) $project);
         $user = (object) [
-            'name' => Cache::flexible(
-                'portfolio.public_profile_name',
-                [300, 900],
-                fn (): ?string => User::query()->value('name'),
-            ),
+            'name' => $projectData['profile_name'],
         ];
 
         return [
@@ -43,12 +47,16 @@ class ProjectPageService
      */
     public function getShowData(string $slug): array
     {
+        $profile = PortfolioProfile::query()->firstOrFail();
+
         $project = Project::query()
+            ->where('portfolio_profile_id', $profile->id)
             ->where('slug', $slug)
             ->where('is_published', true)
             ->firstOrFail();
 
         $related = Project::query()
+            ->where('portfolio_profile_id', $profile->id)
             ->where('is_published', true)
             ->where('id', '!=', $project->id)
             ->where('category', $project->category)
@@ -56,6 +64,7 @@ class ProjectPageService
             ->take(3)
             ->get()
             ->whenEmpty(fn (Collection $projects): Collection => Project::query()
+                ->where('portfolio_profile_id', $profile->id)
                 ->where('is_published', true)
                 ->where('id', '!=', $project->id)
                 ->orderBy('order')
@@ -63,11 +72,7 @@ class ProjectPageService
                 ->get());
 
         $user = (object) [
-            'name' => Cache::flexible(
-                'portfolio.public_profile_name',
-                [300, 900],
-                fn (): ?string => User::query()->value('name'),
-            ),
+            'name' => $profile->name,
         ];
 
         return compact('project', 'related', 'user');

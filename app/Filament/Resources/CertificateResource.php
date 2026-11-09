@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CertificateResource\Pages;
 use App\Models\Certificate;
+use App\Models\CertificateCategory;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -19,6 +20,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class CertificateResource extends Resource
@@ -44,16 +46,24 @@ class CertificateResource extends Resource
 
                         Select::make('certificate_category_id')
                             ->label('Kategori Sertifikat')
-                            ->relationship('certificateCategory', 'name')
+                            ->options(fn (): array => CertificateCategory::query()
+                                ->where('portfolio_profile_id', auth()->user()->portfolioProfile->id)
+                                ->orderBy('order')
+                                ->pluck('name', 'id')
+                                ->all())
                             ->createOptionForm([
                                 TextInput::make('name')
                                     ->label('Nama Kategori')
                                     ->required(),
                             ])
+                            ->createOptionUsing(fn (array $data): int => (int) auth()->user()
+                                ->portfolioProfile
+                                ->certificateCategories()
+                                ->create($data)
+                                ->getKey())
                             ->searchable()
                             ->preload()
                             ->placeholder('Pilih Kategori Sertifikat'),
-
 
                         TextInput::make('issuer')
                             ->label('Lembaga / Instansi Penerbit')
@@ -112,7 +122,7 @@ class CertificateResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->with('certificateCategory'))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('certificateCategory'))
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Foto')
@@ -178,5 +188,12 @@ class CertificateResource extends Resource
         return [
             'index' => Pages\ManageCertificates::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $profileId = auth()->user()?->portfolioProfile?->getKey();
+
+        return parent::getEloquentQuery()->where('portfolio_profile_id', $profileId);
     }
 }

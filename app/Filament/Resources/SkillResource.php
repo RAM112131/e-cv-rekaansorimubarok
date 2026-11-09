@@ -10,12 +10,14 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class SkillResource extends Resource
@@ -54,8 +56,8 @@ class SkillResource extends Resource
                             ->label('Urutan Tampilan')
                             ->numeric()
                             ->placeholder('Kosongkan untuk urutan terakhir'),
-                            
-                        \Filament\Forms\Components\Textarea::make('description')
+
+                        Textarea::make('description')
                             ->label('Deskripsi Keahlian')
                             ->placeholder('Jelaskan pengalaman atau tingkat keahlian Anda di bidang ini...')
                             ->rows(3)
@@ -133,9 +135,10 @@ class SkillResource extends Resource
         ];
     }
 
-    public static function mutateFormDataBeforeSave(array $data): array
+    public static function getEloquentQuery(): Builder
     {
-        $data['user_id'] = auth()->id();
-        return $data;
+        $profileId = auth()->user()?->portfolioProfile?->getKey();
+
+        return parent::getEloquentQuery()->where('portfolio_profile_id', $profileId);
     }
 }

@@ -15,6 +15,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class CertificateCategoryResource extends Resource
@@ -98,5 +99,12 @@ class CertificateCategoryResource extends Resource
         return [
             'index' => Pages\ManageCertificateCategories::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $profileId = auth()->user()?->portfolioProfile?->getKey();
+
+        return parent::getEloquentQuery()->where('portfolio_profile_id', $profileId);
     }
 }

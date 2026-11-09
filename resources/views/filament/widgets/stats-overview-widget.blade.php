@@ -2,12 +2,13 @@
     @php
         use Illuminate\Support\Facades\Cache;
 
-        $totalVisitors = Cache::remember('stats.total_visitors', 300, fn() => \App\Models\Visitor::count());
-        $todayVisitors = Cache::remember('stats.today_visitors', 300, fn() => \App\Models\Visitor::whereDate('visited_at', today())->count());
+        $totalVisitors = Cache::remember('stats.total_visitors.v2', 300, fn() => \App\Models\VisitorEvent::query()->distinct('session_hash')->count('session_hash'));
+        $todayVisitors = Cache::remember('stats.today_visitors.v2', 300, fn() => \App\Models\VisitorEvent::query()->whereDate('visited_at', today())->distinct('session_hash')->count('session_hash'));
         $unreadMessages = Cache::remember('stats.unread_messages', 300, fn() => \App\Models\Message::where('is_read', false)->count());
-        $totalProjects = Cache::remember('stats.total_projects', 300, fn() => \App\Models\Project::count());
-        $totalSkills = Cache::remember('stats.total_skills', 300, fn() => \App\Models\Skill::count());
-        $totalCerts = Cache::remember('stats.total_certs', 300, fn() => \App\Models\Certificate::count());
+        $profileId = auth()->user()?->portfolioProfile?->id;
+        $totalProjects = Cache::remember('stats.total_projects.v2', 300, fn() => \App\Models\Project::query()->where('portfolio_profile_id', $profileId)->where('is_published', true)->count());
+        $totalSkills = Cache::remember('stats.total_skills.v2', 300, fn() => \App\Models\Skill::query()->where('portfolio_profile_id', $profileId)->count());
+        $totalCerts = Cache::remember('stats.total_certs.v2', 300, fn() => \App\Models\Certificate::query()->where('portfolio_profile_id', $profileId)->where('is_published', true)->count());
 
         $cards = [
             [

@@ -13,17 +13,20 @@ return new class extends Migration
     {
         Schema::create('educations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('portfolio_profile_id')->constrained()->cascadeOnDelete();
             $table->string('institution');
             $table->string('degree')->nullable();
             $table->string('major')->nullable();
-            $table->string('start_year')->nullable();
-            $table->string('end_year')->nullable();
-            $table->string('gpa')->nullable();
-            $table->string('semester')->nullable();
+            $table->unsignedSmallInteger('start_year')->nullable();
+            $table->unsignedSmallInteger('end_year')->nullable();
+            $table->boolean('is_current')->default(false);
+            $table->string('gpa', 30)->nullable();
+            $table->string('semester', 30)->nullable();
             $table->text('description')->nullable();
-            $table->integer('order')->default(0);
+            $table->unsignedSmallInteger('order')->default(0);
             $table->timestamps();
+
+            $table->index(['portfolio_profile_id', 'order']);
         });
     }
 

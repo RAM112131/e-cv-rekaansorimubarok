@@ -28,23 +28,19 @@ class TrackVisitor
             $request->is('admin*')
             || $request->is('livewire*')
             || $request->ajax()
+            || ! $request->isMethod('GET')
             || str_contains($requestPurpose, 'prefetch')
         ) {
             return $response;
         }
 
-        $ipAddress = $request->ip();
-        $userAgent = $request->header('User-Agent');
-        $pageUrl = $request->fullUrl();
-        $referrer = $request->header('referer');
-        $sessionId = $request->session()->getId();
+        $sessionHash = hash_hmac('sha256', $request->session()->getId(), (string) config('app.key'));
+        $referrerHost = parse_url((string) $request->header('referer'), PHP_URL_HOST);
 
         TrackVisitorJob::dispatch(
-            $ipAddress,
-            $userAgent,
-            $pageUrl,
-            $referrer,
-            $sessionId,
+            $sessionHash,
+            $request->getPathInfo(),
+            is_string($referrerHost) ? $referrerHost : null,
         )->onConnection('deferred');
 
         return $response;

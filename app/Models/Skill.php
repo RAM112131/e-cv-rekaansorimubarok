@@ -11,7 +11,7 @@ class Skill extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'portfolio_profile_id',
         'name',
         'category',
         'level',
@@ -32,21 +32,29 @@ class Skill extends Model
     {
         static::creating(function (Skill $skill): void {
             if ($skill->order !== null && (int) $skill->order > 0) {
-                static::where('order', '>=', $skill->order)->increment('order');
+                static::query()
+                    ->where('portfolio_profile_id', $skill->portfolio_profile_id)
+                    ->where('order', '>=', $skill->order)
+                    ->increment('order');
             } else {
-                $skill->order = (static::max('order') ?? 0) + 1;
+                $skill->order = (static::query()
+                    ->where('portfolio_profile_id', $skill->portfolio_profile_id)
+                    ->max('order') ?? 0) + 1;
             }
         });
 
         static::deleted(function (Skill $skill): void {
             if ($skill->order !== null && $skill->order > 0) {
-                static::where('order', '>', $skill->order)->decrement('order');
+                static::query()
+                    ->where('portfolio_profile_id', $skill->portfolio_profile_id)
+                    ->where('order', '>', $skill->order)
+                    ->decrement('order');
             }
         });
     }
 
-    public function user(): BelongsTo
+    public function portfolioProfile(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(PortfolioProfile::class);
     }
 }

@@ -8,7 +8,7 @@ test('public content caches are cleared once per request', function () {
     app()->instance('request', Request::create('/'));
 
     Cache::shouldReceive('forget')
-        ->times(14)
+        ->times(26)
         ->andReturnTrue();
 
     PublicContentCache::clear();

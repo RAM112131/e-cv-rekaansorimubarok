@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('certificate_categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('portfolio_profile_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('slug')->nullable()->unique();
-            $table->integer('order')->default(0);
+            $table->string('slug');
+            $table->unsignedSmallInteger('order')->default(0);
             $table->timestamps();
+
+            $table->unique(['portfolio_profile_id', 'slug']);
+            $table->index(['portfolio_profile_id', 'order']);
         });
     }
 

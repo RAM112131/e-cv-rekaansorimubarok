@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('skills', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('portfolio_profile_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('category')->nullable();
-            $table->integer('level')->default(80);
+            $table->unsignedTinyInteger('level')->default(80);
+            $table->text('description')->nullable();
             $table->string('icon')->nullable();
-            $table->integer('order')->default(0);
+            $table->unsignedSmallInteger('order')->default(0);
             $table->timestamps();
+
+            $table->index(['portfolio_profile_id', 'category', 'order']);
         });
     }
 

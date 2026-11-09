@@ -11,7 +11,7 @@ class Project extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'portfolio_profile_id',
         'title',
         'slug',
         'description',
@@ -19,6 +19,11 @@ class Project extends Model
         'gallery',
         'category',
         'tech_stack',
+        'year',
+        'duration',
+        'role',
+        'client',
+        'features',
         'project_url',
         'repo_url',
         'is_featured',
@@ -29,6 +34,8 @@ class Project extends Model
     protected function casts(): array
     {
         return [
+            'tech_stack' => 'array',
+            'features' => 'array',
             'gallery' => 'array',
             'is_featured' => 'boolean',
             'is_published' => 'boolean',
@@ -40,21 +47,29 @@ class Project extends Model
     {
         static::creating(function (Project $project): void {
             if ($project->order !== null && (int) $project->order > 0) {
-                static::where('order', '>=', $project->order)->increment('order');
+                static::query()
+                    ->where('portfolio_profile_id', $project->portfolio_profile_id)
+                    ->where('order', '>=', $project->order)
+                    ->increment('order');
             } else {
-                $project->order = (static::max('order') ?? 0) + 1;
+                $project->order = (static::query()
+                    ->where('portfolio_profile_id', $project->portfolio_profile_id)
+                    ->max('order') ?? 0) + 1;
             }
         });
 
         static::deleted(function (Project $project): void {
             if ($project->order !== null && $project->order > 0) {
-                static::where('order', '>', $project->order)->decrement('order');
+                static::query()
+                    ->where('portfolio_profile_id', $project->portfolio_profile_id)
+                    ->where('order', '>', $project->order)
+                    ->decrement('order');
             }
         });
     }
 
-    public function user(): BelongsTo
+    public function portfolioProfile(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(PortfolioProfile::class);
     }
 }

@@ -348,8 +348,8 @@
                      data-title="{{ $project->title }}"
                      data-category="{{ $project->category }}"
                      data-description="{{ $project->description }}"
-                     data-tech-stack="{{ $project->tech_stack }}"
-                     data-created-at="{{ $project->created_at?->timestamp ?? 0 }}"
+                     data-tech-stack="{{ implode(', ', is_array($project->tech_stack) ? $project->tech_stack : []) }}"
+                     data-created-at="{{ $project->created_at ? \Illuminate\Support\Carbon::parse($project->created_at)->timestamp : 0 }}"
                      data-project-order="{{ $i }}"
                      class="transition-opacity duration-200"
                      style="animation-delay: {{ ($i % 9) * 50 }}ms">
@@ -385,7 +385,7 @@
                             <!-- Tech Stack Badges -->
                             <div class="flex flex-wrap gap-1.5 mb-3">
                                 @php
-                                    $stacks = $project->tech_stack ? array_map('trim', explode(',', $project->tech_stack)) : [];
+                                    $stacks = is_array($project->tech_stack) ? $project->tech_stack : [];
                                     $displayStacks = array_slice($stacks, 0, 3);
                                 @endphp
                                 @foreach($displayStacks as $stack)

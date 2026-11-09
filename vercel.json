@@ -1,0 +1,39 @@
+{
+    "version": 2,
+    "frameworks": null,
+    "functions": {
+        "api/index.php": {
+            "runtime": "vercel-php@0.6.0"
+        }
+    },
+    "routes": [
+        {
+            "src": "(/.*)",
+            "dest": "api/index.php"
+        }
+    ],
+    "env": {
+        "APP_ENV": "production",
+        "APP_KEY": "base64:VUvJe6bJr9AHdRtovPlZAHX6RbQZ1haavVkd3z+cU1w=",
+        "APP_DEBUG": "true",
+        "APP_URL": "",
+        "DB_CONNECTION": "mysql",
+        "DB_HOST": "az9ckj.h.filess.io",
+        "DB_PORT": "61001",
+        "DB_DATABASE": "db_portoweb_ram_rollalong",
+        "DB_USERNAME": "db_portoweb_ram_rollalong",
+        "DB_PASSWORD": "d3331657ab05fd8e169c056f8dc7d811b0269da5",
+
+        "APP_CONFIG_CACHE": "/tmp/config.php",
+        "APP_EVENTS_CACHE": "/tmp/events.php",
+        "APP_PACKAGES_CACHE": "/tmp/packages.php",
+        "APP_ROUTES_CACHE": "/tmp/routes.php",
+        "APP_SERVICES_CACHE": "/tmp/services.php",
+        "VIEW_COMPILED_PATH": "/tmp",
+
+        "CACHE_DRIVER": "array",
+        "LOG_CHANNEL": "stderr",
+        "SESSION_DRIVER": "cookie"
+    }
+
+}

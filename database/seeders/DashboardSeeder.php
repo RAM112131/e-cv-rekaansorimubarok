@@ -3,160 +3,216 @@
 namespace Database\Seeders;
 
 use App\Models\Certificate;
+use App\Models\CvEntry;
+use App\Models\CvLanguage;
+use App\Models\Education;
 use App\Models\Experience;
-use App\Models\Message;
 use App\Models\Project;
-use App\Models\Skill;
+use App\Models\SocialLink;
 use App\Models\User;
-use App\Models\Visitor;
+use App\Services\PublicContentCache;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 use RuntimeException;
 
 class DashboardSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $admin = User::query()->where('role', 'admin')->first();
 
-        if (! $admin) {
-            $adminName = config('auth.seed_admin.name');
-            $adminEmail = config('auth.seed_admin.email');
-            $adminPassword = config('auth.seed_admin.password');
-
-            if (
-                ! is_string($adminEmail)
-                || ! filter_var($adminEmail, FILTER_VALIDATE_EMAIL)
-                || ! is_string($adminPassword)
-                || strlen($adminPassword) < 12
-            ) {
-                throw new RuntimeException(
-                    'Set a valid SEED_ADMIN_EMAIL and a SEED_ADMIN_PASSWORD with at least 12 characters before seeding when no admin user exists.'
-                );
-            }
-
-            $admin = User::create([
-                'name' => is_string($adminName) && $adminName !== '' ? $adminName : 'Portfolio Admin',
-                'email' => $adminEmail,
-                'password' => $adminPassword,
-                'role' => 'admin',
-            ]);
+        if ($admin === null) {
+            throw new RuntimeException('Run AdminUserSeeder with valid admin credentials before seeding portfolio content.');
         }
 
-        // 1. Seed Visitors (log kunjungan 7 hari terakhir)
-        if (Visitor::count() === 0) {
-            for ($i = 6; $i >= 0; $i--) {
-                $date = Carbon::now()->subDays($i);
-                $visitorCount = rand(8, 25);
+        $profile = $admin->portfolioProfile()->firstOrCreate([], [
+            'name' => 'Reka Ansori Mubarok',
+            'email' => 'reka114141@gmail.com',
+            'phone' => '+62 882118269212',
+            'location' => 'Ciamis, Jawa Barat',
+            'headline' => 'Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya',
+            'bio' => 'Mahasiswa aktif Sistem Informasi di UBSI yang antusias dalam pengembangan web. Memiliki pengalaman membangun aplikasi berbasis Laravel dengan integrasi pembayaran digital. Berkomitmen untuk terus belajar dan berkontribusi di lingkungan kerja profesional.',
+            'cv_subtitle' => 'Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya',
+            'cv_about' => 'Mahasiswa aktif Sistem Informasi di UBSI yang antusias dalam pengembangan web. Memiliki pengalaman membangun aplikasi berbasis Laravel dengan integrasi pembayaran digital. Berkomitmen untuk terus belajar dan berkontribusi di lingkungan kerja profesional.',
+        ]);
 
-                for ($j = 0; $j < $visitorCount; $j++) {
-                    Visitor::create([
-                        'ip_address' => '127.0.0.'.rand(1, 100),
-                        'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0',
-                        'page_url' => '/',
-                        'referrer' => rand(0, 1) ? 'https://google.com' : 'https://github.com',
-                        'session_id' => 'sess_'.bin2hex(random_bytes(8)),
-                        'visited_at' => $date->copy()->addMinutes(rand(10, 1300)),
-                    ]);
-                }
-            }
-        }
+        SocialLink::query()->firstOrCreate(
+            ['portfolio_profile_id' => $profile->id, 'platform' => 'LinkedIn'],
+            ['url' => 'https://www.linkedin.com/in/reka-ansori-mubarok-a5508427a', 'sort_order' => 1],
+        );
 
-        // 2. Seed Messages (pesan kontak)
-        if (Message::count() === 0) {
-            Message::create([
-                'name' => 'Budi Santoso',
-                'email' => 'budi@techcorp.id',
-                'subject' => 'Penawaran Proyek Fullstack Web',
-                'message' => 'Halo Ram, kami sedang mencari lead developer untuk pengerjaan platform SaaS. Bisakah kita berdiskusi lebih lanjut?',
-                'is_read' => false,
-                'created_at' => Carbon::now()->subHours(2),
-            ]);
-
-            Message::create([
-                'name' => 'Siti Rahma',
-                'email' => 'siti.hr@innovate.com',
-                'subject' => 'Undangan Interview Senior Laravel Developer',
-                'message' => 'Salam, kami tertarik dengan portofolio Anda dan ingin mengundang Anda dalam proses wawancara.',
-                'is_read' => false,
-                'created_at' => Carbon::now()->subHours(5),
-            ]);
-
-            Message::create([
-                'name' => 'Alex Johnson',
-                'email' => 'alex@globaldigital.com',
-                'subject' => 'Konsultasi Arsitektur Web 3D',
-                'message' => 'Sangat mengagumkan hero 3D di website portofolio Anda. Apakah Anda menerima jasa konsultasi freelance?',
-                'is_read' => true,
-                'replied_at' => Carbon::now()->subDay(),
-                'created_at' => Carbon::now()->subDays(2),
-            ]);
-        }
-
-        // 3. Seed Projects
-        if (Project::count() === 0) {
-            Project::create([
-                'user_id' => $admin->id,
-                'title' => 'E-Commerce Platform Laravel 13',
-                'slug' => 'e-commerce-platform-laravel-13',
-                'description' => 'Platform toko online modern dengan integrasi payment gateway dan Filament v4 dashboard.',
-                'category' => 'Web Application',
-                'tech_stack' => 'Laravel, Filament, Livewire, Tailwind CSS',
-                'project_url' => 'https://example.com/demo-shop',
-                'repo_url' => 'https://github.com/example/demo-shop',
-                'is_featured' => true,
+        foreach ([
+            [
+                'institution' => 'Universitas Bina Sarana Informatika (UBSI) Kota Tasikmalaya',
+                'degree' => 'S1',
+                'major' => 'Sistem Informasi',
+                'start_year' => 2024,
+                'end_year' => null,
+                'is_current' => true,
                 'order' => 1,
-            ]);
-
-            Project::create([
-                'user_id' => $admin->id,
-                'title' => 'Interactive 3D Portfolio Website',
-                'slug' => 'interactive-3d-portfolio-website',
-                'description' => 'Website portofolio interaktif dengan Three.js & GSAP animations.',
-                'category' => 'Web Design & 3D',
-                'tech_stack' => 'Laravel 13, Three.js, GSAP, Tailwind v4',
-                'project_url' => 'https://example.com/portfolio',
-                'repo_url' => 'https://github.com/example/portfolio',
-                'is_featured' => true,
+            ],
+            [
+                'institution' => 'MAN 5 Ciamis',
+                'degree' => null,
+                'major' => 'MIPA',
+                'start_year' => 2020,
+                'end_year' => 2023,
+                'is_current' => false,
                 'order' => 2,
-            ]);
+            ],
+        ] as $education) {
+            Education::query()->firstOrCreate(
+                ['portfolio_profile_id' => $profile->id, 'institution' => $education['institution']],
+                $education,
+            );
         }
 
-        // 4. Seed Skills
-        if (Skill::count() === 0) {
-            Skill::create(['user_id' => $admin->id, 'name' => 'Laravel', 'category' => 'Backend', 'level' => 95, 'order' => 1]);
-            Skill::create(['user_id' => $admin->id, 'name' => 'PHP', 'category' => 'Backend', 'level' => 90, 'order' => 2]);
-            Skill::create(['user_id' => $admin->id, 'name' => 'Filament PHP', 'category' => 'Admin Panel', 'level' => 90, 'order' => 3]);
-            Skill::create(['user_id' => $admin->id, 'name' => 'Tailwind CSS', 'category' => 'Frontend', 'level' => 88, 'order' => 4]);
-            Skill::create(['user_id' => $admin->id, 'name' => 'Three.js / GSAP', 'category' => 'Frontend 3D', 'level' => 80, 'order' => 5]);
+        foreach ([
+            ['name' => 'Indonesia', 'rating' => 5, 'order' => 1],
+            ['name' => 'Inggris', 'rating' => 3, 'order' => 2],
+        ] as $language) {
+            CvLanguage::query()->firstOrCreate(
+                ['portfolio_profile_id' => $profile->id, 'name' => $language['name']],
+                $language,
+            );
         }
 
-        // 5. Seed Experiences
-        if (Experience::count() === 0) {
-            Experience::create([
-                'user_id' => $admin->id,
-                'title' => 'Senior Fullstack Web Developer',
-                'company' => 'Tech Synergy Solutions',
-                'type' => 'Full-time',
-                'start_date' => '2023-01-01',
-                'description' => 'Mengembangkan aplikasi enterprise berbasis Laravel & Livewire dengan skalabilitas tinggi.',
+        foreach ([
+            [
+                'title' => 'Sistem Informasi Bersih Bumi (Manajemen Pengelolaan Sampah)',
+                'slug' => 'sistem-informasi-bersih-bumi',
+                'description' => "Membangun platform manajemen iuran pengangkutan sampah berbasis web untuk membantu RT/RW mengelola data warga dan pembayaran secara digital.\nMengintegrasikan Midtrans Payment Gateway (QRIS & Virtual Account) untuk transaksi non-tunai.\nMenerapkan autentikasi multi-role (Admin, Petugas, Warga) menggunakan Laravel Jetstream.",
+                'year' => 2026,
+                'role' => 'Tugas Kuliah',
+                'tech_stack' => ['Laravel Jetstream', 'Midtrans'],
                 'order' => 1,
-            ]);
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'Website Smart Tourism Guide Kota Banjar',
+                'slug' => 'website-smart-tourism-guide-kota-banjar',
+                'description' => 'Mengembangkan web pemandu wisata online berbasis QR Code untuk meningkatkan aksesibilitas informasi wisata dan menyediakan pemesanan tiket secara online.',
+                'year' => 2025,
+                'role' => 'Tugas Kuliah',
+                'tech_stack' => null,
+                'order' => 2,
+                'is_featured' => true,
+            ],
+            [
+                'title' => 'Sistem Informasi Pemilihan OSIS',
+                'slug' => 'sistem-informasi-pemilihan-osis',
+                'description' => 'Membangun website pemilihan OSIS responsif dengan fitur pemilihan online dan manajemen kandidat.',
+                'year' => 2025,
+                'role' => 'Proyek Mandiri',
+                'tech_stack' => null,
+                'order' => 3,
+                'is_featured' => false,
+            ],
+        ] as $projectData) {
+            $project = Project::query()->firstOrCreate(
+                ['portfolio_profile_id' => $profile->id, 'slug' => $projectData['slug']],
+                [
+                    'title' => $projectData['title'],
+                    'description' => $projectData['description'],
+                    'category' => 'Web Application',
+                    'tech_stack' => $projectData['tech_stack'],
+                    'year' => $projectData['year'],
+                    'role' => $projectData['role'],
+                    'is_featured' => $projectData['is_featured'],
+                    'is_published' => true,
+                    'order' => $projectData['order'],
+                ],
+            );
+
+            CvEntry::query()->firstOrCreate(
+                [
+                    'portfolio_profile_id' => $profile->id,
+                    'entry_type' => 'project',
+                    'project_id' => $project->id,
+                ],
+                [
+                    'title' => $projectData['title'],
+                    'period' => (string) $projectData['year'],
+                    'subtitle' => $projectData['role'],
+                    'description' => $projectData['description'],
+                    'order' => $projectData['order'],
+                ],
+            );
         }
 
-        // 6. Seed Certificates
-        if (Certificate::count() === 0) {
-            Certificate::create([
-                'user_id' => $admin->id,
-                'title' => 'Laravel Certified Developer',
-                'issuer' => 'Laravel LLC',
-                'issue_date' => '2024-05-15',
-                'credential_url' => 'https://laravel.com/certification/verify/example',
+        $experience = Experience::query()->firstOrCreate(
+            [
+                'portfolio_profile_id' => $profile->id,
+                'title' => 'Staf Gudang',
+                'company' => 'Anyar CCTV Bandung',
+            ],
+            [
+                'location' => 'Bandung',
+                'type' => 'Pengalaman Kerja',
+                'start_date' => '2023-09-01',
+                'end_date' => '2024-07-31',
+                'is_current' => false,
+                'description' => 'Melakukan inventarisasi barang, pencatatan stok masuk dan keluar, pengelolaan persediaan, serta pengaturan tata letak penyimpanan. Berkoordinasi dengan tim operasional, membantu proses pengiriman, dan menyusun laporan bulanan.',
                 'order' => 1,
-            ]);
+            ],
+        );
+
+        CvEntry::query()->firstOrCreate(
+            [
+                'portfolio_profile_id' => $profile->id,
+                'entry_type' => 'experience',
+                'experience_id' => $experience->id,
+            ],
+            [
+                'title' => 'Staf Gudang',
+                'period' => 'September 2023 - Juli 2024',
+                'subtitle' => 'Anyar CCTV Bandung',
+                'description' => $experience->description,
+                'order' => 1,
+            ],
+        );
+
+        foreach ([
+            [
+                'title' => 'Divisi HUMAS – Himpunan Mahasiswa Sistem Informasi',
+                'period' => 'Januari - Desember 2025',
+                'subtitle' => 'Pengurus · UBSI Kota Tasikmalaya',
+                'description' => 'Bertugas membangun dan menjaga citra organisasi melalui komunikasi eksternal dan internal, serta mengelola hubungan dengan media dan platform digital.',
+                'order' => 1,
+            ],
+            [
+                'title' => 'Panitia Bakti Sosial Kemasyarakatan',
+                'period' => '4-24 Agustus 2025',
+                'subtitle' => 'Divisi Konsumsi · KMC Galuh Taruna Bandung',
+                'description' => 'Bertanggung jawab atas pengelolaan konsumsi, termasuk perencanaan menu, koordinasi katering, dan distribusi makanan untuk panitia dan peserta kegiatan.',
+                'order' => 2,
+            ],
+        ] as $organization) {
+            CvEntry::query()->firstOrCreate(
+                [
+                    'portfolio_profile_id' => $profile->id,
+                    'entry_type' => 'organization',
+                    'title' => $organization['title'],
+                ],
+                $organization,
+            );
         }
+
+        foreach ([
+            ['title' => 'Belajar Dasar Pemrograman Web', 'issuer' => 'Dicoding', 'year' => 2023, 'order' => 1],
+            ['title' => 'Database Design & SQL', 'issuer' => 'MySkill', 'year' => 2023, 'order' => 2],
+            ['title' => 'Laravel Framework', 'issuer' => 'BuildWith Angga', 'year' => 2024, 'order' => 3],
+            ['title' => 'Google IT Support', 'issuer' => 'Google / Coursera', 'year' => 2024, 'order' => 4],
+        ] as $certificate) {
+            Certificate::query()->firstOrCreate(
+                ['portfolio_profile_id' => $profile->id, 'title' => $certificate['title']],
+                [
+                    'issuer' => $certificate['issuer'],
+                    'issue_date' => "{$certificate['year']}-01-01",
+                    'order' => $certificate['order'],
+                ],
+            );
+        }
+
+        PublicContentCache::clear();
     }
 }

@@ -7,10 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SocialLink extends Model
 {
-    protected $fillable = ['user_id', 'platform', 'url', 'icon', 'order'];
+    protected $fillable = ['portfolio_profile_id', 'platform', 'url', 'sort_order'];
 
-    public function user(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(User::class);
+        return [
+            'sort_order' => 'integer',
+        ];
+    }
+
+    public function portfolioProfile(): BelongsTo
+    {
+        return $this->belongsTo(PortfolioProfile::class);
     }
 }

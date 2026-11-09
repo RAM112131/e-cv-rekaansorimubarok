@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Visitor;
+use App\Models\VisitorEvent;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -15,17 +15,18 @@ class VisitorChartWidget extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
-    // Lazy dinonaktifkan karena di php artisan serve (single-thread), 
+    // Lazy dinonaktifkan karena di php artisan serve (single-thread),
     // request concurrent AJAX malah bikin antrian panjang dan loading lama.
     protected static bool $isLazy = false;
 
     protected function getData(): array
     {
-        return Cache::remember('visitor.chart.data', 300, function () {
+        return Cache::remember('visitor.chart.data.v2', 300, function () {
             $startDate = Carbon::now()->subDays(6)->startOfDay();
 
-            $rawCounts = Visitor::where('visited_at', '>=', $startDate)
-                ->selectRaw('DATE(visited_at) as date_key, COUNT(*) as aggregate')
+            $rawCounts = VisitorEvent::query()
+                ->where('visited_at', '>=', $startDate)
+                ->selectRaw('DATE(visited_at) as date_key, COUNT(DISTINCT session_hash) as aggregate')
                 ->groupBy('date_key')
                 ->pluck('aggregate', 'date_key');
 

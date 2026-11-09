@@ -2,22 +2,29 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Certificate;
+use App\Models\CvEntry;
+use App\Models\CvLanguage;
 use App\Models\Education;
+use App\Models\SocialLink;
 use App\Services\PublicContentCache;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
 use UnitEnum;
 
 class ManageCv extends Page implements HasSchemas
@@ -40,106 +47,70 @@ class ManageCv extends Page implements HasSchemas
 
     public function mount(): void
     {
-        $user = auth()->user();
-        $cvData = $user->cv_data ?? [];
+        $profile = auth()->user()->portfolioProfile()->with([
+            'educations',
+            'socialLinks',
+            'cvLanguages',
+            'certificates' => fn ($query) => $query->where('show_on_cv', true)->orderBy('order'),
+            'cvEntries',
+        ])->firstOrFail();
 
-        $defaultLanguages = [
-            ['name' => 'Indonesia', 'rating' => 5],
-            ['name' => 'Inggris', 'rating' => 3],
-        ];
-
-        $defaultCertifications = [
-            ['name' => 'Belajar Dasar Pemrograman Web', 'issuer' => 'Dicoding', 'year' => '2023'],
-            ['name' => 'Database Design & SQL', 'issuer' => 'MySkill', 'year' => '2023'],
-            ['name' => 'Laravel Framework', 'issuer' => 'BuildWith Angga', 'year' => '2024'],
-            ['name' => 'Google IT Support', 'issuer' => 'Google / Coursera', 'year' => '2024'],
-        ];
-
-        $defaultEducations = [
-            [
-                'institution' => 'Universitas Bina Sarana Informatika (UBSI) Kota Tasikmalaya',
-                'degree' => 'S1',
-                'major' => 'Sistem Informasi',
-                'start_year' => '2024',
-                'end_year' => 'Sekarang',
-                'semester' => '4',
-                'gpa' => '',
-            ],
-            [
-                'institution' => 'MAN 5 Ciamis',
-                'degree' => '',
-                'major' => 'MIPA',
-                'start_year' => '2020',
-                'end_year' => '2023',
-                'semester' => '',
-                'gpa' => '',
-            ],
-        ];
-
-        $defaultProjects = [
-            [
-                'name' => 'Sistem Informasi Bersih Bumi (Manajemen Pengelolaan Sampah)',
-                'badge' => '2026',
-                'sub' => 'Tugas Kuliah',
-                'desc' => "• Membangun platform manajemen iuran pengangkutan sampah berbasis web untuk membantu RT/RW mengelola data warga dan pembayaran secara digital.\n• Mengintegrasikan Midtrans Payment Gateway (QRIS & Virtual Account) untuk kemudahan transaksi non-tunai.\n• Menerapkan autentikasi multi-role (Admin, Petugas, Warga) menggunakan Laravel Jetstream.",
-            ],
-            [
-                'name' => 'Website Smart Tourism Guide Kota Banjar',
-                'badge' => '2025',
-                'sub' => 'Tugas Kuliah',
-                'desc' => "• Mengembangkan Web Pemandu Wisata Online Berbasis QR Code untuk meningkatkan aksesibilitas informasi wisata.\n• Menyediakan sistem pemesanan tiket secara online",
-            ],
-            [
-                'name' => 'Sistem Informasi Pemilihan OSIS',
-                'badge' => '2025',
-                'sub' => 'Proyek Mandiri',
-                'desc' => 'Membangun website pemilihan OSIS responsif dengan fitur pemilihan online dan manajemen kandidat.',
-            ],
-            [
-                'name' => 'Mengikuti Kegiatan Webinar "Membuat Sistem Task Manager Team dengan Laravel"',
-                'badge' => '2025',
-                'sub' => 'Webinar',
-                'desc' => 'Mengikuti webinar yang diselenggarakan oleh ID-Networkers. Mempelajari dasar-dasar pengembangan sistem manajemen tugas tim menggunakan framework Laravel, termasuk struktur proyek, manajemen database, autentikasi, dan implementasi alur kerja kolaboratif.',
-            ],
-            [
-                'name' => 'Staf Gudang di Anyar CCTV Bandung',
-                'badge' => 'September 2023 - Juli 2024',
-                'sub' => 'Pengalaman Kerja',
-                'desc' => 'Melakukan tugas-tugas administrasi gudang secara menyeluruh, termasuk inventarisasi barang, pencatatan masuk-keluar stok, pengelolaan persediaan, dan pengaturan tata letak penyimpanan agar efisien. Berkoordinasi dengan tim operasional, memastikan kelengkapan barang, membantu proses pengiriman, dan menyusun laporan bulanan untuk mendukung kelancaran aktivitas gudang.',
-            ],
-        ];
-
-        $defaultOrgs = [
-            [
-                'name' => 'Divisi HUMAS – Himpunan Mahasiswa Sistem Informasi',
-                'badge' => 'Januari - Desember 2025',
-                'sub' => 'Pengurus · UBSI Kota Tasikmalaya',
-                'desc' => 'Bertugas membangun dan menjaga citra organisasi melalui komunikasi eksternal dan internal, mengelola hubungan dengan media dan platform digital.',
-            ],
-            [
-                'name' => 'Panitia Bakti Sosial Kemasyarakatan',
-                'badge' => '4-24 Agustus 2025',
-                'sub' => 'Divisi Konsumsi · KMC Galuh Taruna Bandung',
-                'desc' => 'Bertanggung jawab atas pengelolaan konsumsi, termasuk perencanaan menu, koordinasi katering, dan distribusi makanan untuk seluruh panitia atau dalam kegiatan.',
-            ],
-        ];
-
-        $existingEducations = $user->educations()->get(['institution', 'degree', 'major', 'start_year', 'end_year', 'semester', 'gpa'])->toArray();
+        $entries = $profile->cvEntries->map(fn (CvEntry $entry): array => [
+            'name' => $entry->title,
+            'badge' => $entry->period,
+            'sub' => $entry->subtitle,
+            'desc' => $entry->description,
+            'entry_type' => $entry->entry_type,
+        ]);
 
         $this->form->fill([
-            'cv_avatar' => $user->cv_avatar,
-            'cv_name' => $cvData['cv_name'] ?? $user->name,
-            'cv_subtitle' => $cvData['cv_subtitle'] ?? 'Mahasiswa Sistem Informasi | UBSI Kota Tasikmalaya',
-            'phone' => $user->phone ?? '+62 882118269212',
-            'email' => $user->email ?? 'reka114141@gmail.com',
-            'linkedin_url' => $user->linkedin_url ?? 'https://www.linkedin.com/in/reka-ansori-mubarok-a5508427a',
-            'location' => $user->location ?? 'Ciamis, Jawa Barat',
-            'cv_about' => $user->cv_about ?? 'Mahasiswa aktif Sistem Informasi di UBSI yang antusias dalam pengembangan web. Memiliki pengalaman membangun aplikasi berbasis Laravel dengan integrasi pembayaran digital. Berkomitmen untuk terus belajar dan berkontribusi di lingkungan kerja profesional.',
-            'cv_languages' => $cvData['cv_languages'] ?? $defaultLanguages,
-            'cv_certifications' => $cvData['cv_certifications'] ?? $defaultCertifications,
-            'educations' => count($existingEducations) > 0 ? $existingEducations : $defaultEducations,
-            'cv_projects' => $cvData['cv_projects'] ?? $defaultProjects,
-            'cv_orgs' => $cvData['cv_orgs'] ?? $defaultOrgs,
+            'cv_avatar' => $profile->cv_avatar,
+            'cv_file' => $profile->cv_file,
+            'cv_name' => $profile->name,
+            'cv_subtitle' => $profile->cv_subtitle,
+            'phone' => $profile->phone,
+            'email' => $profile->email,
+            'linkedin_url' => $profile->socialLinks
+                ->first(fn (SocialLink $link): bool => strtolower($link->platform) === 'linkedin')
+                ?->url,
+            'location' => $profile->location,
+            'cv_about' => $profile->cv_about,
+            'cv_languages' => $profile->cvLanguages
+                ->map(fn (CvLanguage $language): array => [
+                    'name' => $language->name,
+                    'rating' => $language->rating,
+                ])
+                ->all(),
+            'cv_certifications' => $profile->certificates
+                ->map(fn (Certificate $certificate): array => [
+                    'id' => $certificate->id,
+                    'name' => $certificate->title,
+                    'issuer' => $certificate->issuer,
+                    'year' => $certificate->issue_date?->format('Y'),
+                ])
+                ->all(),
+            'educations' => $profile->educations
+                ->map(fn (Education $education): array => [
+                    'institution' => $education->institution,
+                    'degree' => $education->degree,
+                    'major' => $education->major,
+                    'start_year' => $education->start_year,
+                    'end_year' => $education->end_year,
+                    'is_current' => $education->is_current,
+                    'semester' => $education->semester,
+                    'gpa' => $education->gpa,
+                ])
+                ->all(),
+            'cv_projects' => $entries
+                ->whereIn('entry_type', ['project', 'experience'])
+                ->map(fn (array $entry): array => collect($entry)->except('entry_type')->all())
+                ->values()
+                ->all(),
+            'cv_orgs' => $entries
+                ->where('entry_type', 'organization')
+                ->map(fn (array $entry): array => collect($entry)->except('entry_type')->all())
+                ->values()
+                ->all(),
         ]);
     }
 
@@ -171,6 +142,15 @@ class ManageCv extends Page implements HasSchemas
                             ->circleCropper()
                             ->columnSpan('full')
                             ->helperText('Unggah foto profil yang akan tampil di bagian header CV.'),
+                        FileUpload::make('cv_file')
+                            ->label('File CV PDF untuk Diunduh')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->maxSize(10240)
+                            ->disk('public')
+                            ->directory('cv')
+                            ->downloadable()
+                            ->openable()
+                            ->columnSpanFull(),
                         TextInput::make('cv_name')
                             ->label('Nama Lengkap di CV')
                             ->required()
@@ -257,6 +237,7 @@ class ManageCv extends Page implements HasSchemas
                         Repeater::make('cv_certifications')
                             ->label('Daftar Sertifikasi / Ujikom')
                             ->schema([
+                                Hidden::make('id'),
                                 TextInput::make('name')
                                     ->label('Nama Sertifikasi / Pelatihan / Ujikom')
                                     ->required()
@@ -267,6 +248,10 @@ class ManageCv extends Page implements HasSchemas
                                     ->placeholder('BNSP / Dicoding / BuildWith Angga'),
                                 TextInput::make('year')
                                     ->label('Tahun')
+                                    ->numeric()
+                                    ->minValue(1900)
+                                    ->maxValue(now()->year + 10)
+                                    ->required()
                                     ->placeholder('2024'),
                             ])
                             ->columns(3)
@@ -293,10 +278,19 @@ class ManageCv extends Page implements HasSchemas
                                     ->placeholder('Sistem Informasi / MIPA'),
                                 TextInput::make('start_year')
                                     ->label('Tahun Mulai')
+                                    ->numeric()
+                                    ->minValue(1900)
+                                    ->maxValue(now()->year + 10)
                                     ->placeholder('2024'),
                                 TextInput::make('end_year')
                                     ->label('Tahun Selesai')
-                                    ->placeholder('Sekarang / 2023'),
+                                    ->numeric()
+                                    ->minValue(1900)
+                                    ->maxValue(now()->year + 10)
+                                    ->placeholder('2027'),
+                                Toggle::make('is_current')
+                                    ->label('Masih berlangsung')
+                                    ->live(),
                                 TextInput::make('semester')
                                     ->label('Semester')
                                     ->placeholder('4'),
@@ -373,41 +367,119 @@ class ManageCv extends Page implements HasSchemas
     public function save(): void
     {
         $state = $this->form->getState();
+        $profile = auth()->user()->portfolioProfile()->firstOrFail();
 
-        $user = auth()->user();
-        $user->update([
-            'name' => $state['cv_name'] ?? $user->name,
-            'cv_avatar' => $state['cv_avatar'] ?? $user->cv_avatar,
-            'cv_subtitle' => $state['cv_subtitle'] ?? null,
-            'phone' => $state['phone'] ?? null,
-            'email' => $state['email'] ?? $user->email,
-            'linkedin_url' => $state['linkedin_url'] ?? null,
-            'location' => $state['location'] ?? null,
-            'cv_about' => $state['cv_about'] ?? null,
-            'cv_data' => [
-                'cv_name' => $state['cv_name'] ?? $user->name,
-                'cv_languages' => $state['cv_languages'] ?? [],
-                'cv_certifications' => $state['cv_certifications'] ?? [],
-                'cv_projects' => $state['cv_projects'] ?? [],
-                'cv_orgs' => $state['cv_orgs'] ?? [],
-            ],
-        ]);
-
-        // Simpan educations
-        $user->educations()->delete();
-        foreach ($state['educations'] ?? [] as $index => $edu) {
-            Education::create([
-                'user_id' => $user->id,
-                'institution' => $edu['institution'],
-                'degree' => $edu['degree'] ?? null,
-                'major' => $edu['major'] ?? null,
-                'start_year' => $edu['start_year'] ?? null,
-                'end_year' => $edu['end_year'] ?? null,
-                'semester' => $edu['semester'] ?? null,
-                'gpa' => $edu['gpa'] ?? null,
-                'order' => $index,
+        DB::transaction(function () use ($profile, $state): void {
+            $profile->update([
+                'name' => $state['cv_name'],
+                'cv_avatar' => $state['cv_avatar'] ?? null,
+                'cv_file' => $state['cv_file'] ?? null,
+                'cv_subtitle' => $state['cv_subtitle'] ?? null,
+                'phone' => $state['phone'] ?? null,
+                'email' => $state['email'] ?? null,
+                'location' => $state['location'] ?? null,
+                'cv_about' => $state['cv_about'] ?? null,
             ]);
-        }
+
+            $linkedin = $profile->socialLinks()
+                ->where('platform', 'linkedin')
+                ->first();
+
+            if (blank($state['linkedin_url'] ?? null)) {
+                $linkedin?->delete();
+            } elseif ($linkedin !== null) {
+                $linkedin->update(['url' => $state['linkedin_url']]);
+            } else {
+                $profile->socialLinks()->create([
+                    'platform' => 'linkedin',
+                    'url' => $state['linkedin_url'],
+                    'sort_order' => (int) ($profile->socialLinks()->max('sort_order') ?? 0) + 1,
+                ]);
+            }
+
+            $profile->educations()->delete();
+            $profile->educations()->createMany(
+                collect($state['educations'] ?? [])
+                    ->values()
+                    ->map(fn (array $education, int $index): array => [
+                        'institution' => $education['institution'],
+                        'degree' => $education['degree'] ?? null,
+                        'major' => $education['major'] ?? null,
+                        'start_year' => filled($education['start_year'] ?? null)
+                            ? (int) $education['start_year']
+                            : null,
+                        'end_year' => ! empty($education['is_current']) || blank($education['end_year'] ?? null)
+                            ? null
+                            : (int) $education['end_year'],
+                        'is_current' => (bool) ($education['is_current'] ?? false),
+                        'semester' => $education['semester'] ?? null,
+                        'gpa' => $education['gpa'] ?? null,
+                        'order' => $index,
+                    ])
+                    ->all(),
+            );
+
+            $profile->cvLanguages()->delete();
+            $profile->cvLanguages()->createMany(
+                collect($state['cv_languages'] ?? [])
+                    ->values()
+                    ->map(fn (array $language, int $index): array => [
+                        'name' => $language['name'],
+                        'rating' => (int) $language['rating'],
+                        'order' => $index,
+                    ])
+                    ->all(),
+            );
+
+            $profile->certificates()->where('show_on_cv', true)->update(['show_on_cv' => false]);
+
+            foreach ($state['cv_certifications'] ?? [] as $index => $certificateData) {
+                $year = (int) $certificateData['year'];
+                $attributes = [
+                    'title' => $certificateData['name'],
+                    'issuer' => $certificateData['issuer'],
+                    'issue_date' => sprintf('%04d-01-01', $year),
+                    'show_on_cv' => true,
+                    'order' => $index + 1,
+                ];
+                $certificateId = $certificateData['id'] ?? null;
+
+                if ($certificateId !== null) {
+                    $profile->certificates()->findOrFail($certificateId)->update($attributes);
+
+                    continue;
+                }
+
+                $profile->certificates()->create($attributes + ['is_published' => true]);
+            }
+
+            $profile->cvEntries()->delete();
+            $entries = collect($state['cv_projects'] ?? [])
+                ->values()
+                ->map(fn (array $entry, int $index): array => [
+                    'entry_type' => 'project',
+                    'title' => $entry['name'],
+                    'period' => $entry['badge'] ?? null,
+                    'subtitle' => $entry['sub'] ?? null,
+                    'description' => $entry['desc'] ?? null,
+                    'order' => $index,
+                ])
+                ->merge(
+                    collect($state['cv_orgs'] ?? [])
+                        ->values()
+                        ->map(fn (array $entry, int $index): array => [
+                            'entry_type' => 'organization',
+                            'title' => $entry['name'],
+                            'period' => $entry['badge'] ?? null,
+                            'subtitle' => $entry['sub'] ?? null,
+                            'description' => $entry['desc'] ?? null,
+                            'order' => count($state['cv_projects'] ?? []) + $index,
+                        ]),
+                )
+                ->all();
+
+            $profile->cvEntries()->createMany($entries);
+        });
 
         PublicContentCache::clear();
 

@@ -37,17 +37,20 @@ class ManageProfile extends Page implements HasSchemas
 
     public function mount(): void
     {
-        $user = auth()->user();
+        $profile = auth()->user()->portfolioProfile()->with('socialLinks')->firstOrFail();
 
         $this->form->fill([
-            'name' => $user->name,
-            'headline' => $user->headline,
-            'bio' => $user->bio,
-            'phone' => $user->phone ?? '+62 882118269212',
-            'location' => $user->location ?? 'Ciamis, Jawa Barat',
-            'avatar' => $user->avatar,
-            'social_links' => $user->socialLinks()
-                ->get(['platform', 'url'])
+            'name' => $profile->name,
+            'headline' => $profile->headline,
+            'bio' => $profile->bio,
+            'phone' => $profile->phone,
+            'location' => $profile->location,
+            'avatar' => $profile->avatar,
+            'social_links' => $profile->socialLinks
+                ->map(fn (SocialLink $socialLink): array => [
+                    'platform' => $socialLink->platform,
+                    'url' => $socialLink->url,
+                ])
                 ->toArray(),
         ]);
     }
@@ -119,26 +122,27 @@ class ManageProfile extends Page implements HasSchemas
     {
         $state = $this->form->getState();
 
-        $user = auth()->user();
-        $user->update([
+        $profile = auth()->user()->portfolioProfile()->firstOrFail();
+        $profile->update([
             'name' => $state['name'],
             'headline' => $state['headline'],
             'bio' => $state['bio'],
             'phone' => $state['phone'] ?? null,
             'location' => $state['location'] ?? null,
-            'avatar' => $state['avatar'] ?? $user->avatar,
+            'avatar' => $state['avatar'] ?? $profile->avatar,
         ]);
 
-        // Simpan social links
-        $user->socialLinks()->delete();
-        foreach ($state['social_links'] ?? [] as $index => $link) {
-            SocialLink::create([
-                'user_id' => $user->id,
-                'platform' => $link['platform'],
-                'url' => $link['url'],
-                'order' => $index,
-            ]);
-        }
+        $profile->socialLinks()->delete();
+        $profile->socialLinks()->createMany(
+            collect($state['social_links'] ?? [])
+                ->values()
+                ->map(fn (array $link, int $index): array => [
+                    'platform' => $link['platform'],
+                    'url' => $link['url'],
+                    'sort_order' => $index,
+                ])
+                ->all(),
+        );
 
         PublicContentCache::clear();
 

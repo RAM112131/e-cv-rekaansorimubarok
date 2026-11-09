@@ -5,7 +5,6 @@ namespace App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Resources\ProjectResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
-use Illuminate\Support\Facades\Auth;
 
 class ManageProjects extends ManageRecords
 {
@@ -19,7 +18,7 @@ class ManageProjects extends ManageRecords
                 ->icon('heroicon-o-plus')
                 ->modalWidth('6xl')
                 ->mutateFormDataUsing(function (array $data): array {
-                    $data['user_id'] = Auth::id() ?? 1;
+                    $data['portfolio_profile_id'] = auth()->user()->portfolioProfile->id;
 
                     return $data;
                 }),

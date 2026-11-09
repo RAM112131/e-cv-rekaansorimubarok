@@ -5,7 +5,6 @@ namespace App\Filament\Resources\CertificateResource\Pages;
 use App\Filament\Resources\CertificateResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
-use Illuminate\Support\Facades\Auth;
 
 class ManageCertificates extends ManageRecords
 {
@@ -19,9 +18,7 @@ class ManageCertificates extends ManageRecords
                 ->icon('heroicon-o-plus')
                 ->modalWidth('5xl')
                 ->mutateFormDataUsing(function (array $data): array {
-                    $data['user_id'] = Auth::id() ?? 1;
-
-                    $data['user_id'] = Auth::id() ?? 1;
+                    $data['portfolio_profile_id'] = auth()->user()->portfolioProfile->id;
 
                     return $data;
                 }),

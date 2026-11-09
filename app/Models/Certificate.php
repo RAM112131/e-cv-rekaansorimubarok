@@ -11,10 +11,9 @@ class Certificate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'portfolio_profile_id',
         'certificate_category_id',
         'title',
-        'category',
         'image',
         'issuer',
         'credential_id',
@@ -22,6 +21,8 @@ class Certificate extends Model
         'expiration_date',
         'credential_url',
         'description',
+        'is_published',
+        'show_on_cv',
         'order',
     ];
 
@@ -30,6 +31,8 @@ class Certificate extends Model
         return [
             'issue_date' => 'date',
             'expiration_date' => 'date',
+            'is_published' => 'boolean',
+            'show_on_cv' => 'boolean',
             'order' => 'integer',
         ];
     }
@@ -38,22 +41,30 @@ class Certificate extends Model
     {
         static::creating(function (Certificate $certificate): void {
             if ($certificate->order !== null && (int) $certificate->order > 0) {
-                static::where('order', '>=', $certificate->order)->increment('order');
+                static::query()
+                    ->where('portfolio_profile_id', $certificate->portfolio_profile_id)
+                    ->where('order', '>=', $certificate->order)
+                    ->increment('order');
             } else {
-                $certificate->order = (static::max('order') ?? 0) + 1;
+                $certificate->order = (static::query()
+                    ->where('portfolio_profile_id', $certificate->portfolio_profile_id)
+                    ->max('order') ?? 0) + 1;
             }
         });
 
         static::deleted(function (Certificate $certificate): void {
             if ($certificate->order !== null && $certificate->order > 0) {
-                static::where('order', '>', $certificate->order)->decrement('order');
+                static::query()
+                    ->where('portfolio_profile_id', $certificate->portfolio_profile_id)
+                    ->where('order', '>', $certificate->order)
+                    ->decrement('order');
             }
         });
     }
 
-    public function user(): BelongsTo
+    public function portfolioProfile(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(PortfolioProfile::class);
     }
 
     public function certificateCategory(): BelongsTo

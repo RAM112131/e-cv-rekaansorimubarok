@@ -44,7 +44,7 @@ test('visitor tracking middleware records visit on public route', function () {
 
     $response->assertSuccessful();
 
-    $this->assertDatabaseHas('visitors', [
-        'page_url' => url('/'),
+    $this->assertDatabaseHas('visitor_events', [
+        'page_path' => '/',
     ]);
 });

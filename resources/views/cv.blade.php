@@ -456,7 +456,7 @@
         <div class="tl-item">
           <div class="tl-head">
             <div class="tl-name">{{ $edu->institution }}</div>
-            <div class="tl-badge">{{ $edu->start_year }} – {{ $edu->end_year ?? 'Sekarang' }}</div>
+            <div class="tl-badge">{{ $edu->start_year }} – {{ $edu->is_current ? 'Sekarang' : ($edu->end_year ?? '-') }}</div>
           </div>
           @if($edu->degree || $edu->major)
           <div class="tl-sub">{{ $edu->degree }} {{ $edu->major ? '· ' . $edu->major : '' }}</div>
