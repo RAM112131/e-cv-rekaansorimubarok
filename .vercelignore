@@ -1,1 +1,6 @@
+.env*
+/node_modules
 /vendor
+/database/database.sqlite
+/storage/framework/**
+/storage/logs/**
