@@ -31,3 +31,7 @@ frankenphp
 frankenphp-worker.php
 .vercel
 .env*
+/.agent
+/.agents
+/.ai
+/.claude
