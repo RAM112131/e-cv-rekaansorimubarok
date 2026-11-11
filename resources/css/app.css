@@ -25,6 +25,14 @@
 #react-id-card-root {
     opacity: 0;
     transition: opacity 0.4s ease-out;
+    touch-action: none;
+}
+
+#react-id-card-root canvas {
+    touch-action: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #react-id-card-root.is-ready {

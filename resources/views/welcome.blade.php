@@ -277,7 +277,7 @@
     <!-- Swarm Cursor Root -->
     <div id="react-swarm-cursor-root" class="fixed inset-0 z-[5] pointer-events-none"></div>
     <!-- 3D Background Canvas -->
-    <div id="react-id-card-root" class="absolute top-0 left-0 w-full h-screen z-10 pointer-events-auto" data-name="{{ $firstName . ' ' . $lastName }}" data-headline="{{ $user->headline }}" data-avatar="{{ $user->avatar ? Storage::url($user->avatar) : 'null' }}"></div>
+    <div id="react-id-card-root" class="absolute top-0 left-0 w-full h-screen z-10 pointer-events-auto touch-none select-none" data-name="{{ $firstName . ' ' . $lastName }}" data-headline="{{ $user->headline }}" data-avatar="{{ $user->avatar ? Storage::url($user->avatar) : 'null' }}"></div>
 
     <!-- Fixed Navigation Menu -->
     <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 transition-all duration-300">

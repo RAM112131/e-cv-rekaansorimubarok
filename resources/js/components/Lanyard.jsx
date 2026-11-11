@@ -83,8 +83,9 @@ export default function Lanyard({
   const dpr = isMobile ? [1, 1.25] : [1, 1.5];
 
   return (
-    <div ref={containerRef} className="relative z-0 w-full h-screen flex justify-center items-center transform scale-100 origin-center">
+    <div ref={containerRef} className="relative z-0 w-full h-screen flex justify-center items-center transform scale-100 origin-center touch-none select-none">
       <Canvas
+        style={{ touchAction: 'none' }}
         camera={{ position: position, fov: fov }}
         dpr={dpr}
         gl={{
@@ -374,7 +375,10 @@ function Band({
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
             onPointerUp={e => {
-              e.target.releasePointerCapture(e.pointerId);
+              e.stopPropagation();
+              try {
+                e.target.releasePointerCapture(e.pointerId);
+              } catch (err) {}
               cardSpin.current = {
                 elapsed: 0,
                 duration: 1.15,
@@ -383,8 +387,18 @@ function Band({
               };
               drag(false);
             }}
+            onPointerCancel={e => {
+              e.stopPropagation();
+              try {
+                e.target.releasePointerCapture(e.pointerId);
+              } catch (err) {}
+              drag(false);
+            }}
             onPointerDown={e => {
-              e.target.setPointerCapture(e.pointerId);
+              e.stopPropagation();
+              try {
+                e.target.setPointerCapture(e.pointerId);
+              } catch (err) {}
               cardSpin.current = null;
               if (cardVisual.current) {
                 cardVisual.current.rotation.y = 0;
@@ -392,6 +406,11 @@ function Band({
               drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
             }}
           >
+            {/* Invisible expanded hit area for finger touch on mobile */}
+            <mesh visible={false}>
+              <planeGeometry args={[1.3, 2.0]} />
+              <meshBasicMaterial transparent opacity={0} />
+            </mesh>
             <group ref={cardVisual}>
               <mesh geometry={nodes.card.geometry}>
                 <meshPhysicalMaterial
