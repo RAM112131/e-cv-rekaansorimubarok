@@ -3,6 +3,7 @@ import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import cssCompatibilityPlugin from './vite-plugin-css-compatibility.js';
 
 export default defineConfig({
     plugins: [
@@ -22,6 +23,7 @@ export default defineConfig({
         }),
         tailwindcss(),
         react(),
+        cssCompatibilityPlugin(),
     ],
     assetsInclude: ['**/*.glb'],
     server: {
