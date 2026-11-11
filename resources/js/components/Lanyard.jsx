@@ -38,6 +38,7 @@ const BACK_UV_RECT = { x: 0.5, y: 0, w: 0.5, h: 0.757 };
 // Reusable vectors — created ONCE outside component to avoid GC pressure
 const vec = new THREE.Vector3();
 const dir = new THREE.Vector3();
+const anchorVec = new THREE.Vector3();
 
 export default function Lanyard({
   position = [0, 0, 30],
@@ -156,7 +157,8 @@ function Band({
     j1 = useRef(),
     j2 = useRef(),
     j3 = useRef(),
-    card = useRef();
+    card = useRef(),
+    lanyardAnchor = useRef();
 
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 3 };
   const { nodes, materials } = useGLTF(cardGLB);
@@ -235,7 +237,13 @@ function Band({
 
   const [curve] = useState(
     () =>
-      new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(),
+        new THREE.Vector3(),
+        new THREE.Vector3(),
+        new THREE.Vector3(),
+        new THREE.Vector3()
+      ])
   );
   const [dragged, drag] = useState(false);
   const [hovered, hover] = useState(false);
@@ -261,7 +269,7 @@ function Band({
   const j1Y = fixedY - ropeLen;
   const j2Y = j1Y - ropeLen;
   const j3Y = j2Y - ropeLen;
-  const cardAttachmentY = isMobile ? 1.25 : 1.5;
+  const cardAttachmentY = isMobile ? 1.115 : 1.455;
   const cardY = j3Y - cardAttachmentY;
   const cardScale = isMobile ? 1.75 : 2.25;
 
@@ -333,15 +341,24 @@ function Band({
       [j1, j2, j3].forEach(ref => {
         if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
         const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
+        const followSpeed = dragged ? 60 : (minSpeed + clampedDistance * (maxSpeed - minSpeed));
         ref.current.lerped.lerp(
           ref.current.translation(),
-          delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
+          delta * followSpeed
         );
       });
-      curve.points[0].copy(j3.current.lerped);
-      curve.points[1].copy(j2.current.lerped);
-      curve.points[2].copy(j1.current.lerped);
-      curve.points[3].copy(fixed.current.translation());
+
+      if (lanyardAnchor.current) {
+        lanyardAnchor.current.getWorldPosition(anchorVec);
+      } else if (card.current) {
+        anchorVec.copy(card.current.translation()).add(vec.set(0, cardAttachmentY, 0));
+      }
+
+      curve.points[0].copy(anchorVec);
+      curve.points[1].copy(j3.current.lerped);
+      curve.points[2].copy(j2.current.lerped);
+      curve.points[3].copy(j1.current.lerped);
+      curve.points[4].copy(fixed.current.translation());
       band.current.geometry.setPoints(curve.getPoints(curveSegments));
 
       if (onReady && !readySent.current) {
@@ -424,6 +441,7 @@ function Band({
               </mesh>
               <mesh geometry={nodes.clip.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} />
               <mesh geometry={nodes.clamp.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} />
+              <group ref={lanyardAnchor} position={[0, 1.18, 0]} />
             </group>
           </group>
         </RigidBody>
