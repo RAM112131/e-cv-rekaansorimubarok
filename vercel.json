@@ -13,7 +13,11 @@
     ],
     "routes": [
         {
-            "src": "/(build|css|fonts|images|images-optimized|js|models|storage)/(.*)",
+            "src": "/build/(.*)",
+            "dest": "public/build/$1"
+        },
+        {
+            "src": "/(css|fonts|images|images-optimized|js|models|storage)/(.*)",
             "dest": "public/$1/$2"
         },
         {

@@ -4,4 +4,3 @@
 /database/database.sqlite
 /storage/framework/**
 /storage/logs/**
-/public/build/**
