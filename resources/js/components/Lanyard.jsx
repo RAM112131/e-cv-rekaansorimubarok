@@ -49,7 +49,7 @@ export default function Lanyard({
   backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 1,
+  lanyardWidth = 0.7,
   xOffset = 0,
   onReady
 }) {
@@ -148,7 +148,7 @@ function Band({
   backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 1,
+  lanyardWidth = 0.7,
   xOffset = 0,
   onReady
 }) {
@@ -269,7 +269,7 @@ function Band({
   const j1Y = fixedY - ropeLen;
   const j2Y = j1Y - ropeLen;
   const j3Y = j2Y - ropeLen;
-  const cardAttachmentY = isMobile ? 1.115 : 1.455;
+  const cardAttachmentY = isMobile ? 0.975 : 1.275;
   const cardY = j3Y - cardAttachmentY;
   const cardScale = isMobile ? 1.75 : 2.25;
 
@@ -439,9 +439,10 @@ function Band({
                   metalness={0.5}                       // Turun dari 0.8 → 0.5 (hemat PBR cost)
                 />
               </mesh>
-              <mesh geometry={nodes.clip.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} />
-              <mesh geometry={nodes.clamp.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} />
-              <group ref={lanyardAnchor} position={[0, 1.18, 0]} />
+              <mesh geometry={nodes.clip.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} renderOrder={2} />
+              <mesh geometry={nodes.clamp.geometry} material={materials.metal} material-color="#ffffff" material-roughness={0.3} material-metalness={1} renderOrder={2} />
+              {/* Strap enters inside the ring loop down into the swivel clamp collar */}
+              <group ref={lanyardAnchor} position={[0, 1.10, -0.005]} />
             </group>
           </group>
         </RigidBody>
@@ -449,12 +450,14 @@ function Band({
         <meshLineGeometry />
         <meshLineMaterial
           color="white"
-          depthTest={false}
-          resolution={[1000, 1000]}  // Unified: tidak perlu beda mobile/desktop
+          depthTest={true}
+          depthWrite={false}
+          transparent={true}
+          resolution={[1000, 1000]}
           useMap
           map={texture}
           repeat={[-1, 1]}
-          lineWidth={lanyardWidth}
+          lineWidth={isMobile ? 0.6 : 0.72}
         />
       </mesh>
     </>
