@@ -41,6 +41,7 @@
         "LOG_CHANNEL": "stderr",
         "QUEUE_CONNECTION": "sync",
         "SESSION_DRIVER": "database",
-        "VIEW_COMPILED_PATH": "/tmp/views"
+        "VIEW_COMPILED_PATH": "/tmp/views",
+        "HASH_DRIVER": "argon2id"
     }
 }
