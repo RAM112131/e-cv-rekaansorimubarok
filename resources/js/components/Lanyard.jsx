@@ -49,7 +49,7 @@ export default function Lanyard({
   backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 0.7,
+  lanyardWidth = 1,
   xOffset = 0,
   onReady
 }) {
@@ -148,7 +148,7 @@ function Band({
   backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 0.7,
+  lanyardWidth = 1,
   xOffset = 0,
   onReady
 }) {
@@ -160,12 +160,17 @@ function Band({
     card = useRef(),
     lanyardAnchor = useRef();
 
-  const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 3 };
+  const segmentProps = { type: 'dynamic', canSleep: false, colliders: false, angularDamping: 1, linearDamping: 0.8 };
   const { nodes, materials } = useGLTF(cardGLB);
   const lanyardTexture = useTexture(lanyardImage || lanyard);
   const texture = useMemo(() => {
     const strapTexture = lanyardTexture.clone();
     strapTexture.wrapS = strapTexture.wrapT = THREE.RepeatWrapping;
+    // Maksimalkan ketajaman tekstur — matikan mipmap blur & aktifkan anisotropic filtering
+    strapTexture.anisotropy = 16;
+    strapTexture.generateMipmaps = false;
+    strapTexture.minFilter = THREE.LinearFilter;
+    strapTexture.magFilter = THREE.LinearFilter;
     strapTexture.needsUpdate = true;
 
     return strapTexture;
@@ -340,8 +345,7 @@ function Band({
 
       [j1, j2, j3].forEach(ref => {
         if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
-        const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())));
-        const followSpeed = dragged ? 60 : (minSpeed + clampedDistance * (maxSpeed - minSpeed));
+        const followSpeed = dragged ? 60 : 25;
         ref.current.lerped.lerp(
           ref.current.translation(),
           delta * followSpeed
@@ -354,10 +358,14 @@ function Band({
         anchorVec.copy(card.current.translation()).add(vec.set(0, cardAttachmentY, 0));
       }
 
+      // Point 0: Permukaan besi datar pengait
       curve.points[0].copy(anchorVec);
-      curve.points[1].copy(j3.current.lerped);
+      // Point 1: Titik vertikal lurus persis di atas pengait (mencegah tali miring/melengkung di pangkal)
+      curve.points[1].set(anchorVec.x, anchorVec.y + (isMobile ? 0.35 : 0.45), anchorVec.z);
+      // Point 2 & 3: Posisi fisika tengah untuk ayunan yang halus & natural
       curve.points[2].copy(j2.current.lerped);
       curve.points[3].copy(j1.current.lerped);
+      // Point 4: Jangkar atas di plafon
       curve.points[4].copy(fixed.current.translation());
       band.current.geometry.setPoints(curve.getPoints(curveSegments));
 
@@ -371,7 +379,7 @@ function Band({
     }
   });
 
-  curve.curveType = 'chordal';
+  curve.curveType = 'centripetal';
   return (
     <>
       <RigidBody position={[xOffset, fixedY, 0]} ref={fixed} {...segmentProps} type="kinematicPosition" />
@@ -384,7 +392,7 @@ function Band({
       <RigidBody position={[xOffset, j3Y, 0]} ref={j3} {...segmentProps}>
         <BallCollider args={[0.1]} />
       </RigidBody>
-      <RigidBody position={[xOffset, cardY, 0]} ref={card} {...segmentProps} enabledRotations={[false, false, false]} linearDamping={2.5} angularDamping={5} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+      <RigidBody position={[xOffset, cardY, 0]} ref={card} {...segmentProps} enabledRotations={[false, false, false]} linearDamping={1} angularDamping={2} type={dragged ? 'kinematicPosition' : 'dynamic'}>
           <CuboidCollider args={[0.8 * (isMobile ? 0.77 : 1), 1.125 * (isMobile ? 0.77 : 1), 0.01]} />
           <group
             scale={cardScale}
@@ -454,8 +462,8 @@ function Band({
           resolution={[1000, 1000]}
           useMap
           map={texture}
-          repeat={[-1, 1]}
-          lineWidth={isMobile ? 0.48 : 0.6}
+          repeat={[isMobile ? -0.42 : -0.48, 1]}
+          lineWidth={isMobile ? 1.30 : 1}
         />
       </mesh>
     </>
