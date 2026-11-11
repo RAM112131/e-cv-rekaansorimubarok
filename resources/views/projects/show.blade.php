@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth bg-darker dark">
+<html lang="id" class="scroll-smooth bg-darker dark overflow-x-hidden">
 <head>
     <x-theme-preference />
     <meta charset="UTF-8">
@@ -295,9 +295,6 @@
             </template>
         </nav>
     </div>
-    </div>
-        </nav>
-    </div>
 
     <!-- ═══════════════════════════════════════
          HERO SECTION — Full Bleed Cover
@@ -305,9 +302,9 @@
     <div class="relative w-full min-h-[75vh] md:min-h-[90vh] flex items-end pb-0 overflow-hidden futuristic-grid">
 
         <!-- Aurora Background Glow -->
-        <div class="absolute inset-0 pointer-events-none z-0">
-            <div class="absolute top-1/4 left-1/4 w-[600px] h-[400px] bg-amber-500/5 rounded-full blur-[120px] aurora-pulse"></div>
-            <div class="absolute top-1/3 right-1/4 w-[400px] h-[300px] bg-blue-500/4 rounded-full blur-[100px]"></div>
+        <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <div class="absolute top-1/4 left-1/4 w-[min(600px,80vw)] h-[min(400px,50vw)] bg-amber-500/5 rounded-full blur-[120px] aurora-pulse"></div>
+            <div class="absolute top-1/3 right-1/4 w-[min(400px,60vw)] h-[min(300px,40vw)] bg-blue-500/4 rounded-full blur-[100px]"></div>
         </div>
 
         <!-- Cover Image -->
@@ -336,7 +333,7 @@
                 </a>
             </div>
 
-            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 lg:gap-8">
 
                 <!-- Left: Title & Meta -->
                 <div class="max-w-2xl fade-up">
@@ -346,7 +343,7 @@
                         {{ $project->category }}
                     </div>
 
-                    <h1 class="font-heading text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight mb-4 tracking-tight neon-text-gold">
+                    <h1 class="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4 tracking-tight neon-text-gold break-words">
                         {{ $project->title }}
                     </h1>
 
@@ -375,7 +372,7 @@
 
                 <!-- Right: Stats Pills (Year, Duration, Role, Client) -->
                 @if($project->year || $project->duration || $project->role || $project->client)
-                <div class="clay-detail-card p-5 flex flex-wrap gap-6 lg:flex-col lg:gap-4 min-w-[200px] fade-up" style="animation-delay: 150ms;">
+                <div class="clay-detail-card p-4 sm:p-5 flex flex-wrap gap-4 sm:gap-6 lg:flex-col lg:gap-4 w-full lg:min-w-[200px] lg:w-auto fade-up" style="animation-delay: 150ms;">
                     @if($project->year)
                     <div>
                         <span class="block text-[9px] font-mono uppercase tracking-[0.2em] text-slate-500 mb-1">Tahun</span>
@@ -412,10 +409,10 @@
     <!-- ═══════════════════════════════════════
          MAIN CONTENT AREA
     ═══════════════════════════════════════ -->
-    <div class="relative z-10 bg-darker flex-grow">
+    <div class="relative z-10 bg-darker flex-grow overflow-hidden">
 
         <!-- Aurora ambient glow for content area -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-amber-500/4 rounded-full blur-[150px] pointer-events-none"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[min(800px,100vw)] h-[400px] bg-amber-500/4 rounded-full blur-[150px] pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-6 md:px-12 py-16 md:py-20 relative z-10">
 
