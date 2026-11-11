@@ -72,6 +72,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;700&family=Caveat&display=swap" rel="stylesheet">
 
+    <!-- Preload 3D Card Model & Assets for Instant Rendering -->
+    <link rel="preload" href="/models/card.glb?v=2" as="fetch" crossorigin="anonymous">
+    <link rel="preload" href="/images/lanyard.webp" as="image">
+    <link rel="preload" href="/images/gambar-depan.webp?v=2" as="image">
+
     <!-- Removed global Three.js as it conflicts with React Three Fiber -->
     
     <!-- Alpine.js -->
@@ -272,12 +277,7 @@
     <!-- Swarm Cursor Root -->
     <div id="react-swarm-cursor-root" class="fixed inset-0 z-[5] pointer-events-none"></div>
     <!-- 3D Background Canvas -->
-    <div id="react-id-card-root" class="absolute top-0 left-0 w-full h-screen z-10 opacity-100 pointer-events-auto" data-name="{{ $firstName . ' ' . $lastName }}" data-headline="{{ $user->headline }}" data-avatar="{{ $user->avatar ? Storage::url($user->avatar) : 'null' }}"></div>
-    <button type="button" class="lanyard-loading-card" data-id-card-fallback disabled title="Aktifkan kartu 3D">
-        <span class="lanyard-loading-card__strap"></span>
-        <img src="{{ asset('images/gambar-depan.webp') }}" alt="" fetchpriority="high" decoding="async">
-        <span class="sr-only">Aktifkan kartu 3D interaktif</span>
-    </button>
+    <div id="react-id-card-root" class="absolute top-0 left-0 w-full h-screen z-10 pointer-events-auto" data-name="{{ $firstName . ' ' . $lastName }}" data-headline="{{ $user->headline }}" data-avatar="{{ $user->avatar ? Storage::url($user->avatar) : 'null' }}"></div>
 
     <!-- Fixed Navigation Menu -->
     <div class="fixed top-0 left-0 right-0 z-50 flex justify-center p-4 transition-all duration-300">

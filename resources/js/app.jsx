@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (rootElement) {
-        const fallback = document.querySelector('[data-id-card-fallback]');
         const loadIdCard = () => {
             if (rootElement.dataset.loading === 'true') {
                 return;
@@ -31,7 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: rootElement.dataset.name || 'USER',
                 headline: rootElement.dataset.headline || 'Web Developer',
                 avatar: rootElement.dataset.avatar || null,
-                onReady: () => fallback?.classList.add('is-hidden'),
+                onReady: () => {
+                    rootElement.classList.add('is-ready');
+                },
             })
                 .catch((error) => {
                     delete rootElement.dataset.loading;
@@ -39,18 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         };
 
-        if (fallback instanceof HTMLButtonElement) {
-            fallback.disabled = false;
-            fallback.addEventListener('click', loadIdCard);
-
-            if (!prefersReducedMotion) {
-                if (typeof window.requestIdleCallback === 'function') {
-                    window.requestIdleCallback(loadIdCard, { timeout: 2000 });
-                } else {
-                    window.setTimeout(loadIdCard, 700);
-                }
-            }
-        }
+        // Render ID Card 3D immediately upon load
+        loadIdCard();
     }
 
     const swarmCursorRoot = document.getElementById('react-swarm-cursor-root');

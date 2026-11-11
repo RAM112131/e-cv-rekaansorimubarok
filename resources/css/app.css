@@ -22,64 +22,13 @@
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-.lanyard-loading-card {
-    position: absolute;
-    top: clamp(7.25rem, 16vh, 10.5rem);
-    left: 50%;
-    z-index: 11;
-    width: clamp(6.5rem, 24vw, 10rem);
-    aspect-ratio: 591 / 1004;
-    transform: translateX(-50%);
-    pointer-events: auto;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    transition: opacity 180ms ease, visibility 180ms ease;
-}
-
-.lanyard-loading-card:disabled {
-    cursor: default;
-}
-
-.lanyard-loading-card:focus-visible {
-    outline: 2px solid #f8fafc;
-    outline-offset: 4px;
-}
-
-.lanyard-loading-card.is-hidden {
+#react-id-card-root {
     opacity: 0;
-    visibility: hidden;
+    transition: opacity 0.4s ease-out;
 }
 
-.lanyard-loading-card__strap {
-    position: absolute;
-    bottom: calc(100% - 1px);
-    left: 50%;
-    width: 0.45rem;
-    height: clamp(3rem, 7vh, 4.5rem);
-    transform: translateX(-50%);
-    border-radius: 0.25rem 0.25rem 0 0;
-    background: repeating-linear-gradient(135deg, #f8fafc 0 3px, #2563eb 3px 6px, #0f172a 6px 9px);
-}
-
-.lanyard-loading-card img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    border: 1px solid rgb(255 255 255 / 55%);
-    border-radius: 0.45rem;
-    object-fit: cover;
-    box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 35%);
-}
-
-@media (min-width: 1024px) {
-    .lanyard-loading-card {
-        top: clamp(7.5rem, 16vh, 10.5rem);
-        left: calc(50% + 15vw);
-        width: clamp(8rem, 13vw, 11rem);
-    }
+#react-id-card-root.is-ready {
+    opacity: 1;
 }
 
 /* ============================================

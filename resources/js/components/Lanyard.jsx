@@ -10,6 +10,15 @@ import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 const cardGLB = '/models/card.glb?v=2';
 const lanyard = '/images/lanyard.webp';
 
+try {
+  useGLTF.preload(cardGLB);
+  useTexture.preload(lanyard);
+  useTexture.preload('/images/gambar-depan.webp?v=2');
+  useTexture.preload('/images/gambar-belakang.webp?v=2');
+} catch (e) {
+  // Ignore in SSR
+}
+
 import * as THREE from 'three';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
@@ -235,6 +244,16 @@ function Band({
   const cardSpin = useRef(null);
   const readyFrames = useRef(0);
   const readySent = useRef(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onReady && !readySent.current) {
+        readySent.current = true;
+        onReady();
+      }
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [onReady]);
 
   const ropeLen = isMobile ? 0.65 : 1;
   const fixedY = isMobile ? 4.1 : 4.3;

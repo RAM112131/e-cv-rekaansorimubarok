@@ -1,6 +1,5 @@
-import React, { lazy, Suspense, useState, useEffect } from 'react';
-
-const Lanyard = lazy(() => import('./Lanyard'));
+import React, { Suspense, useState, useEffect } from 'react';
+import Lanyard from './Lanyard';
 
 export default function IdCard({ onReady }) {
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 1024);
